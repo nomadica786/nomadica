@@ -30,7 +30,8 @@ export const api = {
      * Get a single product by ID
      */
     get: async (productId: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/products/${productId}`);
+      const response = await fetch(`${API_BASE_URL}/api/products/${encodeURIComponent(productId)}`);
+      console.log(`This is the issue: ${API_BASE_URL}/api/products/${encodeURIComponent(productId)}`)
       if (!response.ok) throw new Error('Failed to fetch product');
       return response.json();
     },
@@ -76,7 +77,7 @@ export const api = {
      */
     get: async (collectionId: string) => {
       const response = await fetch(
-        `${API_BASE_URL}/api/collections/${collectionId}`
+        `${API_BASE_URL}/api/collections/${encodeURIComponent(collectionId)}`
       );
       if (!response.ok) throw new Error('Failed to fetch collection');
       return response.json();
@@ -148,7 +149,7 @@ export const api = {
      * Get a single order by ID
      */
     get: async (orderId: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`);
+      const response = await fetch(`${API_BASE_URL}/api/orders/${encodeURIComponent(orderId)}`);
       if (response.status === 401) throw new Error('Not authenticated');
       if (!response.ok) throw new Error('Failed to fetch order');
       return response.json();
@@ -244,7 +245,7 @@ export const api = {
      * Get cart details
      */
     get: async (cartId: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/cart/${cartId}`);
+      const response = await fetch(`${API_BASE_URL}/api/cart/${encodeURIComponent(cartId)}`);
       if (!response.ok) throw new Error('Failed to fetch cart');
       return response.json();
     },
@@ -253,7 +254,7 @@ export const api = {
      * Update cart (add/remove items)
      */
     update: async (cartId: string, updates: unknown) => {
-      const response = await fetch(`${API_BASE_URL}/api/cart/${cartId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/cart/${encodeURIComponent(cartId)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
@@ -314,7 +315,7 @@ export const api = {
      */
     remove: async (productId: string) => {
       const response = await fetch(
-        `${API_BASE_URL}/api/wishlist/${productId}`,
+        `${API_BASE_URL}/api/wishlist/${encodeURIComponent(productId)}`,
         { method: 'DELETE' }
       );
       if (!response.ok) throw new Error('Failed to remove from wishlist');

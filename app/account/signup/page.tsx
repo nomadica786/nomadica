@@ -6,10 +6,36 @@ import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [activeSlide, setActiveSlide] = useState(1);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = "/api/auth/login";
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstName, lastName, email, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Signup failed");
+      }
+
+      window.location.href = "/account/profile";
+    } catch (err: any) {
+      setError(err.message || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const slides = [
@@ -53,22 +79,27 @@ export default function SignupPage() {
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {error && (
+              <p style={{ fontFamily: "Satoshi", fontSize: "0.875rem", color: "#d9534f", margin: "0.5rem 0" }}>
+                {error}
+              </p>
+            )}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
               <div style={{ position: "relative" }}>
-                <User size={15} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30,30,30,0.35)" }} />
-                <input type="text" placeholder="First name" className="form-input" style={{ paddingLeft: "2.5rem" }} />
+                <User size={15} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30, 30, 30, 0.35)" }} />
+                <input type="text" placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="form-input" style={{ paddingLeft: "2.5rem" }} required />
               </div>
-              <input type="text" placeholder="Last name" className="form-input" />
+              <input type="text" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="form-input" required />
             </div>
 
             <div style={{ position: "relative" }}>
-              <Mail size={15} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30,30,30,0.35)" }} />
-              <input type="email" placeholder="Email address" className="form-input" style={{ paddingLeft: "2.75rem" }} />
+              <Mail size={15} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30, 30, 30, 0.35)" }} />
+              <input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className="form-input" style={{ paddingLeft: "2.75rem" }} required />
             </div>
 
             <div style={{ position: "relative" }}>
-              <Lock size={15} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30,30,30,0.35)" }} />
-              <input type={showPassword ? "text" : "password"} placeholder="Password" className="form-input" style={{ paddingLeft: "2.75rem", paddingRight: "3rem" }} />
+              <Lock size={15} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30, 30, 30, 0.35)" }} />
+              <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="form-input" style={{ paddingLeft: "2.75rem", paddingRight: "3rem" }} required />
               <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(30,30,30,0.35)" }}>
                 {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
@@ -84,8 +115,8 @@ export default function SignupPage() {
               </span>
             </label>
 
-            <button className="btn-primary" type="submit" style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem" }}>
-              Create Account
+            <button className="btn-primary" type="submit" disabled={loading} style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem", opacity: loading ? 0.7 : 1 }}>
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
 

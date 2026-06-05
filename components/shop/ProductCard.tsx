@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Heart, ShoppingBag, Eye } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
+import { api } from "@/components/api/api";
 
 interface ProductCardProps {
   id?: string;
@@ -28,7 +29,20 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
   const productHref = href || `/shop/product-details?id=${id}`;
+
+  useEffect(() => {
+    const checkWishlist = async () => {
+      if (!id) return;
+      try {
+        const res = await api.wishlist.list();
+        const isInWishlist = res?.wishlist?.some((item: any) => item.id === id);
+        setWishlisted(!!isInWishlist);
+      } catch {}
+    };
+    checkWishlist();
+  }, [id]);
 
   return (
     <div
@@ -73,6 +87,42 @@ export default function ProductCard({
             }}
           >
             <button
+              disabled={addingToCart}
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setAddingToCart(true);
+                try {
+                  let cartId = localStorage.getItem("nomadica_cart_id");
+                  const variantId = `gid://shopify/ProductVariant/${id}000`;
+                  
+                  if (!cartId) {
+                    const res = await api.cart.create([{
+                      merchandiseId: variantId,
+                      quantity: 1,
+                      title: "Default Size"
+                    }]);
+                    const newCart = res?.cartCreate?.cart || res?.cart;
+                    if (newCart?.id) {
+                      localStorage.setItem("nomadica_cart_id", newCart.id);
+                    }
+                  } else {
+                    await api.cart.update(cartId, {
+                      lines: [{
+                        merchandiseId: variantId,
+                        quantity: 1,
+                        title: "Default Size"
+                      }]
+                    });
+                  }
+                  
+                  window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: true } }));
+                } catch (err) {
+                  console.error("Card Add to Bag failed:", err);
+                } finally {
+                  setAddingToCart(false);
+                }
+              }}
               style={{
                 width: "100%",
                 padding: "0.75rem",
@@ -92,11 +142,12 @@ export default function ProductCard({
                 transition: "background 0.2s ease",
                 transform: hovered ? "translateY(0)" : "translateY(20px)",
                 transition2: "transform 0.4s ease, background 0.2s ease",
+                opacity: addingToCart ? 0.7 : 1,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               } as any}
             >
               <ShoppingBag size={14} />
-              Add to Bag
+              {addingToCart ? "Adding..." : "Add to Bag"}
             </button>
           </div>
 
@@ -123,9 +174,20 @@ export default function ProductCard({
 
           {/* Wishlist */}
           <button
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
-              setWishlisted(!wishlisted);
+              e.stopPropagation();
+              try {
+                if (wishlisted) {
+                  await api.wishlist.remove(id);
+                  setWishlisted(false);
+                } else {
+                  await api.wishlist.add(id);
+                  setWishlisted(true);
+                }
+              } catch (err) {
+                console.error("Wishlist toggle failed:", err);
+              }
             }}
             style={{
               position: "absolute",

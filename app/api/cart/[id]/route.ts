@@ -112,7 +112,7 @@ export async function PUT(
       } catch {}
     }
 
-    // Update quantities or remove items
+    // Update quantities or remove items or add new items
     lines.forEach((update: any) => {
       // Find item index
       const itemIdx = items.findIndex((item: any) =>
@@ -128,6 +128,14 @@ export async function PUT(
         } else {
           items[itemIdx].quantity = update.quantity;
         }
+      } else if (update.quantity > 0) {
+        items.push({
+          id: update.id || `line_${Date.now()}`,
+          merchandiseId: update.merchandiseId || update.variantId || update.id,
+          variantId: update.variantId || update.merchandiseId || update.id,
+          quantity: update.quantity,
+          title: update.title || 'Default Size'
+        });
       }
     });
 

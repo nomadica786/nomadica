@@ -1,5 +1,5 @@
 // app/api/customers/addresses/route.ts
-import { ShopifyAdminClient } from '@/lib/shopify/client';
+import { ShopifyAdminClient, ShopifyStorefrontClient } from '@/lib/shopify/client';
 import { ADMIN_QUERIES, ADMIN_MUTATIONS } from '@/lib/shopify/queries';
 import { getEnvironment } from '@/utils/env';
 import { MOCK_ADDRESSES } from '@/utils/mockData';
@@ -9,11 +9,81 @@ import { NextResponse, NextRequest } from 'next/server';
 export async function GET() {
   const env = getEnvironment();
   const cookieStore = await cookies();
+  const customerAccessToken = cookieStore.get('customer_access_token')?.value;
   const accessToken = cookieStore.get('shopify_access_token')?.value;
   const shop = cookieStore.get('shopify_shop')?.value;
 
-  const isConfigured = !!env.shopUrl && !!env.clientId;
+  const storefrontToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+  const isStorefrontConfigured = !!env.shopUrl && !!storefrontToken && storefrontToken.trim() !== '';
 
+  // 1. Storefront Customer Addresses
+  if (customerAccessToken) {
+    if (isStorefrontConfigured) {
+      try {
+        const client = new ShopifyStorefrontClient(env.shopUrl!, storefrontToken!);
+        const query = `
+          query GetCustomerAddresses($customerAccessToken: String!) {
+            customer(customerAccessToken: $customerAccessToken) {
+              defaultAddress {
+                id
+              }
+              addresses(first: 10) {
+                edges {
+                  node {
+                    id
+                    address1
+                    address2
+                    city
+                    province
+                    country
+                    zip
+                    firstName
+                    lastName
+                    phone
+                  }
+                }
+              }
+            }
+          }
+        `;
+        const data = await client.request(query, { customerAccessToken });
+        const defaultAddressId = data?.customer?.defaultAddress?.id;
+        const addressesEdges = data?.customer?.addresses?.edges || [];
+
+        const mappedAddresses = addressesEdges.map((edge: any) => {
+          const node = edge.node;
+          return {
+            id: node.id,
+            label: 'Address',
+            name: `${node.firstName} ${node.lastName}`.trim() || 'Traveler',
+            address1: node.address1,
+            address2: node.address2,
+            city: node.city,
+            province: node.province,
+            country: node.country,
+            zip: node.zip,
+            default: node.id === defaultAddressId
+          };
+        });
+
+        return NextResponse.json({ addresses: mappedAddresses });
+      } catch (error) {
+        console.error('Failed to fetch storefront customer addresses, falling back to mock:', error);
+      }
+    }
+
+    // Customer fallback
+    const savedAddresses = cookieStore.get('mock_addresses')?.value;
+    if (savedAddresses) {
+      try {
+        return NextResponse.json({ addresses: JSON.parse(savedAddresses) });
+      } catch {}
+    }
+    return NextResponse.json({ addresses: MOCK_ADDRESSES });
+  }
+
+  // 2. Fallback to developer Admin API
+  const isConfigured = !!env.shopUrl && !!env.clientId;
   if (!accessToken && isConfigured) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
@@ -28,7 +98,6 @@ export async function GET() {
   }
 
   // Fallback to mock addresses
-  // Load from cookies if updated, otherwise default
   const savedAddresses = cookieStore.get('mock_addresses')?.value;
   if (savedAddresses) {
     try {
@@ -44,19 +113,159 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const env = getEnvironment();
   const cookieStore = await cookies();
+  const customerAccessToken = cookieStore.get('customer_access_token')?.value;
   const accessToken = cookieStore.get('shopify_access_token')?.value;
   const shop = cookieStore.get('shopify_shop')?.value;
 
   try {
     const body = await request.json();
+    const storefrontToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+    const isStorefrontConfigured = !!env.shopUrl && !!storefrontToken && storefrontToken.trim() !== '';
 
+    // 1. Storefront Customer Address Creation
+    if (customerAccessToken && isStorefrontConfigured) {
+      try {
+        const client = new ShopifyStorefrontClient(env.shopUrl!, storefrontToken!);
+        const names = (body.name || 'Arjun Mehta').split(' ');
+        const firstName = names[0] || '';
+        const lastName = names.slice(1).join(' ') || '';
+
+        const createMutation = `
+          mutation CreateCustomerAddress($customerAccessToken: String!, $address: MailingAddressInput!) {
+            customerAddressCreate(customerAccessToken: $customerAccessToken, address: $address) {
+              customerAddress {
+                id
+                address1
+                address2
+                city
+                province
+                country
+                zip
+                firstName
+                lastName
+              }
+              customerUserErrors {
+                field
+                message
+                code
+              }
+            }
+          }
+        `;
+
+        const data = await client.request(createMutation, {
+          customerAccessToken,
+          address: {
+            address1: body.address1 || '',
+            address2: body.address2 || '',
+            city: body.city || '',
+            province: body.province || '',
+            country: body.country || 'India',
+            zip: body.zip || '',
+            firstName,
+            lastName
+          }
+        });
+
+        const payload = data?.customerAddressCreate;
+        if (payload?.customerUserErrors && payload.customerUserErrors.length > 0) {
+          const errorMessage = payload.customerUserErrors.map((e: any) => e.message).join(', ');
+          return NextResponse.json({ error: errorMessage }, { status: 400 });
+        }
+
+        const newAddressNode = payload?.customerAddress;
+
+        // Set as default if requested
+        if (body.default && newAddressNode?.id) {
+          const defaultMutation = `
+            mutation SetDefaultAddress($customerAccessToken: String!, $addressId: ID!) {
+              customerDefaultAddressUpdate(customerAccessToken: $customerAccessToken, addressId: $addressId) {
+                customer {
+                  id
+                }
+                customerUserErrors {
+                  message
+                }
+              }
+            }
+          `;
+          await client.request(defaultMutation, {
+            customerAccessToken,
+            addressId: newAddressNode.id
+          });
+        }
+
+        // Fetch updated addresses list
+        const listQuery = `
+          query GetCustomerAddresses($customerAccessToken: String!) {
+            customer(customerAccessToken: $customerAccessToken) {
+              defaultAddress {
+                id
+              }
+              addresses(first: 10) {
+                edges {
+                  node {
+                    id
+                    address1
+                    address2
+                    city
+                    province
+                    country
+                    zip
+                    firstName
+                    lastName
+                  }
+                }
+              }
+            }
+          }
+        `;
+        const listData = await client.request(listQuery, { customerAccessToken });
+        const defaultId = listData?.customer?.defaultAddress?.id;
+        const mappedList = (listData?.customer?.addresses?.edges || []).map((edge: any) => {
+          const node = edge.node;
+          return {
+            id: node.id,
+            label: 'Address',
+            name: `${node.firstName} ${node.lastName}`.trim(),
+            address1: node.address1,
+            address2: node.address2,
+            city: node.city,
+            province: node.province,
+            country: node.country,
+            zip: node.zip,
+            default: node.id === defaultId
+          };
+        });
+
+        return NextResponse.json({
+          customerAddress: {
+            id: newAddressNode.id,
+            label: 'Address',
+            name: `${newAddressNode.firstName} ${newAddressNode.lastName}`.trim(),
+            address1: newAddressNode.address1,
+            address2: newAddressNode.address2,
+            city: newAddressNode.city,
+            province: newAddressNode.province,
+            country: newAddressNode.country,
+            zip: newAddressNode.zip,
+            default: body.default || false
+          },
+          addresses: mappedList,
+          userErrors: []
+        });
+
+      } catch (err: any) {
+        console.error('Failed to create storefront address, falling back to mock:', err);
+      }
+    }
+
+    // Mock Fallback mode
     const isConfigured = !!env.shopUrl && !!env.clientId;
-
-    if (!accessToken && isConfigured) {
+    if (!accessToken && isConfigured && !customerAccessToken) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    // Parse existing mock addresses from cookie or load defaults
     const savedAddressesCookie = cookieStore.get('mock_addresses')?.value;
     let addressesList = [];
     if (savedAddressesCookie) {
@@ -87,24 +296,14 @@ export async function POST(request: NextRequest) {
     }
 
     addressesList.push(newAddress);
-
-    // Save to cookies
     cookieStore.set('mock_addresses', JSON.stringify(addressesList), { path: '/' });
-
-    if (accessToken && shop) {
-      try {
-        const client = new ShopifyAdminClient(shop, accessToken);
-        // Fallback returns success directly
-      } catch (err) {
-        console.error('Failed to create address in Shopify:', err);
-      }
-    }
 
     return NextResponse.json({
       customerAddress: newAddress,
       addresses: addressesList,
       userErrors: []
     });
+
   } catch (error) {
     console.error('Create address error:', error);
     return NextResponse.json({ error: 'Failed to create address' }, { status: 500 });

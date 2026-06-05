@@ -40,7 +40,7 @@ export async function GET(
                     amount
                     currencyCode
                   }
-                  available
+                  available: availableForSale
                 }
               }
             }

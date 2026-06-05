@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 import {
   Search, ShoppingBag, User, Heart, Menu, X, ChevronDown,
 } from "lucide-react";
+import { useAuth } from "@/utils/hooks/useAuth";
+import { MOCK_PRODUCTS } from "@/utils/mockData";
+import { api } from "@/components/api/api";
 
 const navLinks = [
   {
@@ -30,12 +33,59 @@ const navLinks = [
   { label: "Support", href: "/support/faq" },
 ];
 
+const dropdownItemStyle = {
+  display: "block",
+  padding: "0.625rem 1.25rem",
+  fontFamily: "'Satoshi', sans-serif",
+  fontSize: "0.8125rem",
+  color: "#1E1E1E",
+  textDecoration: "none",
+  transition: "background 0.15s ease, color 0.15s ease",
+};
+
 export default function Navbar() {
+  const { isAuthenticated, user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const pathname = usePathname();
+
+  // Cart Drawer State
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cart, setCart] = useState<any>(null);
+  const [cartLoading, setCartLoading] = useState(false);
+
+  const fetchCart = async () => {
+    const cartId = typeof window !== "undefined" ? localStorage.getItem("nomadica_cart_id") : null;
+    if (!cartId) {
+      setCart(null);
+      return;
+    }
+    setCartLoading(true);
+    try {
+      const res = await api.cart.get(cartId);
+      setCart(res.cart);
+    } catch (err) {
+      console.error("Failed to fetch cart:", err);
+    } finally {
+      setCartLoading(false);
+    }
+  };
+
+  const handleUpdateQuantity = async (lineId: string, quantity: number, merchandiseId: string) => {
+    const cartId = localStorage.getItem("nomadica_cart_id");
+    if (!cartId) return;
+
+    try {
+      await api.cart.update(cartId, {
+        lines: [{ id: lineId, quantity, merchandiseId }]
+      });
+      fetchCart();
+    } catch (err) {
+      console.error("Failed to update cart quantity:", err);
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -50,9 +100,26 @@ export default function Navbar() {
   }, [pathname]);
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    document.body.style.overflow = (mobileOpen || cartOpen) ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [mobileOpen]);
+  }, [mobileOpen, cartOpen]);
+
+  useEffect(() => {
+    fetchCart();
+
+    const handleCartUpdate = (e: any) => {
+      fetchCart();
+      if (e.detail?.openDrawer !== false) {
+        setCartOpen(true);
+      }
+    };
+
+    window.addEventListener("cart-updated", handleCartUpdate);
+    return () => window.removeEventListener("cart-updated", handleCartUpdate);
+  }, []);
+
+  const totalItems = cart?.lines?.edges?.reduce((acc: number, edge: any) => acc + edge.node.quantity, 0) || 0;
+  const userInitials = user?.firstName ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ""}`.toUpperCase() : "T";
 
   return (
     <>
@@ -189,10 +256,101 @@ export default function Navbar() {
             <Link href="/account/wishlist" style={{ color: "#1E1E1E", display: "flex" }} className="hidden sm:flex">
               <Heart size={20} />
             </Link>
-            <Link href="/account/login" style={{ color: "#1E1E1E", display: "flex" }} className="hidden sm:flex">
-              <User size={20} />
-            </Link>
+
+            {/* Profile Avatar / Login Icon */}
+            {isAuthenticated ? (
+              <div
+                style={{ position: "relative" }}
+                onMouseEnter={() => setOpenDropdown("user")}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                <Link
+                  href="/account/profile"
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    backgroundColor: "#1E1E1E",
+                    color: "#F7F4EE",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "'Clash Display', sans-serif",
+                    fontSize: "0.8125rem",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                  }}
+                  className="hidden sm:flex"
+                >
+                  {userInitials}
+                </Link>
+                {openDropdown === "user" && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      right: 0,
+                      backgroundColor: "#F7F4EE",
+                      border: "1px solid rgba(30,30,30,0.1)",
+                      minWidth: "150px",
+                      padding: "0.5rem 0",
+                      boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
+                      animation: "fade-up 0.2s ease",
+                      zIndex: 1001,
+                    }}
+                  >
+                    <Link
+                      href="/account/profile?tab=overview"
+                      style={dropdownItemStyle}
+                      onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(122, 92, 62, 0.08)"; }}
+                      onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                    >
+                      Profile Hub
+                    </Link>
+                    <Link
+                      href="/account/profile?tab=orders"
+                      style={dropdownItemStyle}
+                      onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(122, 92, 62, 0.08)"; }}
+                      onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                    >
+                      My Orders
+                    </Link>
+                    <Link
+                      href="/account/profile?tab=wishlist"
+                      style={dropdownItemStyle}
+                      onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(122, 92, 62, 0.08)"; }}
+                      onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                    >
+                      My Wishlist
+                    </Link>
+                    <button
+                      onClick={logout}
+                      style={{
+                        ...dropdownItemStyle,
+                        width: "100%",
+                        border: "none",
+                        background: "none",
+                        textAlign: "left",
+                        color: "rgba(180,60,60,0.8)",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(180, 60, 60, 0.08)"; }}
+                      onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/account/login" style={{ color: "#1E1E1E", display: "flex" }} className="hidden sm:flex">
+                <User size={20} />
+              </Link>
+            )}
+
+            {/* Shopping Bag Button */}
             <button
+              onClick={() => setCartOpen(true)}
               style={{
                 position: "relative",
                 color: "#1E1E1E",
@@ -221,7 +379,7 @@ export default function Navbar() {
                   fontWeight: 600,
                 }}
               >
-                0
+                {totalItems}
               </span>
             </button>
 
@@ -332,18 +490,200 @@ export default function Navbar() {
           ))}
 
           <div style={{ marginTop: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <Link href="/account/login" style={{ textDecoration: "none" }}>
-              <button className="btn-primary" style={{ width: "100%", justifyContent: "center" }}>
-                Sign In
+            {isAuthenticated ? (
+              <>
+                <Link href="/account/profile" style={{ textDecoration: "none" }}>
+                  <button className="btn-primary" style={{ width: "100%", justifyContent: "center" }}>
+                    Profile Hub
+                  </button>
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileOpen(false);
+                  }}
+                  className="btn-outline"
+                  style={{ width: "100%", justifyContent: "center" }}
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/account/login" style={{ textDecoration: "none" }}>
+                  <button className="btn-primary" style={{ width: "100%", justifyContent: "center" }}>
+                    Sign In
+                  </button>
+                </Link>
+                <Link href="/account/signup" style={{ textDecoration: "none" }}>
+                  <button className="btn-outline" style={{ width: "100%", justifyContent: "center" }}>
+                    Create Account
+                  </button>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Cart Drawer Overlay */}
+      {cartOpen && (
+        <div
+          onClick={() => setCartOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 2000,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            backdropFilter: "blur(4px)",
+            animation: "fade-in 0.2s ease",
+          }}
+        />
+      )}
+
+      {/* Cart Drawer */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: "100%",
+          maxWidth: "450px",
+          backgroundColor: "#F7F4EE",
+          boxShadow: "-10px 0 40px rgba(0,0,0,0.15)",
+          zIndex: 2001,
+          transform: cartOpen ? "translateX(0)" : "translateX(100%)",
+          transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Drawer Header */}
+        <div
+          style={{
+            padding: "1.5rem",
+            borderBottom: "1px solid rgba(30,30,30,0.08)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", margin: 0 }}>
+            Shopping Bag ({totalItems})
+          </h2>
+          <button
+            onClick={() => setCartOpen(false)}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "#1E1E1E", padding: "4px" }}
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Drawer Content */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "1.5rem" }}>
+          {cartLoading && !cart ? (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+              <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30, 30, 30, 0.5)" }}>Loading bag...</span>
+            </div>
+          ) : !cart || cart.lines?.edges?.length === 0 ? (
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", textAlign: "center" }}>
+              <ShoppingBag size={48} style={{ color: "rgba(30,30,30,0.2)", marginBottom: "1rem" }} />
+              <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9375rem", fontWeight: 500, color: "#1E1E1E", margin: "0 0 1.5rem" }}>
+                Your shopping bag is empty.
+              </p>
+              <button
+                onClick={() => setCartOpen(false)}
+                className="btn-primary"
+                style={{ fontSize: "0.8125rem", padding: "0.75rem 1.5rem" }}
+              >
+                Continue Shopping
               </button>
-            </Link>
-            <Link href="/account/signup" style={{ textDecoration: "none" }}>
-              <button className="btn-outline" style={{ width: "100%", justifyContent: "center" }}>
-                Create Account
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              {cart.lines.edges.map((edge: any) => {
+                const line = edge.node;
+                const price = parseFloat(line.merchandise?.price?.amount || "0");
+                const title = line.merchandise?.product?.title || "Product";
+                const size = line.merchandise?.title || "Default";
+                const rawId = line.merchandise?.product?.id || "1";
+                const cleanId = String(rawId).split("/").pop() || "1";
+                const numericId = cleanId.replace(/[^0-9]/g, "");
+                const product = MOCK_PRODUCTS.find(p => p.id === numericId) || MOCK_PRODUCTS[0];
+                const image = product?.image || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=300&q=80";
+
+                return (
+                  <div key={line.id} style={{ display: "flex", gap: "1rem", borderBottom: "1px solid rgba(30,30,30,0.05)", paddingBottom: "1.5rem" }}>
+                    <div style={{ width: "80px", aspectRatio: "3/4", overflow: "hidden", backgroundColor: "#EDE9E1", flexShrink: 0 }}>
+                      <img src={image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                      <div>
+                        <h4 style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", fontWeight: 500, color: "#1E1E1E", margin: "0 0 0.25rem" }}>{title}</h4>
+                        <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", margin: "0 0 0.5rem" }}>Size: {size}</p>
+                        <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E", margin: 0 }}>₹{price.toLocaleString("en-IN")}</p>
+                      </div>
+                      
+                      {/* Quantity Controls */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", border: "1px solid rgba(30,30,30,0.15)" }}>
+                          <button
+                            onClick={() => handleUpdateQuantity(line.id, Math.max(0, line.quantity - 1), line.merchandise.id)}
+                            style={{ width: "28px", height: "28px", border: "none", background: "none", cursor: "pointer", color: "#1E1E1E" }}
+                          >
+                            −
+                          </button>
+                          <span style={{ width: "28px", textAlign: "center", fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500 }}>
+                            {line.quantity}
+                          </span>
+                          <button
+                            onClick={() => handleUpdateQuantity(line.id, line.quantity + 1, line.merchandise.id)}
+                            style={{ width: "28px", height: "28px", border: "none", background: "none", cursor: "pointer", color: "#1E1E1E" }}
+                          >
+                            +
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => handleUpdateQuantity(line.id, 0, line.merchandise.id)}
+                          style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(180,60,60,0.8)", textDecoration: "underline" }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Drawer Footer */}
+        {cart && cart.lines?.edges?.length > 0 && (
+          <div
+            style={{
+              padding: "1.5rem",
+              borderTop: "1px solid rgba(30,30,30,0.08)",
+              backgroundColor: "#EDEAE2",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }}>
+              <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30, 30, 30, 0.6)" }}>Subtotal</span>
+              <span style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.125rem", fontWeight: 600, color: "#1E1E1E" }}>
+                ₹{parseFloat(cart.cost?.subtotalAmount?.amount || "0").toLocaleString("en-IN")}
+              </span>
+            </div>
+            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30, 30, 30, 0.45)", margin: "0 0 1.5rem" }}>
+              Shipping and taxes calculated at checkout.
+            </p>
+            <Link href={`/checkout?cartId=${cart.id}`} onClick={() => setCartOpen(false)} style={{ textDecoration: "none" }}>
+              <button className="btn-primary" style={{ width: "100%", justifyContent: "center", height: "48px" }}>
+                Proceed to Checkout
               </button>
             </Link>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

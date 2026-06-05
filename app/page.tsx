@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import { CardSkeleton } from "@/components/ui/SnowBallLoader";
+import { api } from "@/components/api/api";
 
 const heroImage =
   "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80";
@@ -609,11 +610,43 @@ function CategorySection() {
 }
 
 export default function HomePage() {
+  const [products, setProducts] = useState<any[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => setProductsLoading(false), 1200);
-    return () => clearTimeout(t);
+    const fetchProducts = async () => {
+      try {
+        const data = await api.products.list(4);
+        const edges = data?.products?.edges || [];
+        if (edges.length > 0) {
+          setProducts(edges.map((edge: any) => {
+            const node = edge.node;
+            const price = parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
+            const firstImage = node.images?.edges?.[0]?.node?.url || 'https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80';
+            const secondImage = node.images?.edges?.[1]?.node?.url;
+            return {
+              id: node.id,
+              name: node.title,
+              price: price,
+              originalPrice: price * 1.3,
+              image: firstImage,
+              hoverImage: secondImage || firstImage,
+              badge: "New",
+              category: node.productType || 'Apparel',
+              handle: node.handle
+            };
+          }));
+        } else {
+          setProducts(featuredProducts);
+        }
+      } catch (error) {
+        console.error("Failed to load products for homepage:", error);
+        setProducts(featuredProducts);
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+    fetchProducts();
   }, []);
 
   return (
@@ -676,7 +709,7 @@ export default function HomePage() {
           >
             {productsLoading
               ? [1, 2, 3, 4].map((i) => <CardSkeleton key={i} />)
-              : featuredProducts.map((product) => (
+              : products.map((product) => (
                   <ProductCard key={product.id} {...product} />
                 ))}
           </div>

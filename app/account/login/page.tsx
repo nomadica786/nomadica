@@ -23,10 +23,32 @@ export default function LoginPage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = "/api/auth/login";
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      window.location.href = "/account/profile";
+    } catch (err: any) {
+      setError(err.message || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -126,6 +148,11 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {error && (
+              <p style={{ fontFamily: "Satoshi", fontSize: "0.875rem", color: "#d9534f", margin: "0.5rem 0" }}>
+                {error}
+              </p>
+            )}
             <div style={{ position: "relative" }}>
               <Mail size={16} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30,30,30,0.35)" }} />
               <input
@@ -172,8 +199,8 @@ export default function LoginPage() {
               </a>
             </div>
 
-            <button className="btn-primary" type="submit" style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem" }}>
-              Sign In
+            <button className="btn-primary" type="submit" disabled={loading} style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem", opacity: loading ? 0.7 : 1 }}>
+              {loading ? "Signing In..." : "Sign In"}
             </button>
 
             <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: "0.5rem 0" }}>

@@ -147,6 +147,7 @@ export class ShopifyAuth {
       'write_customers',
       'read_checkouts',
       'write_checkouts',
+      'write_storefront_access_tokens',
     ];
   }
 }

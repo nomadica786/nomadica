@@ -38,7 +38,7 @@ export const STOREFRONT_QUERIES = {
                     amount
                     currencyCode
                   }
-                  available
+                  available: availableForSale
                 }
               }
             }
@@ -72,7 +72,7 @@ export const STOREFRONT_QUERIES = {
                 amount
                 currencyCode
               }
-              available
+              available: availableForSale
             }
           }
         }

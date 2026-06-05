@@ -29,6 +29,7 @@ function ProductDetailContent() {
   const handle = searchParams.get("handle");
 
   const [product, setProduct] = useState<ProductDetails | null>(null);
+  const [variants, setVariants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
@@ -37,6 +38,7 @@ function ProductDetailContent() {
   const [wishlisted, setWishlisted] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>("description");
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [cartAdding, setCartAdding] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -69,6 +71,7 @@ function ProductDetailContent() {
             badge: rawProduct.badge,
           };
           setProduct(mappedProduct);
+          setVariants(rawProduct.variants?.edges?.map((edge: any) => edge.node) || []);
           setSelectedColor(mappedProduct.colors[0] || "");
           setSelectedSize(mappedProduct.sizes[0] || "");
           setSelectedImage(0);
@@ -96,6 +99,80 @@ function ProductDetailContent() {
 
     fetchProduct();
   }, [id, handle]);
+
+  // Fetch initial wishlist state
+  useEffect(() => {
+    const checkWishlist = async () => {
+      if (!product?.id) return;
+      try {
+        const res = await api.wishlist.list();
+        const isInWishlist = res?.wishlist?.some((item: any) => item.id === product.id);
+        setWishlisted(!!isInWishlist);
+      } catch (err) {
+        console.error("Failed to check wishlist status:", err);
+      }
+    };
+    checkWishlist();
+  }, [product?.id]);
+
+  const handleWishlistToggle = async () => {
+    if (!product) return;
+    try {
+      if (wishlisted) {
+        await api.wishlist.remove(product.id);
+        setWishlisted(false);
+      } else {
+        await api.wishlist.add(product.id);
+        setWishlisted(true);
+      }
+    } catch (err) {
+      console.error("Failed to toggle wishlist:", err);
+    }
+  };
+
+  const handleAddToBag = async () => {
+    if (!product) return;
+    setCartAdding(true);
+    
+    // Find matching variant
+    const selectedVariant = variants.find(v => v.title.toLowerCase().includes(selectedSize.toLowerCase())) || variants[0];
+    const variantId = selectedVariant?.id || `gid://shopify/ProductVariant/${product.id}`;
+    
+    try {
+      let cartId = localStorage.getItem("nomadica_cart_id");
+      let updatedCart;
+      
+      if (!cartId) {
+        const res = await api.cart.create([{
+          merchandiseId: variantId,
+          quantity: quantity,
+          title: selectedSize
+        }]);
+        const newCart = res?.cartCreate?.cart || res?.cart;
+        if (newCart?.id) {
+          cartId = newCart.id;
+          localStorage.setItem("nomadica_cart_id", newCart.id);
+          updatedCart = newCart;
+        }
+      } else {
+        const res = await api.cart.update(cartId, {
+          lines: [{
+            merchandiseId: variantId,
+            quantity: quantity,
+            title: selectedSize
+          }]
+        });
+        updatedCart = res?.cartLinesUpdate?.cart || res?.cart;
+      }
+      
+      // Notify Navbar to update and open Cart Drawer
+      window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: true } }));
+    } catch (err) {
+      console.error("Failed to add to bag:", err);
+    } finally {
+      setCartAdding(false);
+    }
+  };
 
   if (loading) {
     return <PageLoader />;
@@ -406,15 +483,17 @@ function ProductDetailContent() {
             </div>
 
             <button
+              onClick={handleAddToBag}
+              disabled={cartAdding}
               className="btn-primary"
-              style={{ flex: 1, justifyContent: "center" }}
+              style={{ flex: 1, justifyContent: "center", opacity: cartAdding ? 0.7 : 1 }}
             >
               <ShoppingBag size={16} />
-              Add to Bag
+              {cartAdding ? "Adding..." : "Add to Bag"}
             </button>
 
             <button
-              onClick={() => setWishlisted(!wishlisted)}
+              onClick={handleWishlistToggle}
               style={{
                 width: "52px",
                 height: "52px",
