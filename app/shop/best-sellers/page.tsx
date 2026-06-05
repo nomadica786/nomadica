@@ -1,14 +1,34 @@
 "use client";
 import ProductCard from "@/components/shop/ProductCard";
-
-const bestSellers = [
-  { id: "2", name: "Desert Trek Trousers", price: 4299, image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600&q=80", badge: "Best Seller", category: "Bottoms" },
-  { id: "1", name: "Nomad Linen Shirt", price: 3499, originalPrice: 4999, image: "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80", badge: "Best Seller", category: "Tops" },
-  { id: "4", name: "Terra Wool Sweater", price: 5499, originalPrice: 6999, image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80", badge: "Sale", category: "Knits" },
-  { id: "3", name: "Horizon Canvas Jacket", price: 8999, image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80", badge: "Limited", category: "Outerwear" },
-];
+import { api, useApi } from "@/components/api/api";
+import { PageLoader } from "@/components/ui/PageLoader";
 
 export default function BestSellersPage() {
+  const { data, loading } = useApi(() => api.products.list(50));
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
+  const allProducts = data?.products?.edges?.map((edge: any) => {
+    const node = edge.node;
+    const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
+    const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
+    return {
+      id: node.id,
+      name: node.title,
+      price: priceVal,
+      originalPrice: origPriceVal,
+      image: node.images?.edges?.[0]?.node?.url || '',
+      hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
+      badge: node.badge,
+      category: node.category || 'Tops',
+    };
+  }) || [];
+
+  const bestSellers = allProducts.filter((p: any) => p.badge?.toLowerCase() === 'best seller');
+  const displayProducts = bestSellers.length > 0 ? bestSellers : allProducts.slice(0, 4);
+
   return (
     <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
       <div style={{ position: "relative", height: "300px", overflow: "hidden", backgroundColor: "#7A5C3E" }}>
@@ -20,7 +40,7 @@ export default function BestSellersPage() {
       </div>
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.5rem" }}>
-          {bestSellers.map((p) => <ProductCard key={p.id} {...p} />)}
+          {displayProducts.map((p: any) => <ProductCard key={p.id} {...p} />)}
         </div>
       </div>
     </div>

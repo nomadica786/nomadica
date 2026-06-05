@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import BrandHero from "@/components/brand/BrandHero";
 import StoryGallery from "@/components/brand/StoryGallery";

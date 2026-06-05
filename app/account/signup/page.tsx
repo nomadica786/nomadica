@@ -7,6 +7,11 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [activeSlide, setActiveSlide] = useState(1);
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    window.location.href = "/api/auth/login";
+  };
+
   const slides = [
     { image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80", quote: "Join a community of conscious travellers." },
     { image: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80", quote: "Premium gear, ethically made for every adventure." },
@@ -47,7 +52,7 @@ export default function SignupPage() {
             Join the Nomadica community
           </p>
 
-          <form onSubmit={(e) => e.preventDefault()} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
               <div style={{ position: "relative" }}>
                 <User size={15} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30,30,30,0.35)" }} />

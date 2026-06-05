@@ -1,44 +1,115 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Heart, ShoppingBag, Star, ChevronDown, Truck, RotateCcw, Shield } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
+import { api } from "@/components/api/api";
+import { PageLoader } from "@/components/ui/PageLoader";
 
-const product = {
-  id: "1",
-  name: "Nomad Linen Shirt",
-  price: 3499,
-  originalPrice: 4999,
-  category: "Tops",
-  description: "Crafted from 100% European linen, the Nomad Linen Shirt is designed for the traveller who refuses to sacrifice style for comfort. Its relaxed silhouette breathes beautifully in tropical climates while looking effortlessly polished at dinner.",
-  materials: "100% European Linen. Machine wash cold. Hang dry.",
-  sizes: ["XS", "S", "M", "L", "XL"],
-  colors: ["#D4C5B0", "#4F6B5A", "#7A5C3E"],
-  images: [
-    "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=800&q=80",
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
-    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
-    "https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=80",
-  ],
-  rating: 4.8,
-  reviews: 124,
-  badge: "New",
-};
+interface ProductDetails {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  category: string;
+  description: string;
+  materials: string;
+  sizes: string[];
+  colors: string[];
+  images: string[];
+  rating: number;
+  reviews: number;
+  badge?: string;
+}
 
-const relatedProducts = [
-  { id: "2", name: "Desert Trek Trousers", price: 4299, image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600&q=80", category: "Bottoms" },
-  { id: "5", name: "Drift Cotton Tee", price: 1999, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80", category: "Tops" },
-  { id: "3", name: "Horizon Canvas Jacket", price: 8999, image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80", badge: "Limited", category: "Outerwear" },
-  { id: "4", name: "Terra Wool Sweater", price: 5499, originalPrice: 6999, image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80", badge: "Sale", category: "Knits" },
-];
+function ProductDetailContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+  const handle = searchParams.get("handle");
 
-export default function ProductDetailPage() {
+  const [product, setProduct] = useState<ProductDetails | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
+  const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [wishlisted, setWishlisted] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>("description");
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        let res;
+        if (handle) {
+          res = await api.products.getByHandle(handle);
+        } else {
+          res = await api.products.get(id || "1");
+        }
+
+        const rawProduct = res?.product || res?.productByHandle;
+        if (rawProduct) {
+          const priceVal = rawProduct.price || parseFloat(rawProduct.variants?.edges?.[0]?.node?.price?.amount || "0");
+          const origPriceVal = rawProduct.originalPrice || (rawProduct.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(rawProduct.variants?.edges?.[0]?.node?.compareAtPrice?.amount || "0") : undefined);
+          const mappedProduct: ProductDetails = {
+            id: rawProduct.id,
+            name: rawProduct.title,
+            price: priceVal,
+            originalPrice: origPriceVal,
+            category: rawProduct.category || "Tops",
+            description: rawProduct.description || "",
+            materials: rawProduct.materials || "100% Organic Material. Machine wash cold.",
+            sizes: rawProduct.sizes || ["S", "M", "L", "XL"],
+            colors: rawProduct.colors || ["#7A5C3E", "#1E1E1E"],
+            images: rawProduct.images?.edges?.map((edge: any) => edge.node.url) || [rawProduct.image || ""],
+            rating: rawProduct.rating || 4.7,
+            reviews: rawProduct.reviews || 48,
+            badge: rawProduct.badge,
+          };
+          setProduct(mappedProduct);
+          setSelectedColor(mappedProduct.colors[0] || "");
+          setSelectedSize(mappedProduct.sizes[0] || "");
+          setSelectedImage(0);
+
+          // Fetch related products
+          const listRes = await api.products.list(6);
+          const listMapped = listRes?.products?.edges?.map((edge: any) => {
+            const node = edge.node;
+            return {
+              id: node.id,
+              name: node.title,
+              price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
+              image: node.images?.edges?.[0]?.node?.url || "",
+              category: node.category || "Tops",
+            };
+          }).filter((p: any) => p.id !== rawProduct.id) || [];
+          setRelatedProducts(listMapped.slice(0, 4));
+        }
+      } catch (err) {
+        console.error("Failed to load product:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id, handle]);
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
+  if (!product) {
+    return (
+      <div style={{ paddingTop: "100px", paddingBottom: "100px", textAlign: "center", backgroundColor: "#F7F4EE", minHeight: "100vh", fontFamily: "Satoshi" }}>
+        <h1 style={{ fontFamily: "Clash Display" }}>Product Not Found</h1>
+        <p style={{ margin: "1rem 0" }}>The product you are looking for could not be found.</p>
+        <Link href="/shop" style={{ color: "#7A5C3E", textDecoration: "underline", fontWeight: 500 }}>Back to Shop</Link>
+      </div>
+    );
+  }
 
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -446,5 +517,13 @@ export default function ProductDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductDetailPage() {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <ProductDetailContent />
+    </Suspense>
   );
 }

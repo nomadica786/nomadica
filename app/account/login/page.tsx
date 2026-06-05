@@ -24,6 +24,11 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    window.location.href = "/api/auth/login";
+  };
+
   return (
     <div style={{ paddingTop: "64px", minHeight: "100svh", display: "flex", backgroundColor: "#F7F4EE" }}>
       {/* Left – Image Slider */}
@@ -120,7 +125,7 @@ export default function LoginPage() {
             Sign in to your Nomadica account
           </p>
 
-          <form onSubmit={(e) => e.preventDefault()} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div style={{ position: "relative" }}>
               <Mail size={16} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30,30,30,0.35)" }} />
               <input

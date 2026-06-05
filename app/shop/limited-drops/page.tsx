@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import ProductCard from "@/components/shop/ProductCard";
+import { api, useApi } from "@/components/api/api";
+import { PageLoader } from "@/components/ui/PageLoader";
 
 function Countdown({ targetDate }: { targetDate: Date }) {
   const [time, setTime] = useState({ h: 0, m: 0, s: 0 });
@@ -30,15 +32,32 @@ function Countdown({ targetDate }: { targetDate: Date }) {
   );
 }
 
-const drops = [
-  { id: "3", name: "Horizon Canvas Jacket", price: 8999, image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80", badge: "Limited", category: "Outerwear" },
-  { id: "10", name: "Eclipse Silk Scarf", price: 2299, image: "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=600&q=80", badge: "Limited", category: "Accessories" },
-  { id: "11", name: "Terrain Leather Belt", price: 1799, image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80", badge: "Limited", category: "Accessories" },
-];
-
 export default function LimitedDropsPage() {
-  // eslint-disable-next-line react-hooks/purity
   const target = new Date(Date.now() + 48 * 3600 * 1000);
+  const { data, loading } = useApi(() => api.products.list(50));
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
+  const allProducts = data?.products?.edges?.map((edge: any) => {
+    const node = edge.node;
+    const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
+    const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
+    return {
+      id: node.id,
+      name: node.title,
+      price: priceVal,
+      originalPrice: origPriceVal,
+      image: node.images?.edges?.[0]?.node?.url || '',
+      hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
+      badge: node.badge,
+      category: node.category || 'Tops',
+    };
+  }) || [];
+
+  const drops = allProducts.filter((p: any) => p.badge?.toLowerCase() === 'limited');
+  const displayProducts = drops.length > 0 ? drops : allProducts.slice(0, 3);
 
   return (
     <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
@@ -56,7 +75,7 @@ export default function LimitedDropsPage() {
 
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
-          {drops.map((p) => <ProductCard key={p.id} {...p} />)}
+          {displayProducts.map((p: any) => <ProductCard key={p.id} {...p} />)}
         </div>
       </div>
     </div>

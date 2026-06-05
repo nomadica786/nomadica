@@ -3,34 +3,44 @@ import { useState } from "react";
 import { Search, X } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import SnowballLoader from "@/components/ui/SnowBallLoader";
-
-const allProducts = [
-  { id: "1", name: "Nomad Linen Shirt", price: 3499, image: "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80", category: "Tops" },
-  { id: "2", name: "Desert Trek Trousers", price: 4299, image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600&q=80", category: "Bottoms" },
-  { id: "3", name: "Horizon Canvas Jacket", price: 8999, image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80", category: "Outerwear" },
-  { id: "4", name: "Terra Wool Sweater", price: 5499, image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80", category: "Knits" },
-  { id: "5", name: "Drift Cotton Tee", price: 1999, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80", category: "Tops" },
-  { id: "6", name: "Summit Cargo Pants", price: 5299, image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&q=80", category: "Bottoms" },
-];
+import { api } from "@/components/api/api";
 
 const suggestions = ["Linen", "Jacket", "Trousers", "Wool", "Summer", "Travel"];
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<any[]>([]);
 
-  const filtered = query.length > 1
-    ? allProducts.filter((p) =>
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase())
-      )
-    : [];
-
-  const handleSearch = (val: string) => {
+  const handleSearch = async (val: string) => {
     setQuery(val);
     if (val.length > 1) {
       setLoading(true);
-      setTimeout(() => setLoading(false), 600);
+      try {
+        const data = await api.products.search(val);
+        const mappedResults = data?.search?.edges?.map((edge: any) => {
+          const node = edge.node;
+          const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
+          const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
+          return {
+            id: node.id,
+            name: node.title,
+            price: priceVal,
+            originalPrice: origPriceVal,
+            image: node.images?.edges?.[0]?.node?.url || '',
+            hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
+            badge: node.badge,
+            category: node.category || 'Tops',
+          };
+        }) || [];
+        setResults(mappedResults);
+      } catch (err) {
+        console.error('Search failed:', err);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setResults([]);
     }
   };
 
@@ -110,11 +120,11 @@ export default function SearchPage() {
         ) : query.length > 1 ? (
           <>
             <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", marginBottom: "2rem" }}>
-              {filtered.length} result{filtered.length !== 1 ? "s" : ""} for &quot;{query}&quot;
+              {results.length} result{results.length !== 1 ? "s" : ""} for &quot;{query}&quot;
             </p>
-            {filtered.length > 0 ? (
+            {results.length > 0 ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.5rem" }}>
-                {filtered.map((p) => <ProductCard key={p.id} {...p} />)}
+                {results.map((p) => <ProductCard key={p.id} {...p} />)}
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "4rem 0" }}>

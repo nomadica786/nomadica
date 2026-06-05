@@ -1,19 +1,9 @@
 "use client";
 import { useState } from "react";
 import ProductCard from "@/components/shop/ProductCard";
-import { CardSkeleton } from "@/components/ui/SnowBallLoader";
+import { api, useApi } from "@/components/api/api";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Filter, ChevronDown, X } from "lucide-react";
-
-const allProducts = [
-  { id: "1", name: "Nomad Linen Shirt", price: 3499, originalPrice: 4999, image: "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80", badge: "New", category: "Tops" },
-  { id: "2", name: "Desert Trek Trousers", price: 4299, image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600&q=80", badge: "Best Seller", category: "Bottoms" },
-  { id: "3", name: "Horizon Canvas Jacket", price: 8999, image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80", badge: "Limited", category: "Outerwear" },
-  { id: "4", name: "Terra Wool Sweater", price: 5499, originalPrice: 6999, image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80", badge: "Sale", category: "Knits" },
-  { id: "5", name: "Drift Cotton Tee", price: 1999, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80", category: "Tops" },
-  { id: "6", name: "Summit Cargo Pants", price: 5299, image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&q=80", category: "Bottoms" },
-  { id: "7", name: "Dusk Linen Trousers", price: 3799, image: "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&q=80", category: "Bottoms" },
-  { id: "8", name: "Wander Merino Hoodie", price: 6299, image: "https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80", category: "Outerwear" },
-];
 
 const categories = ["All", "Tops", "Bottoms", "Outerwear", "Knits"];
 const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
@@ -21,11 +11,32 @@ const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Ne
 export default function CollectionsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [sortBy, setSortBy] = useState("Featured");
-  const [filterOpen, setFilterOpen] = useState(false);
+  const { data, loading } = useApi(() => api.products.list(50));
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
+  // Map Shopify GraphQL product nodes back to standard ProductCard props
+  const allProducts = data?.products?.edges?.map((edge: any) => {
+    const node = edge.node;
+    const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
+    const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
+    return {
+      id: node.id,
+      name: node.title,
+      price: priceVal,
+      originalPrice: origPriceVal,
+      image: node.images?.edges?.[0]?.node?.url || '',
+      hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
+      badge: node.badge,
+      category: node.category || 'Tops',
+    };
+  }) || [];
 
   const filtered = allProducts
-    .filter((p) => activeCategory === "All" || p.category === activeCategory)
-    .sort((a, b) => {
+    .filter((p: any ) => activeCategory === "All" || p.category === activeCategory)
+    .sort((a: any, b: any) => {
       if (sortBy === "Price: Low to High") return a.price - b.price;
       if (sortBy === "Price: High to Low") return b.price - a.price;
       return 0;
@@ -136,7 +147,7 @@ export default function CollectionsPage() {
             gap: "1.5rem",
           }}
         >
-          {filtered.map((product) => (
+          {filtered.map((product: any) => (
             <ProductCard key={product.id} {...product} />
           ))}
         </div>

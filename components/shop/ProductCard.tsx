@@ -28,7 +28,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
-  const productHref = href || `/shop/product/${id}`;
+  const productHref = href || `/shop/product-details?id=${id}`;
 
   return (
     <div

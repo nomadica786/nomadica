@@ -1,17 +1,34 @@
 "use client";
 import ProductCard from "@/components/shop/ProductCard";
-import { ArrowRight } from "lucide-react";
-
-const newArrivals = [
-  { id: "1", name: "Nomad Linen Shirt", price: 3499, originalPrice: 4999, image: "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80", badge: "New", category: "Tops" },
-  { id: "5", name: "Drift Cotton Tee", price: 1999, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80", badge: "New", category: "Tops" },
-  { id: "6", name: "Summit Cargo Pants", price: 5299, image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&q=80", badge: "New", category: "Bottoms" },
-  { id: "7", name: "Dusk Linen Trousers", price: 3799, image: "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&q=80", badge: "New", category: "Bottoms" },
-  { id: "8", name: "Wander Merino Hoodie", price: 6299, image: "https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80", badge: "New", category: "Outerwear" },
-  { id: "9", name: "Route Linen Shorts", price: 2499, image: "https://images.unsplash.com/photo-1612825173281-9a193378527e?w=600&q=80", badge: "New", category: "Bottoms" },
-];
+import { api, useApi } from "@/components/api/api";
+import { PageLoader } from "@/components/ui/PageLoader";
 
 export default function NewArrivalsPage() {
+  const { data, loading } = useApi(() => api.products.list(50));
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
+  const allProducts = data?.products?.edges?.map((edge: any) => {
+    const node = edge.node;
+    const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
+    const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
+    return {
+      id: node.id,
+      name: node.title,
+      price: priceVal,
+      originalPrice: origPriceVal,
+      image: node.images?.edges?.[0]?.node?.url || '',
+      hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
+      badge: node.badge,
+      category: node.category || 'Tops',
+    };
+  }) || [];
+
+  const newArrivals = allProducts.filter((p: any) => p.badge?.toLowerCase() === 'new');
+  const displayProducts = newArrivals.length > 0 ? newArrivals : allProducts.slice(0, 6);
+
   return (
     <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
       {/* Hero banner */}
@@ -55,7 +72,7 @@ export default function NewArrivalsPage() {
       {/* Grid */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.5rem" }}>
-          {newArrivals.map((p) => <ProductCard key={p.id} {...p} />)}
+          {displayProducts.map((p: any) => <ProductCard key={p.id} {...p} />)}
         </div>
       </div>
     </div>
