@@ -30,9 +30,11 @@ function CheckoutContent() {
   const [selectedAddressId, setSelectedAddressId] = useState("");
 
   // Payment states
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "upi" | "cod">("card");
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
+  const [upiId, setUpiId] = useState("");
 
   // Checkout states
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -142,9 +144,11 @@ function CheckoutContent() {
         lineItems,
         totalPrice,
         currency: "INR",
-        cardNumber,
-        expiry,
-        cvv
+        paymentMethod,
+        cardNumber: paymentMethod === "card" ? cardNumber : undefined,
+        expiry: paymentMethod === "card" ? expiry : undefined,
+        cvv: paymentMethod === "card" ? cvv : undefined,
+        upiId: paymentMethod === "upi" ? upiId : undefined
       });
 
       if (result.success) {
@@ -209,6 +213,14 @@ function CheckoutContent() {
 
   return (
     <div style={{ backgroundColor: "#F7F4EE", minHeight: "100vh", paddingBottom: "5rem" }}>
+      <style>{`
+        @keyframes scan-bar {
+          0% { top: 0%; }
+          50% { top: 100%; }
+          100% { top: 0%; }
+        }
+      `}</style>
+
       {/* Checkout Navbar */}
       <header style={{ borderBottom: "1px solid rgba(30,30,30,0.08)", height: "64px", display: "flex", alignItems: "center", padding: "0 2rem", backgroundColor: "#F7F4EE" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto", width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -359,54 +371,136 @@ function CheckoutContent() {
             </div>
 
             {/* Payment Gateway Form */}
-            <div style={{ backgroundColor: "#fff", padding: "2rem", border: "1px solid rgba(30,30,30,0.08)", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            <div style={{ backgroundColor: "#fff", padding: "2rem", border: "1px solid rgba(30,30,30,0.08)", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <h3 style={{ fontFamily: "Clash Display", fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>Payment Method</h3>
                 <span style={{ fontSize: "0.75rem", color: "#7A5C3E", border: "1px solid #7A5C3E", padding: "0.2rem 0.5rem", fontWeight: 600 }}>MOCK TEST GATEWAY</span>
               </div>
 
-              <div style={{ padding: "0.875rem 1rem", backgroundColor: "rgba(122,92,62,0.08)", borderLeft: "4px solid #7A5C3E", fontSize: "0.8125rem", color: "#7A5C3E", lineHeight: 1.5 }}>
-                <p style={{ margin: "0 0 0.25rem", fontWeight: 600 }}>Test Card Info:</p>
-                Use card <strong>4242 4242 4242 4242</strong> for a successful mock purchase.
+              {/* Tabs */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem", borderBottom: "1px solid rgba(30,30,30,0.1)", paddingBottom: "1rem" }}>
+                {[
+                  { id: "card", label: "Credit/Debit Card" },
+                  { id: "upi", label: "UPI" },
+                  { id: "cod", label: "Cash on Delivery" }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      setPaymentMethod(tab.id as any);
+                      setErrorMessage("");
+                    }}
+                    style={{
+                      padding: "0.75rem 0.5rem",
+                      backgroundColor: paymentMethod === tab.id ? "#1E1E1E" : "transparent",
+                      color: paymentMethod === tab.id ? "#F7F4EE" : "rgba(30,30,30,0.6)",
+                      border: "1px solid rgba(30,30,30,0.15)",
+                      fontFamily: "Satoshi",
+                      fontSize: "0.8125rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      textAlign: "center",
+                      transition: "all 0.15s ease"
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
 
-              <div>
-                <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>Card Number</label>
-                <input
-                  type="text"
-                  placeholder="4242 4242 4242 4242"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                  className="form-input"
-                  required
-                />
-              </div>
+              {/* Card Payment Form */}
+              {paymentMethod === "card" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                  <div style={{ padding: "0.875rem 1rem", backgroundColor: "rgba(122,92,62,0.08)", borderLeft: "4px solid #7A5C3E", fontSize: "0.8125rem", color: "#7A5C3E", lineHeight: 1.5 }}>
+                    <p style={{ margin: "0 0 0.25rem", fontWeight: 600 }}>Test Card Info:</p>
+                    Use card <strong>4242 4242 4242 4242</strong> for a successful mock purchase.
+                  </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>Expiry Date</label>
-                  <input
-                    type="text"
-                    placeholder="MM / YY"
-                    value={expiry}
-                    onChange={(e) => setExpiry(e.target.value)}
-                    className="form-input"
-                    required
-                  />
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>Card Number</label>
+                    <input
+                      type="text"
+                      placeholder="4242 4242 4242 4242"
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value)}
+                      className="form-input"
+                      required={paymentMethod === "card"}
+                    />
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>Expiry Date</label>
+                      <input
+                        type="text"
+                        placeholder="MM / YY"
+                        value={expiry}
+                        onChange={(e) => setExpiry(e.target.value)}
+                        className="form-input"
+                        required={paymentMethod === "card"}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>CVV</label>
+                      <input
+                        type="text"
+                        placeholder="123"
+                        value={cvv}
+                        onChange={(e) => setCvv(e.target.value)}
+                        className="form-input"
+                        maxLength={4}
+                        required={paymentMethod === "card"}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>CVV</label>
-                  <input
-                    type="text"
-                    placeholder="123"
-                    value={cvv}
-                    onChange={(e) => setCvv(e.target.value)}
-                    className="form-input"
-                    maxLength={4}
-                    required
-                  />
+              )}
+
+              {/* UPI Payment Form */}
+              {paymentMethod === "upi" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", alignItems: "center", textAlign: "center" }}>
+                  <div style={{ width: "100%", textAlign: "left" }}>
+                    <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>UPI Virtual Payment Address (VPA)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. mobileNumber@upi, name@ybl"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      className="form-input"
+                      required={paymentMethod === "upi"}
+                    />
+                  </div>
+
+                  <div style={{ height: "1px", backgroundColor: "rgba(30,30,30,0.08)", width: "100%", margin: "0.5rem 0" }} />
+                  
+                  <p style={{ fontFamily: "Satoshi", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)", margin: 0 }}>OR SCAN MOCK QR CODE</p>
+                  
+                  {/* Mock UPI QR Code Visualizer */}
+                  <div style={{ border: "1px solid rgba(30,30,30,0.1)", padding: "1rem", backgroundColor: "#fff", display: "inline-block", position: "relative" }}>
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=nomadica@upi%26pn=Nomadica%26am=${total}%26cu=INR`} 
+                      alt="UPI QR Code" 
+                      style={{ width: "150px", height: "150px" }}
+                    />
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", backgroundColor: "#7A5C3E", animation: "scan-bar 2s linear infinite" }} />
+                  </div>
+                  
+                  <p style={{ fontFamily: "Satoshi", fontSize: "0.75rem", color: "#7A5C3E", fontWeight: 600 }}>
+                    Scan QR using Google Pay, PhonePe, or Paytm to pay ₹{total.toLocaleString("en-IN")} (Mock simulation).
+                  </p>
                 </div>
-              </div>
+              )}
+
+              {/* Cash on Delivery (COD) Form */}
+              {paymentMethod === "cod" && (
+                <div style={{ padding: "1.25rem", backgroundColor: "rgba(79, 107, 90, 0.08)", borderLeft: "4px solid #4F6B5A", display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%" }}>
+                  <p style={{ margin: 0, fontFamily: "Satoshi", fontWeight: 600, fontSize: "0.875rem", color: "#4F6B5A", textAlign: "left" }}>Cash on Delivery Selected</p>
+                  <p style={{ margin: 0, fontFamily: "Satoshi", fontSize: "0.8125rem", color: "rgba(30,30,30,0.7)", lineHeight: 1.5, textAlign: "left" }}>
+                    Pay with cash, UPI, or card when your order is delivered to your doorstep. A shipping confirmation and receipt will be generated immediately.
+                  </p>
+                </div>
+              )}
             </div>
 
             <button

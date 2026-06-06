@@ -1,11 +1,12 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Heart, ShoppingBag, Star, ChevronDown, Truck, RotateCcw, Shield } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { useAuth } from "@/utils/hooks/useAuth";
 
 interface ProductDetails {
   id: string;
@@ -24,6 +25,8 @@ interface ProductDetails {
 }
 
 function ProductDetailContent() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const handle = searchParams.get("handle");
@@ -117,6 +120,10 @@ function ProductDetailContent() {
 
   const handleWishlistToggle = async () => {
     if (!product) return;
+    if (!isAuthenticated) {
+      router.push("/account/login");
+      return;
+    }
     try {
       if (wishlisted) {
         await api.wishlist.remove(product.id);
@@ -132,6 +139,10 @@ function ProductDetailContent() {
 
   const handleAddToBag = async () => {
     if (!product) return;
+    if (!isAuthenticated) {
+      router.push("/account/login");
+      return;
+    }
     setCartAdding(true);
     
     // Find matching variant

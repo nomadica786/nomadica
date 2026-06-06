@@ -24,17 +24,20 @@ export async function POST(request: NextRequest) {
       if (paymentResult.success) {
         const orderNumber = `NMD-${Math.floor(1000 + Math.random() * 9000)}`;
         const orderId = `gid://shopify/Order/${Math.floor(100000 + Math.random() * 900000)}`;
+        const cookieStore = await cookies();
+        const customerEmail = cookieStore.get('customer_email')?.value;
+
         const newOrder = {
           node: {
             id: orderId,
             orderNumber,
             createdAt: new Date().toISOString(),
-            email: body.email || 'arjun.mehta@email.com',
+            email: customerEmail || body.email || 'arjun.mehta@email.com',
             totalPrice: {
               amount: String(body.totalPrice || 0),
               currencyCode: body.currency || 'INR'
             },
-            status: 'In Transit',
+            status: body.paymentMethod === 'COD' ? 'Pending COD' : 'In Transit',
             lineItems: {
               edges: (body.lineItems || []).map((item: any, idx: number) => ({
                 node: {
@@ -56,7 +59,6 @@ export async function POST(request: NextRequest) {
           }
         };
 
-        const cookieStore = await cookies();
         const existingCookie = cookieStore.get('mock_orders')?.value;
         let orders = [];
         if (existingCookie) {

@@ -1,8 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart, ShoppingBag } from "lucide-react";
 import { api } from "@/components/api/api";
+import { useAuth } from "@/utils/hooks/useAuth";
 
 interface ProductCardProps {
   id?: string;
@@ -27,6 +29,8 @@ export default function ProductCard({
   category,
   href,
 }: ProductCardProps) {
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const [hovered, setHovered] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -91,6 +95,10 @@ export default function ProductCard({
               onClick={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                if (!isAuthenticated) {
+                  router.push("/account/login");
+                  return;
+                }
                 setAddingToCart(true);
                 try {
                   let cartId = localStorage.getItem("nomadica_cart_id");
@@ -177,6 +185,10 @@ export default function ProductCard({
             onClick={async (e) => {
               e.preventDefault();
               e.stopPropagation();
+              if (!isAuthenticated) {
+                router.push("/account/login");
+                return;
+              }
               try {
                 if (wishlisted) {
                   await api.wishlist.remove(id);

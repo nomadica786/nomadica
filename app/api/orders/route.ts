@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   const env = getEnvironment();
   const cookieStore = await cookies();
+  const customerEmail = cookieStore.get('customer_email')?.value;
   const customerAccessToken = cookieStore.get('customer_access_token')?.value;
   const accessToken = cookieStore.get('shopify_access_token')?.value;
   const shop = cookieStore.get('shopify_shop')?.value;
@@ -16,12 +17,19 @@ export async function GET() {
   const storefrontToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
   const isStorefrontConfigured = !!env.shopUrl && !!storefrontToken && storefrontToken.trim() !== '';
 
-  // Load custom mock orders from cookie
+  // Load custom mock orders from cookie (filtered by customer email)
   let customOrders: any[] = [];
   const mockOrdersCookie = cookieStore.get('mock_orders')?.value;
   if (mockOrdersCookie) {
     try {
-      customOrders = JSON.parse(mockOrdersCookie);
+      const parsedOrders = JSON.parse(mockOrdersCookie);
+      if (customerEmail) {
+        customOrders = parsedOrders.filter((order: any) =>
+          order?.node?.email?.toLowerCase() === customerEmail.toLowerCase()
+        );
+      } else {
+        customOrders = parsedOrders;
+      }
     } catch {}
   }
 
@@ -111,7 +119,7 @@ export async function GET() {
 
         return NextResponse.json({
           orders: {
-            edges: mappedEdges
+            edges: [...customOrders, ...mappedEdges]
           }
         });
 
@@ -213,7 +221,7 @@ export async function GET() {
 
       return NextResponse.json({
         orders: {
-          edges: mappedEdges
+          edges: [...customOrders, ...mappedEdges]
         }
       });
     }
