@@ -143,6 +143,9 @@ export class ShopifyAuth {
     return [
       'read_products',
       'read_orders',
+      'write_orders',
+      'read_draft_orders',
+      'write_draft_orders',
       'read_customers',
       'write_customers',
       'read_checkouts',

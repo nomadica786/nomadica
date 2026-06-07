@@ -166,7 +166,6 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <div
             style={{
-              display: "flex",
               alignItems: "center",
               gap: "2.5rem",
               position: "absolute",
@@ -253,7 +252,7 @@ export default function Navbar() {
             <Link href="/shop/search" style={{ color: "#1E1E1E", display: "flex" }}>
               <Search size={20} />
             </Link>
-            <Link href="/account/wishlist" style={{ color: "#1E1E1E", display: "flex" }} className="hidden sm:flex">
+            <Link href="/account/wishlist" style={{ color: "#1E1E1E" }} className="hidden sm:flex">
               <Heart size={20} />
             </Link>
 
@@ -272,7 +271,6 @@ export default function Navbar() {
                     borderRadius: "50%",
                     backgroundColor: "#1E1E1E",
                     color: "#F7F4EE",
-                    display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontFamily: "'Clash Display', sans-serif",
@@ -343,7 +341,7 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <Link href="/account/login" style={{ color: "#1E1E1E", display: "flex" }} className="hidden sm:flex">
+              <Link href="/account/login" style={{ color: "#1E1E1E" }} className="hidden sm:flex">
                 <User size={20} />
               </Link>
             )}
@@ -391,10 +389,9 @@ export default function Navbar() {
                 border: "none",
                 cursor: "pointer",
                 color: "#1E1E1E",
-                display: "flex",
                 padding: "4px",
               }}
-              className="md:hidden"
+              className="md:hidden flex"
               aria-label="Toggle menu"
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -607,11 +604,7 @@ export default function Navbar() {
                 const price = parseFloat(line.merchandise?.price?.amount || "0");
                 const title = line.merchandise?.product?.title || "Product";
                 const size = line.merchandise?.title || "Default";
-                const rawId = line.merchandise?.product?.id || "1";
-                const cleanId = String(rawId).split("/").pop() || "1";
-                const numericId = cleanId.replace(/[^0-9]/g, "");
-                const product = MOCK_PRODUCTS.find(p => p.id === numericId) || MOCK_PRODUCTS[0];
-                const image = product?.image || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=300&q=80";
+                const image = line.merchandise?.product?.images?.edges?.[0]?.node?.url || line.merchandise?.image || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=300&q=80";
 
                 return (
                   <div key={line.id} style={{ display: "flex", gap: "1rem", borderBottom: "1px solid rgba(30,30,30,0.05)", paddingBottom: "1.5rem" }}>
@@ -677,11 +670,11 @@ export default function Navbar() {
             <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30, 30, 30, 0.45)", margin: "0 0 1.5rem" }}>
               Shipping and taxes calculated at checkout.
             </p>
-            <Link href={`/checkout?cartId=${cart.id}`} onClick={() => setCartOpen(false)} style={{ textDecoration: "none" }}>
+            <a href={cart.checkoutUrl || `/checkout?cartId=${cart.id}`} onClick={() => setCartOpen(false)} style={{ textDecoration: "none" }}>
               <button className="btn-primary" style={{ width: "100%", justifyContent: "center", height: "48px" }}>
                 Proceed to Checkout
               </button>
-            </Link>
+            </a>
           </div>
         )}
       </div>

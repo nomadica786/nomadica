@@ -185,7 +185,15 @@ export const STOREFRONT_QUERIES = {
                     id
                     title
                     product {
+                      id
                       title
+                      images(first: 1) {
+                        edges {
+                          node {
+                            url
+                          }
+                        }
+                      }
                     }
                     price {
                       amount
@@ -219,6 +227,17 @@ export const STOREFRONT_QUERIES = {
                 ... on ProductVariant {
                   id
                   title
+                  product {
+                    id
+                    title
+                    images(first: 1) {
+                      edges {
+                        node {
+                          url
+                        }
+                      }
+                    }
+                  }
                   price {
                     amount
                     currencyCode

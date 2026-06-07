@@ -147,7 +147,9 @@ function ProductDetailContent() {
     
     // Find matching variant
     const selectedVariant = variants.find(v => v.title.toLowerCase().includes(selectedSize.toLowerCase())) || variants[0];
-    const variantId = selectedVariant?.id || `gid://shopify/ProductVariant/${product.id}`;
+    const variantId = selectedVariant?.id || (product.id && product.id.startsWith("gid://shopify/")
+      ? product.id.replace("/Product/", "/ProductVariant/")
+      : `gid://shopify/ProductVariant/${product.id}`);
     
     try {
       let cartId = localStorage.getItem("nomadica_cart_id");
@@ -157,7 +159,10 @@ function ProductDetailContent() {
         const res = await api.cart.create([{
           merchandiseId: variantId,
           quantity: quantity,
-          title: selectedSize
+          title: selectedSize,
+          price: product.price,
+          productTitle: product.name,
+          image: product.images[0] || ""
         }]);
         const newCart = res?.cartCreate?.cart || res?.cart;
         if (newCart?.id) {
@@ -170,7 +175,10 @@ function ProductDetailContent() {
           lines: [{
             merchandiseId: variantId,
             quantity: quantity,
-            title: selectedSize
+            title: selectedSize,
+            price: product.price,
+            productTitle: product.name,
+            image: product.images[0] || ""
           }]
         });
         updatedCart = res?.cartLinesUpdate?.cart || res?.cart;

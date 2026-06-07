@@ -4,6 +4,7 @@ import { getEnvironment } from '@/utils/env';
 import { MOCK_ORDERS } from '@/utils/mockData';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { getShopifySession } from '@/utils/shopifySession';
 
 export async function GET(
   request: Request,
@@ -12,8 +13,9 @@ export async function GET(
   const { id } = await params;
   const env = getEnvironment();
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get('shopify_access_token')?.value;
-  const shop = cookieStore.get('shopify_shop')?.value;
+  const session = getShopifySession();
+  const accessToken = session?.accessToken || cookieStore.get('shopify_access_token')?.value;
+  const shop = session?.shop || cookieStore.get('shopify_shop')?.value;
 
   const isConfigured = !!env.shopUrl && !!env.clientId;
 

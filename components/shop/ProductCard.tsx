@@ -102,13 +102,18 @@ export default function ProductCard({
                 setAddingToCart(true);
                 try {
                   let cartId = localStorage.getItem("nomadica_cart_id");
-                  const variantId = `gid://shopify/ProductVariant/${id}000`;
+                  const variantId = id && id.startsWith("gid://shopify/")
+                    ? id.replace("/Product/", "/ProductVariant/")
+                    : `gid://shopify/ProductVariant/${id}000`;
                   
                   if (!cartId) {
                     const res = await api.cart.create([{
                       merchandiseId: variantId,
                       quantity: 1,
-                      title: "Default Size"
+                      title: "Default Size",
+                      price,
+                      productTitle: name,
+                      image
                     }]);
                     const newCart = res?.cartCreate?.cart || res?.cart;
                     if (newCart?.id) {
@@ -119,7 +124,10 @@ export default function ProductCard({
                       lines: [{
                         merchandiseId: variantId,
                         quantity: 1,
-                        title: "Default Size"
+                        title: "Default Size",
+                        price,
+                        productTitle: name,
+                        image
                       }]
                     });
                   }

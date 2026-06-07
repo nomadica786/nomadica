@@ -60,6 +60,10 @@ function CheckoutContent() {
       try {
         const res = await api.cart.get(cartId);
         setCart(res.cart);
+        if (res.cart?.checkoutUrl && !res.cart.checkoutUrl.startsWith("/checkout")) {
+          window.location.href = res.cart.checkoutUrl;
+          return;
+        }
       } catch (err) {
         console.error("Failed to load cart:", err);
       } finally {
@@ -244,7 +248,7 @@ function CheckoutContent() {
           </div>
         )}
 
-        <form onSubmit={handlePlaceOrder} style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: "4rem" }} className="lg:grid-cols-[1fr_400px] grid-cols-1">
+        <form onSubmit={handlePlaceOrder} className="grid lg:grid-cols-[1fr_400px] grid-cols-1 gap-16">
           {/* Left Column: Checkout Details */}
           <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
             
@@ -336,7 +340,7 @@ function CheckoutContent() {
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }} className="grid-cols-1 md:grid-cols-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>City</label>
                   <input
