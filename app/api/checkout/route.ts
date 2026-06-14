@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const env = getEnvironment();
 
-    // Use mock payment gateway if in development or if live Shopify config is missing
-    if (env.isDev || !env.shopUrl) {
+    // Process checkout using mock payment gateway and sync with Shopify Admin API
+    if (true) {
       const paymentResult = await MockPaymentGateway.processPayment({
         orderId: body.orderId || `MOCK_ORDER_${Date.now()}`,
         amount: body.totalPrice || body.amount || 0,
@@ -194,11 +194,21 @@ export async function POST(request: NextRequest) {
             }
           } catch (err: any) {
             console.error('  - [SHOPIFY EXCEPTION] Caught error during Shopify API communication:', err.message);
-            if (err.message && err.message.includes('403')) {
+            const isAccessDenied = err.message && (
+              err.message.includes('403') || 
+              err.message.includes('Access denied') || 
+              err.message.includes('access scope')
+            );
+            if (isAccessDenied) {
               console.error('\n  ================================================================');
-              console.error('  [403 FORBIDDEN DETECTED] This token is missing required scopes!');
-              console.error('  TO FIX: Please visit http://localhost:3000/api/auth/login in');
-              console.error('  your browser to re-run OAuth and request the new scopes.');
+              console.error('  [ACCESS DENIED DETECTED] This token is missing required scopes!');
+              console.error('  If using a Custom App Access Token (shpca_ or shpat_):');
+              console.error('  1. Go to Shopify Admin -> Settings -> Apps and sales channels -> Develop apps.');
+              console.error('  2. Select your app and go to the "Configuration" tab.');
+              console.error('  3. Under "Admin API integration", click "Edit" and enable:');
+              console.error('     - write_draft_orders, read_draft_orders');
+              console.error('     - write_orders, read_orders');
+              console.error('  4. Save and click "Reinstall app" to apply scopes.');
               console.error('  ================================================================\n');
             } else {
               console.error(err.stack);
@@ -280,11 +290,6 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json(paymentResult);
-    } else {
-      return NextResponse.json({
-        success: false,
-        error: 'Production payment processing not configured'
-      }, { status: 501 });
     }
   } catch (error) {
     console.error('Checkout error:', error);

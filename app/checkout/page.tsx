@@ -136,6 +136,7 @@ function CheckoutContent() {
     // Construct line items list for order tracking / receipt
     const lineItems = cart.lines.edges.map((edge: any) => {
       const line = edge.node;
+      const liveImage = line.merchandise?.product?.images?.edges?.[0]?.node?.url || line.merchandise?.image;
       const rawId = line.merchandise?.product?.id || "1";
       const cleanId = String(rawId).split("/").pop() || "1";
       const numericId = cleanId.replace(/[^0-9]/g, "");
@@ -145,7 +146,7 @@ function CheckoutContent() {
         title: line.merchandise?.product?.title || "Product",
         quantity: line.quantity,
         price: parseFloat(line.merchandise?.price?.amount || "0"),
-        image: product?.image || "",
+        image: liveImage || product?.image || "",
         variantId: line.merchandise?.id
       };
     });
@@ -555,6 +556,7 @@ function CheckoutContent() {
                   const price = parseFloat(line.merchandise?.price?.amount || "0");
                   const title = line.merchandise?.product?.title || "Product";
                   const size = line.merchandise?.title || "Default";
+                  const liveImage = line.merchandise?.product?.images?.edges?.[0]?.node?.url || line.merchandise?.image;
                   const rawId = line.merchandise?.product?.id || "1";
                   const cleanId = String(rawId).split("/").pop() || "1";
                   const numericId = cleanId.replace(/[^0-9]/g, "");
@@ -563,7 +565,7 @@ function CheckoutContent() {
                   return (
                     <div key={line.id} style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
                       <div style={{ width: "50px", aspectRatio: "3/4", overflow: "hidden", backgroundColor: "#EDE9E1", flexShrink: 0 }}>
-                        <img src={product?.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={liveImage || product?.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       </div>
                       <div style={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <div>

@@ -706,11 +706,11 @@ export default function Navbar() {
             <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30, 30, 30, 0.45)", margin: "0 0 1.5rem" }}>
               Shipping and taxes calculated at checkout.
             </p>
-            <a href={cart.checkoutUrl || `/checkout?cartId=${cart.id}`} onClick={() => setCartOpen(false)} style={{ textDecoration: "none" }}>
+            <Link href={`/checkout?cartId=${cart.id}`} onClick={() => setCartOpen(false)} style={{ textDecoration: "none" }}>
               <button className="btn-primary" style={{ width: "100%", justifyContent: "center", height: "48px" }}>
                 Proceed to Checkout
               </button>
-            </a>
+            </Link>
           </div>
         )}
       </div>
