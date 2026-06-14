@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const API_BASE_URL = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
 
 /**
  * Centralized API client for all backend calls
@@ -31,7 +31,6 @@ export const api = {
      */
     get: async (productId: string) => {
       const response = await fetch(`${API_BASE_URL}/api/products/${encodeURIComponent(productId)}`);
-      console.log(`This is the issue: ${API_BASE_URL}/api/products/${encodeURIComponent(productId)}`)
       if (!response.ok) throw new Error('Failed to fetch product');
       return response.json();
     },

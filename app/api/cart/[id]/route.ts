@@ -14,28 +14,40 @@ export async function GET(
   const env = getEnvironment();
   const storefrontToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
 
-  if (env.shopUrl && storefrontToken) {
+  // If this is a mock cart ID, skip Shopify and go straight to cookie fallback
+  const isMockCart = id.startsWith('MOCK_CART_');
+  console.log(`[CART API] Cart ID: ${id} | Mock: ${isMockCart}`);
+
+  if (!isMockCart && env.shopUrl && storefrontToken) {
     try {
       const client = new ShopifyStorefrontClient(env.shopUrl, storefrontToken);
       const data = await client.request(STOREFRONT_QUERIES.GET_CART, { id });
       if (data?.cart) {
+        console.log(`[CART API] Successfully retrieved live cart from Shopify: ${id}`);
         return NextResponse.json(data);
       } else {
-        console.warn(`[CART API] Live Shopify cart ${id} returned null. Falling back to mock...`);
+        console.warn(`[CART API] Live Shopify cart ${id} returned null. Falling back to local...`);
       }
     } catch (err) {
-      console.error(`Failed to fetch live cart ${id}, falling back to mock:`, err);
+      console.error(`Failed to fetch live cart ${id}, falling back to local:`, err);
     }
+  } else if (isMockCart) {
+    console.log(`[CART API] Mock cart detected, reading from local storage: ${id}`);
   }
 
-  // Fallback
+  // Fallback to local/mock cart
   const cookieStore = await cookies();
   const cartData = cookieStore.get(`shopify_cart_${id}`)?.value;
   let items = [];
   if (cartData) {
     try {
       items = JSON.parse(cartData);
-    } catch {}
+      console.log(`[CART API] ✅ Loaded ${items.length} items from mock cart: ${id}`);
+    } catch (e) {
+      console.error(`[CART API] Failed to parse mock cart data:`, e);
+    }
+  } else {
+    console.log(`[CART API] ℹ️ No mock cart data found in cookies for: ${id}`);
   }
 
   // Populate product details for mock cart lines
@@ -79,6 +91,7 @@ export async function GET(
     };
   });
 
+  console.log(`[CART API] Returning cart ${id} with subtotal: ${subtotal}`);
   return NextResponse.json({
     cart: {
       id,
@@ -105,24 +118,39 @@ export async function PUT(
   const storefrontToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
 
   try {
-    const { lines } = await request.json(); // Array of { id: string, quantity: number, merchandiseId?: string }
+    const { lines } = await request.json(); // Array of { merchandiseId: string, quantity: number }
 
-    if (env.shopUrl && storefrontToken) {
+    // If this is a mock cart, skip Shopify and go straight to mock update
+    const isMockCart = id.startsWith('MOCK_CART_');
+    console.log(`[CART API] Cart update - ID: ${id} | Mock: ${isMockCart}`);
+    console.log(`[CART API] Lines to add:`, JSON.stringify(lines, null, 2));
+
+    if (!isMockCart && env.shopUrl && storefrontToken) {
       try {
         const client = new ShopifyStorefrontClient(env.shopUrl, storefrontToken);
+        // Filter lines to only include valid CartLineInput fields (merchandiseId, quantity, attributes, customAttributes)
+        const validLines = lines.map((line: any) => ({
+          merchandiseId: line.merchandiseId,
+          quantity: line.quantity
+        }));
+        console.log(`[CART API] Sending to Shopify with cartLinesAdd:`, JSON.stringify(validLines, null, 2));
         const data = await client.request(STOREFRONT_QUERIES.UPDATE_CART, {
           cartId: id,
-          lines,
+          lines: validLines,
         });
-        if (data?.cartLinesUpdate?.cart) {
+        if (data?.cartLinesAdd?.cart) {
+          console.log(`[CART API] ✅ Successfully added items to live Shopify cart: ${id}`);
+          console.log(`[CART API] Cart now has ${data.cartLinesAdd.cart.lines.edges.length} items`);
           return NextResponse.json(data);
         } else {
-          console.warn(`[CART API] Shopify cartLinesUpdate returned null or had userErrors for cart ${id}:`, JSON.stringify(data?.cartLinesUpdate?.userErrors || [], null, 2));
+          console.warn(`[CART API] ⚠️ Shopify cartLinesAdd returned null or had userErrors for cart ${id}:`, JSON.stringify(data?.cartLinesAdd?.userErrors || [], null, 2));
           console.warn('[CART API] Falling back to mock cart update...');
         }
       } catch (err) {
-        console.error(`Failed to update live cart ${id}, falling back to mock:`, err);
+        console.error(`[CART API] Failed to add to live cart ${id}, falling back to mock:`, err);
       }
+    } else if (isMockCart) {
+      console.log(`[CART API] Mock cart detected, updating local storage: ${id}`);
     }
 
     // Mock cart update
@@ -132,36 +160,35 @@ export async function PUT(
     if (cartData) {
       try {
         items = JSON.parse(cartData);
-      } catch {}
+        console.log(`[CART API] Loaded ${items.length} items from mock cart: ${id}`);
+      } catch (e) {
+        console.error(`[CART API] Failed to parse mock cart data:`, e);
+      }
     }
 
-    // Update quantities or remove items or add new items
-    lines.forEach((update: any) => {
-      // Find item index
-      const itemIdx = items.findIndex((item: any) =>
-        item.id === update.id || 
-        item.merchandiseId === update.id || 
-        item.merchandiseId === update.merchandiseId ||
-        item.variantId === update.id
+    // For mock carts: add new items (not update existing)
+    lines.forEach((newLine: any) => {
+      const existingIdx = items.findIndex((item: any) =>
+        item.merchandiseId === newLine.merchandiseId
       );
 
-      if (itemIdx !== -1) {
-        if (update.quantity === 0) {
-          items.splice(itemIdx, 1);
-        } else {
-          items[itemIdx].quantity = update.quantity;
-        }
-      } else if (update.quantity > 0) {
+      if (existingIdx !== -1) {
+        // Item already in cart, increase quantity
+        items[existingIdx].quantity += newLine.quantity;
+        console.log(`[CART API] ℹ️ Increased quantity for ${newLine.merchandiseId}`);
+      } else {
+        // Add new item
         items.push({
-          id: update.id || `line_${Date.now()}`,
-          merchandiseId: update.merchandiseId || update.variantId || update.id,
-          variantId: update.variantId || update.merchandiseId || update.id,
-          quantity: update.quantity,
-          title: update.title || 'Default Size',
-          price: update.price || 3499,
-          productTitle: update.productTitle || update.title || 'Product',
-          image: update.image || ''
+          id: `line_${Date.now()}`,
+          merchandiseId: newLine.merchandiseId,
+          variantId: newLine.merchandiseId,
+          quantity: newLine.quantity,
+          title: 'Default Size',
+          price: 3499,
+          productTitle: 'Product',
+          image: ''
         });
+        console.log(`[CART API] ✅ Added new item to mock cart`);
       }
     });
 
@@ -170,16 +197,32 @@ export async function PUT(
       path: '/',
       maxAge: 60 * 60 * 24 * 7,
     });
+    console.log(`[CART API] ✅ Mock cart now has ${items.length} items`);
 
     return NextResponse.json({
-      cartLinesUpdate: {
+      cartLinesAdd: {
         cart: {
           id,
           lines: {
             edges: items.map((item: any, idx: number) => ({
               node: {
                 id: `line_${idx}`,
-                quantity: item.quantity
+                quantity: item.quantity,
+                merchandise: {
+                  id: item.merchandiseId,
+                  title: item.title,
+                  product: {
+                    id: '1',
+                    title: item.productTitle,
+                    images: {
+                      edges: item.image ? [{ node: { url: item.image } }] : []
+                    }
+                  },
+                  price: {
+                    amount: String(item.price),
+                    currencyCode: 'INR'
+                  }
+                }
               }
             }))
           }

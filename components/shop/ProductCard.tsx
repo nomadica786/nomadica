@@ -101,10 +101,32 @@ export default function ProductCard({
                 }
                 setAddingToCart(true);
                 try {
+                  console.log("========================================");
+                  console.log("[CHECKOUT FLOW] STEP 1: Customer adding to cart");
+                  console.log("========================================");
+                  console.log(`  Product: ${name} (${price} INR)`);
+                  
+                  // Fetch product to get actual variant ID
+                  console.log(`  Fetching product ${id} to get variant ID...`);
+                  const productRes = await api.products.get(id || "1");
+                  const product = productRes?.product || productRes?.productByHandle;
+                  
+                  if (!product) {
+                    throw new Error('Product not found');
+                  }
+
+                  // Get first available variant (in real implementation, user would select variant)
+                  const variant = product.variants?.edges?.[0]?.node;
+                  const variantId = variant?.id;
+
+                  if (!variantId) {
+                    console.error('[ProductCard] No variant ID found in product response:', product);
+                    throw new Error('Product has no variants');
+                  }
+
+                  console.log(`  ✅ Using variant ID: ${variantId}`);
+
                   let cartId = localStorage.getItem("nomadica_cart_id");
-                  const variantId = id && id.startsWith("gid://shopify/")
-                    ? id.replace("/Product/", "/ProductVariant/")
-                    : `gid://shopify/ProductVariant/${id}000`;
                   
                   if (!cartId) {
                     const res = await api.cart.create([{
@@ -117,10 +139,11 @@ export default function ProductCard({
                     }]);
                     const newCart = res?.cartCreate?.cart || res?.cart;
                     if (newCart?.id) {
+                      console.log(`  ✅ Created new cart: ${newCart.id}`);
                       localStorage.setItem("nomadica_cart_id", newCart.id);
                     }
                   } else {
-                    await api.cart.update(cartId, {
+                    const res = await api.cart.update(cartId, {
                       lines: [{
                         merchandiseId: variantId,
                         quantity: 1,
@@ -130,6 +153,7 @@ export default function ProductCard({
                         image
                       }]
                     });
+                    console.log(`  ✅ Updated existing cart: ${cartId}`);
                   }
                   
                   window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: true } }));

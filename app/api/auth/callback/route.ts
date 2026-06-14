@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000/';
     const redirectUri = `${appUrl}/api/auth/callback`;
     const tokenResponse = await ShopifyAuth.getAccessToken(code, redirectUri);
 

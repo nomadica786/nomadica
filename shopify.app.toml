@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "07b46039702995ece18f7e09f6602f2e"
-application_url = "http://localhost:3000/"
+application_url = "https://nomadica-orcin.vercel.app/"
 embedded = true
 name = "Nomadica"
 
@@ -13,7 +13,7 @@ use_legacy_install_flow = false
 
 [auth]
 redirect_urls = [
-  "http://localhost:3000/auth/callback",
+  "https://nomadica-orcin.vercel.app/auth/callback",
   "https://shopify.com/authentication/74176135246/social/google/callback",
   "https://cstjac-4d.myshopify.com/authentication/social/google/callback"
 ]

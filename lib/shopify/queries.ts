@@ -270,8 +270,8 @@ export const STOREFRONT_QUERIES = {
   `,
 
   UPDATE_CART: `
-    mutation UpdateCart($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
-      cartLinesUpdate(cartId: $cartId, lines: $lines) {
+    mutation UpdateCart($cartId: ID!, $lines: [CartLineInput!]!) {
+      cartLinesAdd(cartId: $cartId, lines: $lines) {
         cart {
           id
           lines(first: 100) {
@@ -279,6 +279,27 @@ export const STOREFRONT_QUERIES = {
               node {
                 id
                 quantity
+                merchandise {
+                  ... on ProductVariant {
+                    id
+                    title
+                    product {
+                      id
+                      title
+                      images(first: 1) {
+                        edges {
+                          node {
+                            url
+                          }
+                        }
+                      }
+                    }
+                    price {
+                      amount
+                      currencyCode
+                    }
+                  }
+                }
               }
             }
           }

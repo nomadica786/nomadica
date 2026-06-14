@@ -58,12 +58,19 @@ function CheckoutContent() {
         return;
       }
       try {
+        console.log("========================================");
+        console.log("[CHECKOUT FLOW] STEP 2: Loading checkout page");
+        console.log("========================================");
+        console.log(`  Loading cart: ${cartId}`);
+        
         const res = await api.cart.get(cartId);
         setCart(res.cart);
-        if (res.cart?.checkoutUrl && !res.cart.checkoutUrl.startsWith("/checkout")) {
-          window.location.href = res.cart.checkoutUrl;
-          return;
-        }
+        
+        const itemCount = res.cart?.lines?.edges?.length || 0;
+        const subtotal = res.cart?.cost?.subtotalAmount?.amount || "0";
+        console.log(`  ✅ Cart loaded: ${itemCount} items, Subtotal: ${subtotal} INR`);
+        // Always use custom checkout (don't redirect to Shopify)
+        // This allows us to process payments through our own gateway
       } catch (err) {
         console.error("Failed to load cart:", err);
       } finally {
@@ -108,6 +115,14 @@ function CheckoutContent() {
     setErrorMessage("");
     setIsSubmitting(true);
 
+    console.log("========================================");
+    console.log("[CHECKOUT FLOW] STEP 3: Customer filled form");
+    console.log("========================================");
+    console.log(`  Email: ${email}`);
+    console.log(`  Name: ${firstName} ${lastName}`);
+    console.log(`  Address: ${address1}, ${city}`);
+    console.log(`  Items: ${cart.lines?.edges?.length}`);
+
     if (!cart || cart.lines?.edges?.length === 0) {
       setErrorMessage("Your shopping bag is empty");
       setIsSubmitting(false);
@@ -135,6 +150,9 @@ function CheckoutContent() {
       };
     });
 
+    console.log("[CHECKOUT FLOW] STEP 4: Submitting to /api/checkout");
+    console.log(`  Total: ${totalPrice} INR (Subtotal: ${subtotal} + Shipping: ${shipping})`);
+
     try {
       const result = await api.checkout.process({
         email,
@@ -156,6 +174,12 @@ function CheckoutContent() {
       });
 
       if (result.success) {
+        console.log("========================================");
+        console.log("[CHECKOUT FLOW] STEP 7: Order finalized!");
+        console.log("========================================");
+        console.log(`  ✅ Order Number: ${result.orderNumber}`);
+        console.log(`  ✅ Shopify Order ID: ${result.shopifyOrderId}`);
+        
         setOrderInfo(result);
         setCheckoutSuccess(true);
         // Clear local cart

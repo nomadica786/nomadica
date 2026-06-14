@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/auth/login/route.ts
 import { ShopifyAuth } from '@/lib/shopify/auth';
 import { ShopifyStorefrontClient } from '@/lib/shopify/client';
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json({ success: true });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Shopify customer login failed, falling back to mock:', err);
       }
     }

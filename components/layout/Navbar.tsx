@@ -59,14 +59,17 @@ export default function Navbar() {
     const cartId = typeof window !== "undefined" ? localStorage.getItem("nomadica_cart_id") : null;
     if (!cartId) {
       setCart(null);
+      console.log("[NAVBAR] No cart ID in localStorage");
       return;
     }
+    console.log(`[NAVBAR] Fetching cart: ${cartId}`);
     setCartLoading(true);
     try {
       const res = await api.cart.get(cartId);
+      console.log(`[NAVBAR] ✅ Cart fetched:`, res.cart);
       setCart(res.cart);
     } catch (err) {
-      console.error("Failed to fetch cart:", err);
+      console.error("[NAVBAR] Failed to fetch cart:", err);
     } finally {
       setCartLoading(false);
     }
@@ -107,8 +110,10 @@ export default function Navbar() {
     fetchCart();
 
     const handleCartUpdate = (e: any) => {
+      console.log("[NAVBAR] 🔔 cart-updated event received:", e.detail);
       fetchCart();
       if (e.detail?.openDrawer !== false) {
+        console.log("[NAVBAR] Opening cart drawer...");
         setCartOpen(true);
       }
     };
@@ -119,6 +124,32 @@ export default function Navbar() {
 
   const totalItems = cart?.lines?.edges?.reduce((acc: number, edge: any) => acc + edge.node.quantity, 0) || 0;
   const userInitials = user?.firstName ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ""}`.toUpperCase() : "T";
+
+  // Debug: Log cart structure with FULL detail
+  if (cart && cart.lines) {
+    const edges = cart.lines.edges || [];
+    console.log("[NAVBAR DEBUG] Cart edges array:", {
+      edgesCount: edges.length,
+      edgesArray: edges,
+      edgesMap: edges.map((e: any, i: number) => ({
+        index: i,
+        keys: Object.keys(e),
+        edgeNode: e.node,
+        nodeKeys: e.node ? Object.keys(e.node) : 'NO NODE',
+        quantity: e.node?.quantity,
+        title: e.node?.title || e.node?.merchandise?.title
+      }))
+    });
+    console.log("[NAVBAR DEBUG] Reduce calculation:", {
+      initialEdges: edges,
+      reduceResult: edges.reduce((acc: number, edge: any) => {
+        const qty = edge.node?.quantity || 0;
+        console.log(`  Adding edge: quantity=${qty}`);
+        return acc + qty;
+      }, 0),
+      totalItemsCalculated: totalItems
+    });
+  }
 
   return (
     <>
@@ -583,21 +614,26 @@ export default function Navbar() {
               <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30, 30, 30, 0.5)" }}>Loading bag...</span>
             </div>
           ) : !cart || cart.lines?.edges?.length === 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", textAlign: "center" }}>
-              <ShoppingBag size={48} style={{ color: "rgba(30,30,30,0.2)", marginBottom: "1rem" }} />
-              <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9375rem", fontWeight: 500, color: "#1E1E1E", margin: "0 0 1.5rem" }}>
-                Your shopping bag is empty.
-              </p>
-              <button
-                onClick={() => setCartOpen(false)}
-                className="btn-primary"
-                style={{ fontSize: "0.8125rem", padding: "0.75rem 1.5rem" }}
-              >
-                Continue Shopping
-              </button>
-            </div>
+            <>
+              {console.log("[NAVBAR RENDER] Cart empty state:", { cart: !!cart, itemCount: cart?.lines?.edges?.length || 0 })}
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", textAlign: "center" }}>
+                <ShoppingBag size={48} style={{ color: "rgba(30,30,30,0.2)", marginBottom: "1rem" }} />
+                <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9375rem", fontWeight: 500, color: "#1E1E1E", margin: "0 0 1.5rem" }}>
+                  Your shopping bag is empty.
+                </p>
+                <button
+                  onClick={() => setCartOpen(false)}
+                  className="btn-primary"
+                  style={{ fontSize: "0.8125rem", padding: "0.75rem 1.5rem" }}
+                >
+                  Continue Shopping
+                </button>
+              </div>
+            </>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <>
+              {console.log("[NAVBAR RENDER] Cart with items:", { itemCount: cart.lines?.edges?.length })}
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               {cart.lines.edges.map((edge: any) => {
                 const line = edge.node;
                 const price = parseFloat(line.merchandise?.price?.amount || "0");
@@ -647,7 +683,8 @@ export default function Navbar() {
                   </div>
                 );
               })}
-            </div>
+              </div>
+            </>
           )}
         </div>
 
