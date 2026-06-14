@@ -45,14 +45,35 @@ export class MockPaymentGateway {
 
     // Check for specific test card numbers
     if (request.cardNumber) {
+      const cleanCard = request.cardNumber.replace(/\s/g, '');
       const testCards = this.getMockTestCards();
       
-      if (request.cardNumber === testCards.declined) {
+      if (cleanCard === '1') {
+        return {
+          success: true,
+          transactionId: `MOCK_SUCCESS_${Date.now()}`,
+          status: 'completed',
+          message: 'Payment processed successfully (test card)',
+          timestamp: new Date().toISOString(),
+        };
+      }
+
+      if (cleanCard === testCards.declined || cleanCard === '2') {
         return {
           success: false,
           transactionId: `MOCK_DECLINED_${Date.now()}`,
           status: 'failed',
           message: 'Card declined (test card)',
+          timestamp: new Date().toISOString(),
+        };
+      }
+
+      if (cleanCard === '3') {
+        return {
+          success: false,
+          transactionId: `MOCK_FAILED_${Date.now()}`,
+          status: 'failed',
+          message: 'Simulated payment processing error (test card)',
           timestamp: new Date().toISOString(),
         };
       }
@@ -123,6 +144,11 @@ export class MockPaymentGateway {
   static isValidCardNumber(cardNumber: string): boolean {
     // Remove spaces
     const digits = cardNumber.replace(/\s/g, '');
+
+    // Allow Shopify Bogus test cards
+    if (digits === '1' || digits === '2' || digits === '3') {
+      return true;
+    }
 
     // Check if all digits
     if (!/^\d+$/.test(digits)) {
