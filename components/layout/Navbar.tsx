@@ -6,7 +6,6 @@ import {
   Search, ShoppingBag, User, Heart, Menu, X, ChevronDown,
 } from "lucide-react";
 import { useAuth } from "@/utils/hooks/useAuth";
-import { MOCK_PRODUCTS } from "@/utils/mockData";
 import { api } from "@/components/api/api";
 
 const navLinks = [
