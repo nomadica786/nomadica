@@ -1,82 +1,151 @@
-"use client";
+// app/brand/journal/page.tsx
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Compass, ArrowRight } from 'lucide-react';
+import Navbar from '@/components/layout/Navbar';
+import { getBlogArticles, getReadingTime } from '@/lib/shopify/journal';
+import JournalGridClient from './JournalGridClient';
 
-import { useState } from "react";
-import Link from "next/link";
-import SearchInput from "@/components/ui/SearchInput";
-import ProductCard from "@/components/shop/ProductCard";
+// Force dynamic rendering to fetch fresh articles on every request
+export const dynamic = 'force-dynamic';
 
-const articles = [
-  { id: "1", title: "Field notes from Kashmir", category: "Travel", image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=700&q=80" },
-  { id: "2", title: "The case for fewer, better layers", category: "Style", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=700&q=80" },
-  { id: "3", title: "Material stories: hemp and linen", category: "Sustainability", image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=700&q=80" },
-  { id: "4", title: "How travel shaped our latest collection", category: "Design", image: "https://images.unsplash.com/photo-1495121605193-b116b5b9c5d0?w=700&q=80" },
-];
 
-const allEntries = articles.map((article) => ({
-  ...article,
-  description: "A short editorial glimpse at the inspiration and craft behind Nomadica.",
-  price: 0,
-}));
+export const metadata = {
+  title: 'Brand Journal | Stories, Guides & Perspectives | Nomadica',
+  description: 'Wanderlust narratives, destination guides, slow travel perspectives, and cultural insights from the Nomadica global travel community.',
+  openGraph: {
+    title: 'Brand Journal | Stories, Guides & Perspectives | Nomadica',
+    description: 'Wanderlust narratives, destination guides, slow travel perspectives, and cultural insights.',
+    images: [{ url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80' }],
+    type: 'website',
+  }
+};
 
-export default function JournalPage() {
-  const [query, setQuery] = useState("");
+export default async function BrandJournalPage() {
+  // Fetch initial batch of articles (1 featured + up to 9 grid items = 10 items)
+  const { articles, pageInfo } = await getBlogArticles(10);
+  
+  const featuredArticle = articles[0] || null;
+  const remainingArticles = articles.slice(1);
 
-  const filtered = query
-    ? allEntries.filter((entry) =>
-        entry.title.toLowerCase().includes(query.toLowerCase()) ||
-        entry.category.toLowerCase().includes(query.toLowerCase())
-      )
-    : allEntries;
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
-      <section style={{ padding: "4rem 1.5rem" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem", textAlign: "center", marginBottom: "2rem" }}>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.85rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#7A5C3E" }}>
-              Journal
-            </p>
-            <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", margin: 0, color: "#1E1E1E" }}>
-              Notes from the road.
-            </h1>
-            <p style={{ maxWidth: "700px", margin: "0 auto", fontFamily: "'Satoshi', sans-serif", fontSize: "1rem", lineHeight: 1.8, color: "rgba(30,30,30,0.7)" }}>
-              Explore curated stories, editorial insights, and the ideas that shape our collections.
-            </p>
+    <div className="min-h-screen bg-[#F7F4EE] text-[#1E1E1E] pt-[64px]">
+      <Navbar />
+
+      {/* Hero Section */}
+      <section className="relative flex flex-col justify-center items-center px-6 text-center bg-[#EDEAE2] border-b border-black/5" style={{ minHeight: "45vh" }}>
+        {/* Background Grain Pattern */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
+        
+        <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-4">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-black/15 bg-[#F7F4EE] shadow-sm">
+            <Compass size={13} className="text-[#7A5C3E]" style={{ animation: 'spin 8s linear infinite' }} />
+            <span className="font-sans text-[10px] font-bold tracking-[0.2em] text-[#7A5C3E] uppercase leading-none">
+              BRAND JOURNAL
+            </span>
           </div>
 
-          <div style={{ marginBottom: "2rem" }}>
-            <SearchInput value={query} onChange={setQuery} placeholder="Search journal stories..." />
-          </div>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-normal leading-[1.1] tracking-tight text-[#1E1E1E] mt-2">
+            Stories, Guides <br className="sm:hidden" />
+            <span className="italic font-normal text-[#7A5C3E]">& Perspectives</span>
+          </h1>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1.25rem" }}>
-            {filtered.map((entry) => (
-              <Link
-                key={entry.id}
-                href="#"
-                style={{
-                  display: "block",
-                  borderRadius: "24px",
-                  overflow: "hidden",
-                  backgroundColor: "#fff",
-                  textDecoration: "none",
-                  boxShadow: "0 10px 30px rgba(30,30,30,0.06)",
-                }}
-              >
-                <img src={entry.image} alt={entry.title} style={{ width: "100%", height: "240px", objectFit: "cover" }} />
-                <div style={{ padding: "1.5rem" }}>
-                  <p style={{ margin: 0, fontFamily: "'Satoshi', sans-serif", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.18em", color: "#7A5C3E" }}>
-                    {entry.category}
-                  </p>
-                  <h2 style={{ margin: "0.75rem 0", fontFamily: "'Clash Display', sans-serif", fontSize: "1.35rem", color: "#1E1E1E" }}>{entry.title}</h2>
-                  <p style={{ margin: 0, fontFamily: "'Satoshi', sans-serif", fontSize: "0.95rem", color: "rgba(30,30,30,0.72)", lineHeight: 1.75 }}>
-                    {entry.description}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <p className="font-sans text-sm sm:text-base text-black/60 leading-relaxed max-w-xl mt-4">
+            A quiet space dedicated to visual storytelling, destination guides, slow travel journals, and cultural perspectives from explorers around the globe.
+          </p>
         </div>
       </section>
+
+      {/* Main Content Area */}
+      <main className="max-w-7xl mx-auto px-6 py-16 sm:px-8 space-y-24">
+        {/* Featured Article Section */}
+        {featuredArticle && (
+          <section className="w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center bg-[#EDEAE2] rounded-3xl overflow-hidden p-6 lg:p-8 border border-black/5">
+              {/* Featured Image */}
+              <div className="lg:col-span-7 w-full">
+                <Link href={`/brand/journal/${featuredArticle.handle}`}>
+                  <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] lg:aspect-[4/3] xl:aspect-[16/10] overflow-hidden rounded-2xl bg-[#F7F4EE] group">
+                    <Image
+                      src={featuredArticle.image?.url || 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=80'}
+                      alt={featuredArticle.image?.altText || featuredArticle.title}
+                      fill
+                      priority
+                      sizes="(max-width: 1024px) 100vw, 800px"
+                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                    />
+                    <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300" />
+                  </div>
+                </Link>
+              </div>
+
+              {/* Featured Meta Info */}
+              <div className="lg:col-span-5 flex flex-col justify-center h-full space-y-4">
+                <span className="font-sans text-[10px] font-bold tracking-[0.15em] text-[#7A5C3E] uppercase bg-[#F7F4EE] px-3.5 py-1 rounded-full w-max border border-black/5 shadow-sm">
+                  {featuredArticle.tags?.[0] || 'Featured'}
+                </span>
+
+                <Link href={`/brand/journal/${featuredArticle.handle}`} className="group">
+                  <h2 className="text-3xl sm:text-4xl lg:text-3.5xl xl:text-4xl text-[#1E1E1E] leading-tight hover:text-[#7A5C3E] transition-colors duration-300">
+                    {featuredArticle.title}
+                  </h2>
+                </Link>
+
+                <p className="font-sans text-sm text-black/60 leading-relaxed">
+                  {featuredArticle.excerpt}
+                </p>
+
+                <div className="flex flex-col gap-1 border-t border-black/5 pt-4 mt-2">
+                  <span className="font-sans text-[11px] font-semibold text-black/80">
+                    By {featuredArticle.authorV2?.name || 'Nomadica Staff'}
+                  </span>
+                  <div className="flex items-center gap-2 text-[10px] font-medium text-black/40 font-sans">
+                    <span>{formatDate(featuredArticle.publishedAt)}</span>
+                    <span className="h-1 w-1 rounded-full bg-black/15" />
+                    <span>{getReadingTime(featuredArticle.contentHtml)} min read</span>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <Link 
+                    href={`/brand/journal/${featuredArticle.handle}`}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#1E1E1E] text-[#F7F4EE] font-sans text-xs font-bold tracking-wider uppercase rounded-full shadow-sm hover:bg-[#7A5C3E] transition-all duration-300 group"
+                  >
+                    Read Story
+                    <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Editorial Journal Grid */}
+        <section className="space-y-12">
+          <div className="flex items-center justify-between border-b border-black/5 pb-4">
+            <h2 className="text-2xl font-normal text-[#1E1E1E]">
+              Recent Perspectives
+            </h2>
+            <span className="font-sans text-[10px] font-bold text-black/40 tracking-wider uppercase">
+              {remainingArticles.length} Stories Found
+            </span>
+          </div>
+
+          <JournalGridClient 
+            initialArticles={remainingArticles} 
+            initialPageInfo={pageInfo} 
+          />
+        </section>
+      </main>
     </div>
   );
 }
