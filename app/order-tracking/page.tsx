@@ -36,10 +36,10 @@ export default function OrderTrackingPage() {
   };
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
+    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
       <div style={{ maxWidth: "680px", margin: "0 auto", padding: "4rem 1.5rem" }}>
         
-        <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#7A5C3E", marginBottom: "1rem", textAlign: "center" }}>
+        <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "1rem", textAlign: "center" }}>
           Shipment Tracking
         </p>
         <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 600, color: "#1E1E1E", textAlign: "center", marginBottom: "2.5rem" }}>
@@ -113,21 +113,21 @@ export default function OrderTrackingPage() {
 
             <div style={{ display: "grid", gap: "1.25rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <Package size={18} color="#7A5C3E" />
+                <Package size={18} color="#1E1E1E" />
                 <span style={{ fontFamily: "Satoshi", fontSize: "0.9375rem" }}>
                   Status: <strong>{trackingInfo.status || (trackingInfo.fulfillmentStatus === "FULFILLED" ? "Delivered" : "In Transit")}</strong>
                 </span>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <Calendar size={18} color="#7A5C3E" />
+                <Calendar size={18} color="#1E1E1E" />
                 <span style={{ fontFamily: "Satoshi", fontSize: "0.9375rem" }}>
                   Placed on: {new Date(trackingInfo.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
                 </span>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <DollarSign size={18} color="#7A5C3E" />
+                <DollarSign size={18} color="#1E1E1E" />
                 <span style={{ fontFamily: "Satoshi", fontSize: "0.9375rem" }}>
                   Total Amount: ₹{parseFloat(trackingInfo.totalPrice?.amount || '0').toLocaleString("en-IN")}
                 </span>

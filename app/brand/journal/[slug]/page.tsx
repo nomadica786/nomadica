@@ -91,7 +91,7 @@ export default async function ArticlePage({ params }: PageProps) {
   const category = article.tags?.[0] || 'Travel';
 
   return (
-    <div className="min-h-screen bg-[#F7F4EE] text-[#1E1E1E] pt-[64px]">
+    <div className="min-h-screen bg-[#FFFFFF] text-[#1E1E1E] pt-[64px]">
       {/* Inject Structured Metadata JSON-LD */}
       <script
         type="application/ld+json"
@@ -104,7 +104,7 @@ export default async function ArticlePage({ params }: PageProps) {
       <div className="max-w-4xl mx-auto px-6 pt-10 sm:px-8">
         <Link 
           href="/brand/journal" 
-          className="inline-flex items-center gap-2 text-xs font-bold tracking-wider uppercase text-black/50 hover:text-[#7A5C3E] transition-colors duration-300 group"
+          className="inline-flex items-center gap-2 text-xs font-bold tracking-wider uppercase text-black/50 hover:text-[#1E1E1E] transition-colors duration-300 group"
         >
           <ArrowLeft size={14} className="transition-transform duration-300 group-hover:-translate-x-1" />
           Back to Journal
@@ -114,7 +114,7 @@ export default async function ArticlePage({ params }: PageProps) {
       <main className="max-w-4xl mx-auto px-6 py-12 sm:px-8 space-y-10">
         {/* Article Header */}
         <header className="space-y-6 text-center max-w-3xl mx-auto">
-          <span className="font-sans text-[10px] font-bold tracking-[0.2em] text-[#7A5C3E] uppercase block">
+          <span className="font-sans text-[10px] font-bold tracking-[0.2em] text-[#1E1E1E] uppercase block">
             {category}
           </span>
           
@@ -125,7 +125,7 @@ export default async function ArticlePage({ params }: PageProps) {
           {/* Meta Elements */}
           <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 border-y border-black/5 py-4 font-sans text-xs text-black/50">
             <div className="flex items-center gap-1.5">
-              <User size={13} className="text-[#7A5C3E]" />
+              <User size={13} className="text-[#1E1E1E]" />
               <span className="font-semibold text-black/70">
                 {article.authorV2?.name || 'Nomadica Staff'}
               </span>
@@ -145,7 +145,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
         {/* Cover Image */}
         {article.image?.url && (
-          <div className="relative w-full aspect-[16/9] overflow-hidden rounded-3xl bg-[#EDEAE2] border border-black/5 shadow-sm">
+          <div className="relative w-full aspect-[16/9] overflow-hidden rounded-3xl bg-[#FFFFFF] border border-black/5 shadow-sm">
             <Image
               src={article.image.url}
               alt={article.image.altText || article.title}
@@ -167,9 +167,9 @@ export default async function ArticlePage({ params }: PageProps) {
         <footer className="border-t border-black/5 pt-12 pb-16 flex justify-center">
           <Link 
             href="/brand/journal" 
-            className="inline-flex items-center gap-2 px-8 py-3.5 border border-black/15 bg-white text-black font-sans text-xs font-bold tracking-wider uppercase rounded-full shadow-sm hover:bg-[#EDEAE2] hover:border-black/30 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-8 py-3.5 border border-black/15 bg-white text-black font-sans text-xs font-bold tracking-wider uppercase rounded-full shadow-sm hover:bg-[#FFFFFF] hover:border-black/30 transition-all duration-300"
           >
-            <Compass size={14} className="text-[#7A5C3E]" />
+            <Compass size={14} className="text-[#1E1E1E]" />
             Return to Journal Landing
           </Link>
         </footer>

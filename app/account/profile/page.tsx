@@ -133,7 +133,7 @@ function ProfileContent() {
 
   function statusColor(status: string) {
     if (status === "Delivered" || status === "FULFILLED") return "#4F6B5A";
-    if (status === "In Transit" || status === "PARTIALLY_FULFILLED") return "#7A5C3E";
+    if (status === "In Transit" || status === "PARTIALLY_FULFILLED") return "#1E1E1E";
     return "#1E1E1E";
   }
 
@@ -142,7 +142,7 @@ function ProfileContent() {
   const totalSpent = orders.reduce((acc, order) => acc + order.total, 0);
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
+    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "3rem 1.5rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: "3rem", alignItems: "start" }} className="lg:grid-cols-[240px_1fr] grid-cols-1">
           
@@ -162,7 +162,7 @@ function ProfileContent() {
                   margin: "0 auto 1rem",
                 }}
               >
-                <span style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#F7F4EE" }}>
+                <span style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#FFFFFF" }}>
                   {userInitials}
                 </span>
               </div>
@@ -183,7 +183,7 @@ function ProfileContent() {
                     padding: "0.75rem 1rem",
                     border: "none",
                     backgroundColor: activeTab === id ? "#1E1E1E" : "transparent",
-                    color: activeTab === id ? "#F7F4EE" : "rgba(30,30,30,0.6)",
+                    color: activeTab === id ? "#FFFFFF" : "rgba(30,30,30,0.6)",
                     cursor: "pointer",
                     fontFamily: "'Satoshi', sans-serif",
                     fontSize: "0.875rem",
@@ -241,7 +241,7 @@ function ProfileContent() {
                         { label: "Total Spent", value: `₹${totalSpent.toLocaleString("en-IN")}` },
                         { label: "Rewards Points", value: (orders.length * 100).toString() },
                       ].map(({ label, value }) => (
-                        <div key={label} style={{ backgroundColor: "#EDEAE2", padding: "1.5rem 1.25rem" }}>
+                        <div key={label} style={{ backgroundColor: "#FFFFFF", padding: "1.5rem 1.25rem" }}>
                           <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{value}</p>
                           <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", letterSpacing: "0.04em" }}>{label}</p>
                         </div>
@@ -300,7 +300,7 @@ function ProfileContent() {
                               <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.45)", marginBottom: "0.75rem" }}>{order.date} · {order.items} item{order.items > 1 ? "s" : ""}</p>
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                 <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "1rem", fontWeight: 700, color: "#1E1E1E" }}>₹{order.total.toLocaleString("en-IN")}</span>
-                                <Link href={`/order-tracking?order=${order.orderNumber}&email=${user?.email}`} style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "#7A5C3E", textDecoration: "none", fontWeight: 500 }}>
+                                <Link href={`/order-tracking?order=${order.orderNumber}&email=${user?.email}`} style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "#1E1E1E", textDecoration: "none", fontWeight: 500 }}>
                                   Track Details
                                 </Link>
                               </div>
@@ -328,7 +328,7 @@ function ProfileContent() {
                                 top: "0.75rem",
                                 right: "0.75rem",
                                 zIndex: 10,
-                                backgroundColor: "rgba(247,244,238,0.9)",
+                                backgroundColor: "rgba(255, 255, 255,0.9)",
                                 border: "none",
                                 borderRadius: "50%",
                                 width: "32px",
@@ -467,11 +467,11 @@ function ProfileContent() {
                       {addresses.map((addr) => (
                         <div key={addr.id} style={{ padding: "1.5rem", border: addr.default ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.15)", position: "relative", backgroundColor: "#fff" }}>
                           {addr.default && (
-                            <span style={{ position: "absolute", top: "0.75rem", right: "0.75rem", fontFamily: "'Satoshi', sans-serif", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", backgroundColor: "#1E1E1E", color: "#F7F4EE", padding: "0.2rem 0.5rem" }}>
+                            <span style={{ position: "absolute", top: "0.75rem", right: "0.75rem", fontFamily: "'Satoshi', sans-serif", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", backgroundColor: "#1E1E1E", color: "#FFFFFF", padding: "0.2rem 0.5rem" }}>
                               Default
                             </span>
                           )}
-                          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#7A5C3E", marginBottom: "0.625rem" }}>{addr.label}</p>
+                          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.625rem" }}>{addr.label}</p>
                           <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9375rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{addr.name}</p>
                           <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }}>{addr.address1} {addr.address2 ? `, ${addr.address2}` : ""}</p>
                           <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.6)" }}>{addr.city}, {addr.province} {addr.zip}</p>

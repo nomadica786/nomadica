@@ -4,10 +4,10 @@ import Link from "next/link";
 
 export default function AccountPage() {
   return (
-    <div style={{ paddingTop: "64px", minHeight: "100vh", backgroundColor: "#F7F4EE" }}>
+    <div style={{ paddingTop: "64px", minHeight: "100vh", backgroundColor: "#FFFFFF" }}>
       <section style={{ padding: "5rem 1.5rem" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.85rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#7A5C3E", marginBottom: "1rem" }}>
+          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.85rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "1rem" }}>
             Account
           </p>
           <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", margin: 0, color: "#1E1E1E", marginBottom: "1.5rem" }}>
@@ -32,8 +32,8 @@ export default function AccountPage() {
                   borderRadius: "24px",
                   padding: "2rem",
                   textDecoration: "none",
-                  backgroundColor: item.accent ? "#7A5C3E" : "#fff",
-                  color: item.accent ? "#F7F4EE" : "#1E1E1E",
+                  backgroundColor: item.accent ? "#1E1E1E" : "#fff",
+                  color: item.accent ? "#FFFFFF" : "#1E1E1E",
                   border: item.accent ? "none" : "1px solid rgba(30,30,30,0.08)",
                   boxShadow: "0 12px 32px rgba(30,30,30,0.06)",
                   transition: "transform 0.2s ease",
@@ -42,7 +42,7 @@ export default function AccountPage() {
                 onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
               >
                 <h2 style={{ margin: 0, fontFamily: "'Clash Display', sans-serif", fontSize: "1.25rem", marginBottom: "0.75rem" }}>{item.label}</h2>
-                <p style={{ margin: 0, fontFamily: "'Satoshi', sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: item.accent ? "rgba(247,244,238,0.88)" : "rgba(30,30,30,0.72)" }}>
+                <p style={{ margin: 0, fontFamily: "'Satoshi', sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: item.accent ? "rgba(255, 255, 255,0.88)" : "rgba(30,30,30,0.72)" }}>
                   {item.description}
                 </p>
               </Link>

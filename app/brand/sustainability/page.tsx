@@ -9,11 +9,11 @@ const metrics = [
 
 export default function SustainabilityPage() {
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
+    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
       <section style={{ padding: "4.5rem 1.5rem" }}>
         <div style={{ maxWidth: "1120px", margin: "0 auto" }}>
           <div style={{ display: "grid", gap: "1.5rem", textAlign: "center", marginBottom: "3rem" }}>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.85rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#7A5C3E" }}>
+            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.85rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1E1E1E" }}>
               Sustainability
             </p>
             <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", margin: 0, color: "#1E1E1E" }}>
@@ -35,9 +35,9 @@ export default function SustainabilityPage() {
           </div>
 
           <div style={{ display: "grid", gap: "1.5rem", gridTemplateColumns: "1.4fr 1fr" }}>
-            <div style={{ padding: "2.5rem", borderRadius: "28px", backgroundColor: "#1E1E1E", color: "#F7F4EE" }}>
+            <div style={{ padding: "2.5rem", borderRadius: "28px", backgroundColor: "#1E1E1E", color: "#FFFFFF" }}>
               <h2 style={{ margin: 0, fontFamily: "'Clash Display', sans-serif", fontSize: "2rem" }}>Responsible materials</h2>
-              <p style={{ marginTop: "1.25rem", fontFamily: "'Satoshi', sans-serif", fontSize: "1rem", lineHeight: 1.8, color: "rgba(247,244,238,0.88)" }}>
+              <p style={{ marginTop: "1.25rem", fontFamily: "'Satoshi', sans-serif", fontSize: "1rem", lineHeight: 1.8, color: "rgba(255, 255, 255,0.88)" }}>
                 We source recycled nylon, organic cotton, and low-impact plant-based dyes to reduce our footprint without losing performance.
               </p>
             </div>
@@ -56,7 +56,7 @@ export default function SustainabilityPage() {
               </button>
             </Link>
             <Link href="/brand/journal" style={{ textDecoration: "none" }}>
-              <button style={{ border: "none", background: "#7A5C3E", color: "#F7F4EE", padding: "0.95rem 1.75rem", cursor: "pointer", letterSpacing: "0.08em" }}>
+              <button style={{ border: "none", background: "#1E1E1E", color: "#FFFFFF", padding: "0.95rem 1.75rem", cursor: "pointer", letterSpacing: "0.08em" }}>
                 Read the Journal
               </button>
             </Link>

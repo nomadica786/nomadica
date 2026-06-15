@@ -30,13 +30,13 @@ const highlights = [
 
 export default function BrandLandingPage() {
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE" }}>
+    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF" }}>
       <BrandHero />
 
       <section style={{ padding: "4rem 1.5rem 2rem" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginBottom: "2rem", textAlign: "center" }}>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#7A5C3E" }}>
+            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E1E1E" }}>
               Discover the brand
             </p>
             <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2rem, 4vw, 3.4rem)", margin: 0, color: "#1E1E1E" }}>
@@ -82,7 +82,7 @@ export default function BrandLandingPage() {
       <section style={{ padding: "0 1.5rem 4rem" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ marginBottom: "2rem", textAlign: "center" }}>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#7A5C3E", marginBottom: "0.75rem" }}>Search the journal</p>
+            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.75rem" }}>Search the journal</p>
             <SearchInput placeholder="Search Nomadica journal entries" />
           </div>
 

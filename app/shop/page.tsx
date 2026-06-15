@@ -116,17 +116,17 @@ function CollectionsPageContent() {
   const pageLabel = isAll ? "Explore" : "Collection";
 
   return (
-    <div style={{ paddingTop: "64px", minHeight: "100vh", backgroundColor: "#F7F4EE" }}>
+    <div style={{ paddingTop: "64px", minHeight: "100vh", backgroundColor: "#FFFFFF" }}>
       {/* Header */}
       <div
         style={{
           borderBottom: "1px solid rgba(30,30,30,0.1)",
           padding: "3rem 1.5rem 2rem",
-          backgroundColor: "#F7F4EE",
+          backgroundColor: "#FFFFFF",
         }}
       >
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#7A5C3E", marginBottom: "0.5rem" }}>
+          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
             {pageLabel}
           </p>
           <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
@@ -141,7 +141,7 @@ function CollectionsPageContent() {
           position: "sticky",
           top: "64px",
           zIndex: 100,
-          backgroundColor: "#F7F4EE",
+          backgroundColor: "#FFFFFF",
           borderBottom: "1px solid rgba(30,30,30,0.1)",
           padding: "0 1.5rem",
         }}
@@ -170,7 +170,7 @@ function CollectionsPageContent() {
                     padding: "0.5rem 1rem",
                     border: isSelected ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.2)",
                     backgroundColor: isSelected ? "#1E1E1E" : "transparent",
-                    color: isSelected ? "#F7F4EE" : "#1E1E1E",
+                    color: isSelected ? "#FFFFFF" : "#1E1E1E",
                     fontFamily: "'Satoshi', sans-serif",
                     fontSize: "0.8125rem",
                     fontWeight: 500,

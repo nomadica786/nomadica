@@ -5,7 +5,7 @@ interface SnowballLoaderProps {
   size?: "sm" | "md" | "lg";
 }
 
-export default function SnowballLoader({ color = "#7A5C3E", size = "md" }: SnowballLoaderProps) {
+export default function SnowballLoader({ color = "#1E1E1E", size = "md" }: SnowballLoaderProps) {
   const dotSize = size === "sm" ? 6 : size === "lg" ? 12 : 8;
   return (
     <div
@@ -40,7 +40,7 @@ export function CardSkeleton() {
       <div
         style={{
           aspectRatio: "3/4",
-          backgroundColor: "#E8E4DC",
+          backgroundColor: "#f0f0f0",
         }}
         className="skeleton"
       />

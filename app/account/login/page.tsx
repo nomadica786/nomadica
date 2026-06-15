@@ -52,7 +52,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ paddingTop: "64px", minHeight: "100svh", display: "flex", backgroundColor: "#F7F4EE" }}>
+    <div style={{ paddingTop: "64px", minHeight: "100svh", display: "flex", backgroundColor: "#FFFFFF" }}>
       {/* Left – Image Slider */}
       <div
         style={{
@@ -77,7 +77,7 @@ export default function LoginPage() {
             <img src={slide.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30,30,30,0.7) 0%, transparent 60%)" }} />
             <div style={{ position: "absolute", bottom: "3rem", left: "3rem", right: "3rem" }}>
-              <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.75rem", fontWeight: 500, color: "#F7F4EE", lineHeight: 1.3, maxWidth: "400px" }}>
+              <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.75rem", fontWeight: 500, color: "#FFFFFF", lineHeight: 1.3, maxWidth: "400px" }}>
                 &quot;{slide.quote}&quot;
               </p>
               <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.5rem" }}>
@@ -88,7 +88,7 @@ export default function LoginPage() {
                     style={{
                       width: activeSlide === idx ? "24px" : "8px",
                       height: "3px",
-                      backgroundColor: activeSlide === idx ? "#F7F4EE" : "rgba(247,244,238,0.4)",
+                      backgroundColor: activeSlide === idx ? "#FFFFFF" : "rgba(255, 255, 255,0.4)",
                       border: "none",
                       cursor: "pointer",
                       transition: "all 0.3s ease",
@@ -111,7 +111,7 @@ export default function LoginPage() {
           flexDirection: "column",
           justifyContent: "center",
           padding: "3rem 2rem",
-          backgroundColor: "#F7F4EE",
+          backgroundColor: "#FFFFFF",
         }}
         className="md:max-w-sm lg:max-w-md"
       >
@@ -194,7 +194,7 @@ export default function LoginPage() {
             </div>
 
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <a href="#" style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "#7A5C3E", textDecoration: "none" }}>
+              <a href="#" style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "#1E1E1E", textDecoration: "none" }}>
                 Forgot password?
               </a>
             </div>
@@ -239,7 +239,7 @@ export default function LoginPage() {
 
           <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", textAlign: "center", marginTop: "2rem" }}>
             Don&lsquo;t have an account?{" "}
-            <Link href="/account/signup" style={{ color: "#7A5C3E", textDecoration: "none", fontWeight: 500 }}>
+            <Link href="/account/signup" style={{ color: "#1E1E1E", textDecoration: "none", fontWeight: 500 }}>
               Sign up
             </Link>
           </p>

@@ -17,7 +17,7 @@ export default function BrandHero() {
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "linear-gradient(135deg, rgba(26, 26, 26, 0.18), rgba(247, 244, 238, 0.02) 45%, rgba(247, 244, 238, 0.82))",
+            "linear-gradient(135deg, rgba(26, 26, 26, 0.18), rgba(255, 255, 255, 0.02) 45%, rgba(255, 255, 255, 0.82))",
           pointerEvents: "none",
         }}
       />
@@ -40,7 +40,7 @@ export default function BrandHero() {
           zIndex: 1,
           maxWidth: "880px",
           textAlign: "center",
-          color: "#F7F4EE",
+          color: "#FFFFFF",
           display: "grid",
           gap: "1.5rem",
         }}
@@ -51,7 +51,7 @@ export default function BrandHero() {
             fontSize: "0.8rem",
             letterSpacing: "0.25em",
             textTransform: "uppercase",
-            color: "rgba(247,244,238,0.85)",
+            color: "rgba(255, 255, 255,0.85)",
           }}
         >
           Crafted for journeys that leave a mark
@@ -73,7 +73,7 @@ export default function BrandHero() {
             fontSize: "1rem",
             maxWidth: "680px",
             margin: "0 auto",
-            color: "rgba(247,244,238,0.85)",
+            color: "rgba(255, 255, 255,0.85)",
             lineHeight: 1.8,
           }}
         >
@@ -83,9 +83,9 @@ export default function BrandHero() {
           <Link href="/brand/about" style={{ textDecoration: "none" }}>
             <button
               style={{
-                border: "1px solid rgba(247,244,238,0.7)",
+                border: "1px solid rgba(255, 255, 255,0.7)",
                 background: "transparent",
-                color: "#F7F4EE",
+                color: "#FFFFFF",
                 padding: "0.95rem 2rem",
                 fontFamily: "'Satoshi', sans-serif",
                 fontSize: "0.9rem",
@@ -99,7 +99,7 @@ export default function BrandHero() {
           <Link href="/brand/story" style={{ textDecoration: "none" }}>
             <button
               style={{
-                background: "#F7F4EE",
+                background: "#FFFFFF",
                 color: "#1E1E1E",
                 border: "none",
                 padding: "0.95rem 2rem",

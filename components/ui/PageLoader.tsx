@@ -42,7 +42,7 @@ export function PageLoader() {
         <span
           style={{
             fontFamily: "'Clash Display', sans-serif",
-            color: "#F7F4EE",
+            color: "#FFFFFF",
             fontSize: phase === "hold" ? "clamp(4rem, 12vw, 9rem)" : phase === "exit" ? "clamp(1rem, 3vw, 2rem)" : "clamp(2rem, 6vw, 5rem)",
             fontWeight: 600,
             letterSpacing: "-0.02em",
@@ -59,7 +59,7 @@ export function PageLoader() {
         <span
           style={{
             fontFamily: "'Satoshi', sans-serif",
-            color: "#7A5C3E",
+            color: "#1E1E1E",
             fontSize: "clamp(0.75rem, 2vw, 1rem)",
             letterSpacing: "0.3em",
             textTransform: "uppercase",
@@ -81,14 +81,14 @@ export function PageLoader() {
           transform: "translateX(-50%)",
           width: "120px",
           height: "1px",
-          backgroundColor: "rgba(247, 244, 238, 0.15)",
+          backgroundColor: "rgba(255, 255, 255, 0.15)",
           overflow: "hidden",
         }}
       >
         <div
           style={{
             height: "100%",
-            backgroundColor: "#7A5C3E",
+            backgroundColor: "#1E1E1E",
             width: phase === "enter" ? "0%" : phase === "hold" ? "70%" : "100%",
             transition: "width 1.4s cubic-bezier(0.16, 1, 0.3, 1)",
           }}

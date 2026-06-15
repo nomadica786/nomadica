@@ -60,7 +60,7 @@ export default function Footer() {
     <footer
       style={{
         backgroundColor: "#1E1E1E",
-        color: "#F7F4EE",
+        color: "#FFFFFF",
         paddingTop: "5rem",
         paddingBottom: "2rem",
       }}
@@ -73,7 +73,7 @@ export default function Footer() {
             gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
             gap: "3rem",
             paddingBottom: "4rem",
-            borderBottom: "1px solid rgba(247,244,238,0.1)",
+            borderBottom: "1px solid rgba(255, 255, 255,0.1)",
           }}
         >
           {/* Brand */}
@@ -84,7 +84,7 @@ export default function Footer() {
                 fontSize: "1.75rem",
                 fontWeight: 600,
                 marginBottom: "1rem",
-                color: "#F7F4EE",
+                color: "#FFFFFF",
               }}
             >
               NOMADICA
@@ -93,7 +93,7 @@ export default function Footer() {
               style={{
                 fontFamily: "'Satoshi', sans-serif",
                 fontSize: "0.875rem",
-                color: "rgba(247,244,238,0.55)",
+                color: "rgba(255, 255, 255,0.55)",
                 lineHeight: 1.7,
                 maxWidth: "260px",
                 marginBottom: "1.5rem",
@@ -110,10 +110,10 @@ export default function Footer() {
                 style={{
                   flex: 1,
                   padding: "0.75rem 1rem",
-                  background: "rgba(247,244,238,0.07)",
-                  border: "1px solid rgba(247,244,238,0.15)",
+                  background: "rgba(255, 255, 255,0.07)",
+                  border: "1px solid rgba(255, 255, 255,0.15)",
                   borderRight: "none",
-                  color: "#F7F4EE",
+                  color: "#FFFFFF",
                   fontFamily: "'Satoshi', sans-serif",
                   fontSize: "0.8125rem",
                   outline: "none",
@@ -122,13 +122,13 @@ export default function Footer() {
               <button
                 style={{
                   padding: "0.75rem 1rem",
-                  backgroundColor: "#7A5C3E",
+                  backgroundColor: "#1E1E1E",
                   border: "none",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#F7F4EE",
+                  color: "#FFFFFF",
                 }}
               >
                 <Mail size={16} />
@@ -142,11 +142,11 @@ export default function Footer() {
                   key={i}
                   href="#"
                   style={{
-                    color: "rgba(247,244,238,0.4)",
+                    color: "rgba(255, 255, 255,0.4)",
                     transition: "color 0.2s ease",
                   }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#7A5C3E")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(247,244,238,0.4)")}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#1E1E1E")}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255,0.4)")}
                 >
                   <Icon size={18} />
                 </a>
@@ -164,7 +164,7 @@ export default function Footer() {
                   fontWeight: 500,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  color: "#F7F4EE",
+                  color: "#FFFFFF",
                   marginBottom: "1.25rem",
                 }}
               >
@@ -178,12 +178,12 @@ export default function Footer() {
                       style={{
                         fontFamily: "'Satoshi', sans-serif",
                         fontSize: "0.875rem",
-                        color: "rgba(247,244,238,0.5)",
+                        color: "rgba(255, 255, 255,0.5)",
                         textDecoration: "none",
                         transition: "color 0.2s ease",
                       }}
-                      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#F7F4EE")}
-                      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(247,244,238,0.5)")}
+                      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#FFFFFF")}
+                      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255,0.5)")}
                     >
                       {link.label}
                     </Link>
@@ -209,7 +209,7 @@ export default function Footer() {
             style={{
               fontFamily: "'Satoshi', sans-serif",
               fontSize: "0.8125rem",
-              color: "rgba(247,244,238,0.3)",
+              color: "rgba(255, 255, 255,0.3)",
             }}
           >
             © 2025 Nomadica. All rights reserved.
@@ -220,10 +220,10 @@ export default function Footer() {
                 key={method}
                 style={{
                   padding: "0.25rem 0.5rem",
-                  border: "1px solid rgba(247,244,238,0.15)",
+                  border: "1px solid rgba(255, 255, 255,0.15)",
                   fontFamily: "'Satoshi', sans-serif",
                   fontSize: "0.625rem",
-                  color: "rgba(247,244,238,0.35)",
+                  color: "rgba(255, 255, 255,0.35)",
                   letterSpacing: "0.05em",
                 }}
               >

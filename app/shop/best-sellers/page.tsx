@@ -2,7 +2,7 @@
 import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
-import { groupProducts } from "@/utils/productGroup";
+import { groupProducts, sortNewArrivalsFirst } from "@/utils/productGroup";
 
 export default function BestSellersPage() {
   const { data, loading } = useApi(() => api.products.list(50));
@@ -30,31 +30,17 @@ export default function BestSellersPage() {
 
   const groupedProducts = groupProducts(allProducts);
   const bestSellers = groupedProducts.filter((p: any) => p.badge?.toLowerCase() === 'best seller');
-  const displayProducts = bestSellers.length > 0 ? bestSellers : groupedProducts.slice(0, 4);
+  const baseList = bestSellers.length > 0 ? bestSellers : groupedProducts.slice(0, 4);
 
-  const newestId = (() => {
-    if (displayProducts.length === 0) return '';
-    let newest = displayProducts[0];
-    let maxTime = 0;
-    for (const p of displayProducts) {
-      if (p.createdAt) {
-        const time = new Date(p.createdAt).getTime();
-        if (time > maxTime) {
-          maxTime = time;
-          newest = p;
-        }
-      }
-    }
-    return maxTime > 0 ? newest.id : '';
-  })();
+  const { sorted: displayProducts, newestIds } = sortNewArrivalsFirst(baseList, 3);
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
-      <div style={{ position: "relative", height: "300px", overflow: "hidden", backgroundColor: "#7A5C3E" }}>
+    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
+      <div style={{ position: "relative", height: "300px", overflow: "hidden", backgroundColor: "#1E1E1E" }}>
         <img src="https://images.unsplash.com/photo-1489493887464-892be6d1daae?w=1600&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.3 }} />
         <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(247,244,238,0.7)", marginBottom: "0.75rem" }}>Community Picks</p>
-          <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(3rem, 7vw, 5rem)", fontWeight: 600, color: "#F7F4EE", letterSpacing: "-0.02em" }}>Best Sellers</h1>
+          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(255, 255, 255,0.7)", marginBottom: "0.75rem" }}>Community Picks</p>
+          <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(3rem, 7vw, 5rem)", fontWeight: 600, color: "#FFFFFF", letterSpacing: "-0.02em" }}>Best Sellers</h1>
         </div>
       </div>
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
@@ -63,7 +49,7 @@ export default function BestSellersPage() {
             <ProductCard
               key={p.id}
               {...p}
-              badge={p.id === newestId ? "New" : p.badge}
+              badge={newestIds.has(p.id) ? "New" : p.badge}
             />
           ))}
         </div>

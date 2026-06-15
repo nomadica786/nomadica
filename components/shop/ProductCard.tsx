@@ -96,7 +96,7 @@ export default function ProductCard({
             position: "relative",
             aspectRatio: "3/4",
             overflow: "hidden",
-            backgroundColor: "#EDE9E1",
+            backgroundColor: "#FFFFFF",
           }}
         >
           <img
@@ -201,7 +201,7 @@ export default function ProductCard({
               style={{
                 width: "100%",
                 padding: "0.75rem",
-                backgroundColor: "#F7F4EE",
+                backgroundColor: "#FFFFFF",
                 color: "#1E1E1E",
                 border: "none",
                 cursor: "pointer",
@@ -233,8 +233,8 @@ export default function ProductCard({
                 position: "absolute",
                 top: "0.75rem",
                 left: "0.75rem",
-                backgroundColor: currentBadge === "Sale" ? "#7A5C3E" : currentBadge === "New" ? "#4F6B5A" : "#1E1E1E",
-                color: "#F7F4EE",
+                backgroundColor: currentBadge === "Sale" ? "#1E1E1E" : currentBadge === "New" ? "#4F6B5A" : "#1E1E1E",
+                color: "#FFFFFF",
                 padding: "0.25rem 0.625rem",
                 fontFamily: "'Satoshi', sans-serif",
                 fontSize: "0.625rem",
@@ -275,7 +275,7 @@ export default function ProductCard({
               width: "32px",
               height: "32px",
               borderRadius: "50%",
-              backgroundColor: "rgba(247,244,238,0.9)",
+              backgroundColor: "rgba(255, 255, 255,0.9)",
               border: "none",
               cursor: "pointer",
               display: "flex",
@@ -283,10 +283,10 @@ export default function ProductCard({
               justifyContent: "center",
               opacity: hovered ? 1 : 0,
               transition: "opacity 0.3s ease",
-              color: wishlisted ? "#7A5C3E" : "#1E1E1E",
+              color: wishlisted ? "#1E1E1E" : "#1E1E1E",
             }}
           >
-            <Heart size={14} fill={wishlisted ? "#7A5C3E" : "none"} />
+            <Heart size={14} fill={wishlisted ? "#1E1E1E" : "none"} />
           </button>
         </div>
       </Link>
@@ -298,7 +298,7 @@ export default function ProductCard({
             style={{
               fontFamily: "'Satoshi', sans-serif",
               fontSize: "0.6875rem",
-              color: "#7A5C3E",
+              color: "#1E1E1E",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               marginBottom: "0.25rem",
@@ -341,7 +341,7 @@ export default function ProductCard({
                   borderRadius: "50%",
                   backgroundColor: v.colorHex,
                   border: activeVariant?.id === v.id ? "1.5px solid #1E1E1E" : "1px solid rgba(30, 30, 30, 0.2)",
-                  boxShadow: activeVariant?.id === v.id ? "0 0 0 1.5px #F7F4EE inset" : "none",
+                  boxShadow: activeVariant?.id === v.id ? "0 0 0 1.5px #FFFFFF inset" : "none",
                   cursor: "pointer",
                   padding: 0,
                   transition: "transform 0.15s ease",

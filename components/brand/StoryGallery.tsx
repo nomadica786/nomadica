@@ -33,7 +33,7 @@ export default function StoryGallery() {
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap", marginBottom: "2rem" }}>
           <div>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#7A5C3E", marginBottom: "0.5rem" }}>
+            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
               Brand stories
             </p>
             <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2rem, 4vw, 3rem)", margin: 0, color: "#1E1E1E" }}>
@@ -56,7 +56,7 @@ export default function StoryGallery() {
                 minHeight: index === 0 ? "420px" : "240px",
                 display: "block",
                 borderRadius: "18px",
-                backgroundColor: "#F7F4EE",
+                backgroundColor: "#FFFFFF",
                 textDecoration: "none",
               }}
               className="img-hover-zoom"
@@ -73,14 +73,14 @@ export default function StoryGallery() {
                   background: "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.42) 55%, rgba(0,0,0,0.62))",
                 }}
               />
-              <div style={{ position: "absolute", bottom: "1.5rem", left: "1.5rem", right: "1.5rem", color: "#F7F4EE" }}>
+              <div style={{ position: "absolute", bottom: "1.5rem", left: "1.5rem", right: "1.5rem", color: "#FFFFFF" }}>
                 <p style={{ margin: 0, fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.18em", textTransform: "uppercase", opacity: 0.9 }}>
                   {index === 0 ? "Featured" : "Story"}
                 </p>
                 <h3 style={{ margin: "0.35rem 0 0", fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(1.4rem, 2.5vw, 2rem)", lineHeight: 1.1 }}>
                   {tile.title}
                 </h3>
-                <p style={{ margin: "0.85rem 0 0", fontFamily: "'Satoshi', sans-serif", fontSize: "0.95rem", color: "rgba(247,244,238,0.92)", lineHeight: 1.6 }}>
+                <p style={{ margin: "0.85rem 0 0", fontFamily: "'Satoshi', sans-serif", fontSize: "0.95rem", color: "rgba(255, 255, 255,0.92)", lineHeight: 1.6 }}>
                   {tile.subtitle}
                 </p>
               </div>

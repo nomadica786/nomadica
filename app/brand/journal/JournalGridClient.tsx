@@ -64,7 +64,7 @@ export default function JournalGridClient({
             >
               <Link href={`/brand/journal/${article.handle}`} className="flex flex-col h-full">
                 {/* Image Container */}
-                <div className="relative w-full aspect-[3/2] overflow-hidden bg-[#EDEAE2]">
+                <div className="relative w-full aspect-[3/2] overflow-hidden bg-[#FFFFFF]">
                   <Image
                     src={article.image?.url || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80'}
                     alt={article.image?.altText || article.title}
@@ -78,12 +78,12 @@ export default function JournalGridClient({
                 <div className="flex-1 p-6 flex flex-col justify-between">
                   <div>
                     {/* Category tag */}
-                    <span className="font-sans text-[10px] font-bold tracking-wider text-[#7A5C3E] uppercase block mb-3">
+                    <span className="font-sans text-[10px] font-bold tracking-wider text-[#1E1E1E] uppercase block mb-3">
                       {category}
                     </span>
                     
                     {/* Title */}
-                    <h3 className="text-xl text-[#1E1E1E] leading-snug mb-3 group-hover:text-[#7A5C3E] transition-colors">
+                    <h3 className="text-xl text-[#1E1E1E] leading-snug mb-3 group-hover:text-[#1E1E1E] transition-colors">
                       {article.title}
                     </h3>
                     
@@ -104,7 +104,7 @@ export default function JournalGridClient({
                       </span>
                     </div>
                     
-                    <span className="font-sans text-[9px] font-semibold tracking-wider text-black/40 uppercase bg-[#F7F4EE] px-2.5 py-1 rounded-full">
+                    <span className="font-sans text-[9px] font-semibold tracking-wider text-black/40 uppercase bg-[#FFFFFF] px-2.5 py-1 rounded-full">
                       {readingTime} min read
                     </span>
                   </div>
@@ -121,7 +121,7 @@ export default function JournalGridClient({
           <button
             onClick={loadMore}
             disabled={isLoading}
-            className="flex items-center gap-2.5 px-8 py-3.5 border border-black/15 bg-white text-black font-sans text-xs font-bold tracking-wider uppercase rounded-full shadow-sm hover:bg-[#F7F4EE] hover:border-black/30 transition-all duration-300 disabled:opacity-50"
+            className="flex items-center gap-2.5 px-8 py-3.5 border border-black/15 bg-white text-black font-sans text-xs font-bold tracking-wider uppercase rounded-full shadow-sm hover:bg-[#FFFFFF] hover:border-black/30 transition-all duration-300 disabled:opacity-50"
           >
             {isLoading ? (
               <>

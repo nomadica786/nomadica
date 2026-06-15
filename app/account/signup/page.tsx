@@ -45,7 +45,7 @@ export default function SignupPage() {
   ];
 
   return (
-    <div style={{ paddingTop: "64px", minHeight: "100svh", display: "flex", backgroundColor: "#F7F4EE" }}>
+    <div style={{ paddingTop: "64px", minHeight: "100svh", display: "flex", backgroundColor: "#FFFFFF" }}>
       {/* Left – Image Slider (hidden on mobile) */}
       <div style={{ flex: 1, position: "relative", overflow: "hidden" }} className="hidden md:block">
         {slides.map((slide, i) => (
@@ -53,10 +53,10 @@ export default function SignupPage() {
             <img src={slide.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30,30,30,0.7) 0%, transparent 60%)" }} />
             <div style={{ position: "absolute", bottom: "3rem", left: "3rem", right: "3rem" }}>
-              <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.75rem", fontWeight: 500, color: "#F7F4EE", maxWidth: "360px" }}>&quot;{slide.quote}&quot;</p>
+              <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.75rem", fontWeight: 500, color: "#FFFFFF", maxWidth: "360px" }}>&quot;{slide.quote}&quot;</p>
               <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.5rem" }}>
                 {slides.map((_, idx) => (
-                  <button key={idx} onClick={() => setActiveSlide(idx)} style={{ width: activeSlide === idx ? "24px" : "8px", height: "3px", backgroundColor: activeSlide === idx ? "#F7F4EE" : "rgba(247,244,238,0.4)", border: "none", cursor: "pointer", transition: "all 0.3s ease", padding: 0 }} />
+                  <button key={idx} onClick={() => setActiveSlide(idx)} style={{ width: activeSlide === idx ? "24px" : "8px", height: "3px", backgroundColor: activeSlide === idx ? "#FFFFFF" : "rgba(255, 255, 255,0.4)", border: "none", cursor: "pointer", transition: "all 0.3s ease", padding: 0 }} />
                 ))}
               </div>
             </div>
@@ -65,7 +65,7 @@ export default function SignupPage() {
       </div>
 
       {/* Right – Form */}
-      <div style={{ width: "100%", maxWidth: "480px", display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem 2rem", backgroundColor: "#F7F4EE" }}>
+      <div style={{ width: "100%", maxWidth: "480px", display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem 2rem", backgroundColor: "#FFFFFF" }}>
         <div style={{ maxWidth: "400px", margin: "0 auto", width: "100%" }}>
           <Link href="/" style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", textDecoration: "none", display: "block", marginBottom: "3rem" }}>
             NOMADICA
@@ -106,12 +106,12 @@ export default function SignupPage() {
             </div>
 
             <label style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", cursor: "pointer" }}>
-              <input type="checkbox" style={{ marginTop: "2px", accentColor: "#7A5C3E" }} />
+              <input type="checkbox" style={{ marginTop: "2px", accentColor: "#1E1E1E" }} />
               <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }}>
                 I agree to the{" "}
-                <Link href="/support/terms" style={{ color: "#7A5C3E", textDecoration: "none" }}>Terms</Link>
+                <Link href="/support/terms" style={{ color: "#1E1E1E", textDecoration: "none" }}>Terms</Link>
                 {" "}and{" "}
-                <Link href="/support/privacy-policy" style={{ color: "#7A5C3E", textDecoration: "none" }}>Privacy Policy</Link>
+                <Link href="/support/privacy-policy" style={{ color: "#1E1E1E", textDecoration: "none" }}>Privacy Policy</Link>
               </span>
             </label>
 
@@ -122,7 +122,7 @@ export default function SignupPage() {
 
           <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", textAlign: "center", marginTop: "2rem" }}>
             Already have an account?{" "}
-            <Link href="/account/login" style={{ color: "#7A5C3E", textDecoration: "none", fontWeight: 500 }}>Sign in</Link>
+            <Link href="/account/login" style={{ color: "#1E1E1E", textDecoration: "none", fontWeight: 500 }}>Sign in</Link>
           </p>
         </div>
       </div>

@@ -40,14 +40,14 @@ const VideoCard = memo(({
   return (
     <div
       onClick={() => onClick(video.videoId)}
-      className="group relative mb-6 break-inside-avoid overflow-hidden rounded-2xl border border-black/5 bg-[#EDEAE2] cursor-pointer shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:border-black/10"
+      className="group relative mb-6 break-inside-avoid overflow-hidden rounded-2xl border border-black/5 bg-[#FFFFFF] cursor-pointer shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:border-black/10"
       style={{ backfaceVisibility: "hidden" }}
     >
       {/* Aspect Ratio Container */}
-      <div className={`relative w-full ${aspect} overflow-hidden bg-[#EDEAE2]`}>
+      <div className={`relative w-full ${aspect} overflow-hidden bg-[#FFFFFF]`}>
         {/* Placeholder Skeleton */}
         {!imageLoaded && (
-          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-[#EDEAE2] via-[#E5E2DA] to-[#EDEAE2]" />
+          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-[#FFFFFF] via-[#E5E2DA] to-[#FFFFFF]" />
         )}
         
         <Image
@@ -69,21 +69,21 @@ const VideoCard = memo(({
         <div className="absolute inset-0 flex flex-col justify-between p-4 z-10">
           {/* Top Info (Creator Badge) */}
           <div className="self-end translate-y-[-10px] opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-            <span className="backdrop-blur-md bg-black/40 text-[#F7F4EE] text-[10px] font-semibold tracking-wider px-2.5 py-1 rounded-full uppercase">
+            <span className="backdrop-blur-md bg-black/40 text-[#FFFFFF] text-[10px] font-semibold tracking-wider px-2.5 py-1 rounded-full uppercase">
               {video.channelTitle}
             </span>
           </div>
 
           {/* Center Play Button */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-75 opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F7F4EE] text-black shadow-xl transition-transform duration-300 hover:scale-110">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FFFFFF] text-black shadow-xl transition-transform duration-300 hover:scale-110">
               <Play size={20} fill="currentColor" className="ml-1" />
             </div>
           </div>
 
           {/* Bottom Info (Title) */}
           <div className="w-full">
-            <p className="font-sans text-xs font-semibold leading-relaxed text-[#F7F4EE] tracking-wide line-clamp-2 drop-shadow-md group-hover:text-[#EDEAE2]">
+            <p className="font-sans text-xs font-semibold leading-relaxed text-[#FFFFFF] tracking-wide line-clamp-2 drop-shadow-md group-hover:text-[#FFFFFF]">
               {video.title}
             </p>
           </div>
@@ -181,25 +181,25 @@ export default function BrandStoryPage() {
   }, [closeVideoModal]);
 
   return (
-    <div className="min-h-screen bg-[#F7F4EE] text-[#1E1E1E]">
+    <div className="min-h-screen bg-[#FFFFFF] text-[#1E1E1E]">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative flex flex-col justify-center items-center px-6 text-center bg-[#EDEAE2] border-b border-black/5" style={{ minHeight: "55vh" }}>
+      <section className="relative flex flex-col justify-center items-center px-6 text-center bg-[#FFFFFF] border-b border-black/5" style={{ minHeight: "55vh" }}>
         {/* Background Grain/Visual Pattern Overlay */}
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
         
         <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-black/15 bg-[#F7F4EE] shadow-sm">
-            <Compass size={13} className="text-[#7A5C3E]" style={{ animation: 'spin 8s linear infinite' }} />
-            <span className="font-sans text-[10px] font-bold tracking-[0.2em] text-[#7A5C3E] uppercase leading-none">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-black/15 bg-[#FFFFFF] shadow-sm">
+            <Compass size={13} className="text-[#1E1E1E]" style={{ animation: 'spin 8s linear infinite' }} />
+            <span className="font-sans text-[10px] font-bold tracking-[0.2em] text-[#1E1E1E] uppercase leading-none">
               BRAND STORY
             </span>
           </div>
 
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-normal leading-[1.1] tracking-tight text-[#1E1E1E] mt-2">
             Stories From <br className="sm:hidden" />
-            <span className="italic font-normal text-[#7A5C3E]">Around The World</span>
+            <span className="italic font-normal text-[#1E1E1E]">Around The World</span>
           </h1>
 
           <p className="font-sans text-sm sm:text-base text-black/60 leading-relaxed max-w-xl mt-4">
@@ -225,7 +225,7 @@ export default function BrandStoryPage() {
         <div ref={sentinelRef} className="w-full flex flex-col items-center justify-center py-16 gap-3">
           {isLoading && (
             <>
-              <Loader2 className="animate-spin text-[#7A5C3E] mb-2" size={32} />
+              <Loader2 className="animate-spin text-[#1E1E1E] mb-2" size={32} />
               <span className="font-sans text-xs font-semibold text-black/40 tracking-wider uppercase">
                 Loading more stories...
               </span>
@@ -243,7 +243,7 @@ export default function BrandStoryPage() {
           {/* Close Button */}
           <button 
             onClick={closeVideoModal}
-            className="absolute top-6 right-6 z-[2010] flex h-12 w-12 items-center justify-center rounded-full bg-[#F7F4EE]/10 text-[#F7F4EE] hover:bg-[#F7F4EE]/20 hover:scale-105 transition-all duration-200"
+            className="absolute top-6 right-6 z-[2010] flex h-12 w-12 items-center justify-center rounded-full bg-[#FFFFFF]/10 text-[#FFFFFF] hover:bg-[#FFFFFF]/20 hover:scale-105 transition-all duration-200"
           >
             <X size={24} />
           </button>

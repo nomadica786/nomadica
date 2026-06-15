@@ -37,10 +37,10 @@ export default function NewArrivalsPage() {
     return timeB - timeA;
   });
 
-  const newestId = displayProducts[0]?.id || '';
+  const newestIds = new Set(displayProducts.slice(0, 3).map(p => p.id));
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
+    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
       {/* Hero banner */}
       <div
         style={{
@@ -67,13 +67,13 @@ export default function NewArrivalsPage() {
             padding: "1.5rem",
           }}
         >
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#7A5C3E", marginBottom: "0.75rem", fontWeight: 500 }}>
+          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.75rem", fontWeight: 500 }}>
             Just Landed
           </p>
-          <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(3rem, 7vw, 5.5rem)", fontWeight: 600, color: "#F7F4EE", letterSpacing: "-0.02em", lineHeight: 1 }}>
+          <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(3rem, 7vw, 5.5rem)", fontWeight: 600, color: "#FFFFFF", letterSpacing: "-0.02em", lineHeight: 1 }}>
             New Arrivals
           </h1>
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "1rem", color: "rgba(247,244,238,0.65)", marginTop: "1rem", maxWidth: "400px", lineHeight: 1.7 }}>
+          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "1rem", color: "rgba(255, 255, 255,0.65)", marginTop: "1rem", maxWidth: "400px", lineHeight: 1.7 }}>
             The latest additions to the Nomadica collection, designed for every destination.
           </p>
         </div>
@@ -86,7 +86,7 @@ export default function NewArrivalsPage() {
             <ProductCard
               key={p.id}
               {...p}
-              badge={p.id === newestId ? "New" : p.badge}
+              badge={newestIds.has(p.id) ? "New" : p.badge}
             />
           ))}
         </div>

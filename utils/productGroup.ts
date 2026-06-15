@@ -56,7 +56,7 @@ export function parseProduct(product: any) {
       const baseName = name.slice(mc.length + 1).trim();
       return {
         colorName,
-        colorHex: COLOR_HEX_MAP[colorName] || "#EDEAE2",
+        colorHex: COLOR_HEX_MAP[colorName] || "#FFFFFF",
         baseName,
         isClothVariation: true
       };
@@ -77,7 +77,7 @@ export function parseProduct(product: any) {
     if (isKnownColor) {
       return {
         colorName,
-        colorHex: COLOR_HEX_MAP[colorName] || "#EDEAE2",
+        colorHex: COLOR_HEX_MAP[colorName] || "#FFFFFF",
         baseName,
         isClothVariation: true
       };
@@ -171,7 +171,7 @@ export function groupProducts(products: any[]): GroupedProduct[] {
     if (!colorHex) {
       const lastWord = cleanColor.split(" ").pop() || "";
       const wordKey = Object.keys(COLOR_HEX_MAP).find(k => k.toLowerCase() === lastWord.toLowerCase());
-      colorHex = wordKey ? COLOR_HEX_MAP[wordKey] : "#EDEAE2";
+      colorHex = wordKey ? COLOR_HEX_MAP[wordKey] : "#FFFFFF";
     }
 
     const variant: ColorVariant = {

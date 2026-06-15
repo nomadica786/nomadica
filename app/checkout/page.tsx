@@ -208,10 +208,10 @@ function CheckoutContent() {
 
   if (!cartId || !cart || cart.lines?.edges?.length === 0) {
     return (
-      <div style={{ paddingTop: "100px", paddingBottom: "100px", textAlign: "center", backgroundColor: "#F7F4EE", minHeight: "100vh", fontFamily: "Satoshi" }}>
+      <div style={{ paddingTop: "100px", paddingBottom: "100px", textAlign: "center", backgroundColor: "#FFFFFF", minHeight: "100vh", fontFamily: "Satoshi" }}>
         <h1 style={{ fontFamily: "Clash Display", fontSize: "2rem", marginBottom: "1rem" }}>Checkout Not Active</h1>
         <p style={{ color: "rgba(30,30,30,0.6)", marginBottom: "2rem" }}>You don&apos;t have an active cart session to checkout.</p>
-        <Link href="/shop" style={{ color: "#7A5C3E", textDecoration: "underline", fontWeight: 500 }}>Back to Shop</Link>
+        <Link href="/shop" style={{ color: "#1E1E1E", textDecoration: "underline", fontWeight: 500 }}>Back to Shop</Link>
       </div>
     );
   }
@@ -222,11 +222,11 @@ function CheckoutContent() {
 
   if (checkoutSuccess) {
     return (
-      <div style={{ backgroundColor: "#F7F4EE", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Satoshi" }}>
+      <div style={{ backgroundColor: "#FFFFFF", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Satoshi" }}>
         <div style={{ backgroundColor: "#fff", border: "1px solid rgba(30,30,30,0.08)", padding: "3rem 2rem", maxWidth: "500px", width: "100%", textAlign: "center", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
           <CheckCircle size={64} color="#4F6B5A" style={{ margin: "0 auto 1.5rem" }} />
           <h1 style={{ fontFamily: "Clash Display", fontSize: "2rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.5rem" }}>Order Confirmed!</h1>
-          <p style={{ color: "#7A5C3E", fontWeight: 600, fontSize: "1.125rem", marginBottom: "1rem" }}>Order Number: {orderInfo?.orderNumber}</p>
+          <p style={{ color: "#1E1E1E", fontWeight: 600, fontSize: "1.125rem", marginBottom: "1rem" }}>Order Number: {orderInfo?.orderNumber}</p>
           <p style={{ color: "rgba(30,30,30,0.6)", lineHeight: 1.6, marginBottom: "2rem" }}>
             Thank you for shopping with Nomadica. We have successfully processed your payment. You will be redirected to your profile dashboard shortly to track your shipment.
           </p>
@@ -241,7 +241,7 @@ function CheckoutContent() {
   }
 
   return (
-    <div style={{ backgroundColor: "#F7F4EE", minHeight: "100vh", paddingBottom: "5rem" }}>
+    <div style={{ backgroundColor: "#FFFFFF", minHeight: "100vh", paddingBottom: "5rem" }}>
       <style>{`
         @keyframes scan-bar {
           0% { top: 0%; }
@@ -251,7 +251,7 @@ function CheckoutContent() {
       `}</style>
 
       {/* Checkout Navbar */}
-      <header style={{ borderBottom: "1px solid rgba(30,30,30,0.08)", height: "64px", display: "flex", alignItems: "center", padding: "0 2rem", backgroundColor: "#F7F4EE" }}>
+      <header style={{ borderBottom: "1px solid rgba(30,30,30,0.08)", height: "64px", display: "flex", alignItems: "center", padding: "0 2rem", backgroundColor: "#FFFFFF" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto", width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Link href="/" style={{ fontFamily: "Clash Display", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", textDecoration: "none", letterSpacing: "-0.01em" }}>
             NOMADICA
@@ -288,7 +288,7 @@ function CheckoutContent() {
                       onClick={() => applyAddress(addr)}
                       style={{
                         padding: "1rem",
-                        border: selectedAddressId === addr.id ? "2px solid #7A5C3E" : "1px solid rgba(30,30,30,0.15)",
+                        border: selectedAddressId === addr.id ? "2px solid #1E1E1E" : "1px solid rgba(30,30,30,0.15)",
                         cursor: "pointer",
                         backgroundColor: selectedAddressId === addr.id ? "rgba(122,92,62,0.04)" : "transparent",
                         transition: "all 0.15s ease"
@@ -403,7 +403,7 @@ function CheckoutContent() {
             <div style={{ backgroundColor: "#fff", padding: "2rem", border: "1px solid rgba(30,30,30,0.08)", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <h3 style={{ fontFamily: "Clash Display", fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>Payment Method</h3>
-                <span style={{ fontSize: "0.75rem", color: "#7A5C3E", border: "1px solid #7A5C3E", padding: "0.2rem 0.5rem", fontWeight: 600 }}>MOCK TEST GATEWAY</span>
+                <span style={{ fontSize: "0.75rem", color: "#1E1E1E", border: "1px solid #1E1E1E", padding: "0.2rem 0.5rem", fontWeight: 600 }}>MOCK TEST GATEWAY</span>
               </div>
 
               {/* Tabs */}
@@ -423,7 +423,7 @@ function CheckoutContent() {
                     style={{
                       padding: "0.75rem 0.5rem",
                       backgroundColor: paymentMethod === tab.id ? "#1E1E1E" : "transparent",
-                      color: paymentMethod === tab.id ? "#F7F4EE" : "rgba(30,30,30,0.6)",
+                      color: paymentMethod === tab.id ? "#FFFFFF" : "rgba(30,30,30,0.6)",
                       border: "1px solid rgba(30,30,30,0.15)",
                       fontFamily: "Satoshi",
                       fontSize: "0.8125rem",
@@ -441,7 +441,7 @@ function CheckoutContent() {
               {/* Card Payment Form */}
               {paymentMethod === "card" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                  <div style={{ padding: "0.875rem 1rem", backgroundColor: "rgba(122,92,62,0.08)", borderLeft: "4px solid #7A5C3E", fontSize: "0.8125rem", color: "#7A5C3E", lineHeight: 1.5 }}>
+                  <div style={{ padding: "0.875rem 1rem", backgroundColor: "rgba(122,92,62,0.08)", borderLeft: "4px solid #1E1E1E", fontSize: "0.8125rem", color: "#1E1E1E", lineHeight: 1.5 }}>
                     <p style={{ margin: "0 0 0.25rem", fontWeight: 600 }}>Test Card Info:</p>
                     Use card <strong>4242 4242 4242 4242</strong> for a successful mock purchase.
                   </div>
@@ -512,10 +512,10 @@ function CheckoutContent() {
                       alt="UPI QR Code" 
                       style={{ width: "150px", height: "150px" }}
                     />
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", backgroundColor: "#7A5C3E", animation: "scan-bar 2s linear infinite" }} />
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", backgroundColor: "#1E1E1E", animation: "scan-bar 2s linear infinite" }} />
                   </div>
                   
-                  <p style={{ fontFamily: "Satoshi", fontSize: "0.75rem", color: "#7A5C3E", fontWeight: 600 }}>
+                  <p style={{ fontFamily: "Satoshi", fontSize: "0.75rem", color: "#1E1E1E", fontWeight: 600 }}>
                     Scan QR using Google Pay, PhonePe, or Paytm to pay ₹{total.toLocaleString("en-IN")} (Mock simulation).
                   </p>
                 </div>
@@ -564,7 +564,7 @@ function CheckoutContent() {
 
                   return (
                     <div key={line.id} style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                      <div style={{ width: "50px", aspectRatio: "3/4", overflow: "hidden", backgroundColor: "#EDE9E1", flexShrink: 0 }}>
+                      <div style={{ width: "50px", aspectRatio: "3/4", overflow: "hidden", backgroundColor: "#FFFFFF", flexShrink: 0 }}>
                         <img src={liveImage || product?.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       </div>
                       <div style={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }}>

@@ -36,7 +36,7 @@ export default function SearchInput({ value, onChange, placeholder = "Search sto
         style={{
           width: "100%",
           padding: "1rem 1rem 1rem 3rem",
-          backgroundColor: "rgba(247,244,238,0.95)",
+          backgroundColor: "rgba(255, 255, 255,0.95)",
           border: "1px solid rgba(30,30,30,0.1)",
           boxShadow: "0 8px 30px rgba(0,0,0,0.06)",
           fontFamily: "'Satoshi', sans-serif",

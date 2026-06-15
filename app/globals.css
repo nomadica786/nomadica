@@ -3,9 +3,9 @@
 @import "tailwindcss";
 
 :root {
-  --sand: #F7F4EE;
+  --sand: #FFFFFF;
   --charcoal: #1E1E1E;
-  --leather: #7A5C3E;
+  --leather: #1E1E1E;
   --sage: #4F6B5A;
   --white: #FFFFFF;
 }
@@ -136,9 +136,9 @@ h1, h2, h3, h4, h5, h6 {
 .skeleton {
   background: linear-gradient(
     90deg,
-    #e8e4dc 25%,
-    #f0ece4 50%,
-    #e8e4dc 75%
+    #f0f0f0 25%,
+    #f8f8f8 50%,
+    #f0f0f0 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;

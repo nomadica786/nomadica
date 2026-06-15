@@ -168,7 +168,7 @@ function HeroSection() {
               fontWeight: 500,
               letterSpacing: "0.25em",
               textTransform: "uppercase",
-              color: "#F7F4EE",
+              color: "#FFFFFF",
               opacity: 0.8,
               display: "block",
               marginBottom: "1rem",
@@ -181,7 +181,7 @@ function HeroSection() {
               fontFamily: "'Clash Display', sans-serif",
               fontSize: "clamp(3rem, 8vw, 7rem)",
               fontWeight: 600,
-              color: "#F7F4EE",
+              color: "#FFFFFF",
               lineHeight: 0.95,
               letterSpacing: "-0.02em",
               marginBottom: "1.5rem",
@@ -198,7 +198,7 @@ function HeroSection() {
               <button
                 style={{
                   padding: "0.875rem 2rem",
-                  backgroundColor: "#F7F4EE",
+                  backgroundColor: "#FFFFFF",
                   color: "#1E1E1E",
                   border: "none",
                   cursor: "pointer",
@@ -212,8 +212,8 @@ function HeroSection() {
                   gap: "0.5rem",
                   transition: "background 0.2s ease",
                 }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#7A5C3E") && ((e.currentTarget as HTMLElement).style.color = "#F7F4EE")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "#F7F4EE") && ((e.currentTarget as HTMLElement).style.color = "#1E1E1E")}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#1E1E1E") && ((e.currentTarget as HTMLElement).style.color = "#FFFFFF")}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "#FFFFFF") && ((e.currentTarget as HTMLElement).style.color = "#1E1E1E")}
               >
                 Shop Now <ArrowRight size={16} />
               </button>
@@ -223,8 +223,8 @@ function HeroSection() {
                 style={{
                   padding: "0.875rem 2rem",
                   backgroundColor: "transparent",
-                  color: "#F7F4EE",
-                  border: "1px solid rgba(247,244,238,0.5)",
+                  color: "#FFFFFF",
+                  border: "1px solid rgba(255, 255, 255,0.5)",
                   cursor: "pointer",
                   fontFamily: "'Satoshi', sans-serif",
                   fontSize: "0.875rem",
@@ -258,7 +258,7 @@ function HeroSection() {
             style={{
               fontFamily: "'Satoshi', sans-serif",
               fontSize: "0.6875rem",
-              color: "#F7F4EE",
+              color: "#FFFFFF",
               letterSpacing: "0.15em",
               textTransform: "uppercase",
               writingMode: "vertical-rl",
@@ -266,7 +266,7 @@ function HeroSection() {
           >
             Scroll
           </span>
-          <ChevronDown size={16} color="#F7F4EE" style={{ animation: "bounce-dot 1.4s infinite" }} />
+          <ChevronDown size={16} color="#FFFFFF" style={{ animation: "bounce-dot 1.4s infinite" }} />
         </div>
       </div>
     </section>
@@ -327,7 +327,7 @@ function ContainerScrollSection() {
               fontSize: "0.75rem",
               letterSpacing: "0.25em",
               textTransform: "uppercase",
-              color: "#7A5C3E",
+              color: "#1E1E1E",
               marginBottom: "1rem",
             }}
           >
@@ -338,7 +338,7 @@ function ContainerScrollSection() {
               fontFamily: "'Clash Display', sans-serif",
               fontSize: "clamp(2.5rem, 7vw, 6rem)",
               fontWeight: 600,
-              color: "#F7F4EE",
+              color: "#FFFFFF",
               lineHeight: 1,
               letterSpacing: "-0.02em",
               maxWidth: "900px",
@@ -388,7 +388,7 @@ function TestimonialsSection() {
   return (
     <section
       style={{
-        backgroundColor: "#F7F4EE",
+        backgroundColor: "#FFFFFF",
         padding: "6rem 1.5rem",
         overflow: "hidden",
       }}
@@ -401,7 +401,7 @@ function TestimonialsSection() {
               fontSize: "0.75rem",
               letterSpacing: "0.25em",
               textTransform: "uppercase",
-              color: "#7A5C3E",
+              color: "#1E1E1E",
               marginBottom: "0.75rem",
             }}
           >
@@ -440,7 +440,7 @@ function TestimonialsSection() {
                 flexShrink: 0,
                 width: "clamp(280px, 35vw, 400px)",
                 scrollSnapAlign: "start",
-                backgroundColor: active === i ? "#1E1E1E" : "#EDEAE2",
+                backgroundColor: active === i ? "#1E1E1E" : "#FFFFFF",
                 padding: "2.5rem 2rem",
                 cursor: "pointer",
                 transition: "all 0.4s ease",
@@ -456,7 +456,7 @@ function TestimonialsSection() {
                     height: "48px",
                     borderRadius: "50%",
                     objectFit: "cover",
-                    border: `2px solid ${active === i ? "#7A5C3E" : "transparent"}`,
+                    border: `2px solid ${active === i ? "#1E1E1E" : "transparent"}`,
                   }}
                 />
                 <div>
@@ -465,7 +465,7 @@ function TestimonialsSection() {
                       fontFamily: "'Clash Display', sans-serif",
                       fontSize: "0.9375rem",
                       fontWeight: 500,
-                      color: active === i ? "#F7F4EE" : "#1E1E1E",
+                      color: active === i ? "#FFFFFF" : "#1E1E1E",
                     }}
                   >
                     {t.name}
@@ -474,7 +474,7 @@ function TestimonialsSection() {
                     style={{
                       fontFamily: "'Satoshi', sans-serif",
                       fontSize: "0.75rem",
-                      color: active === i ? "rgba(247,244,238,0.5)" : "rgba(30,30,30,0.5)",
+                      color: active === i ? "rgba(255, 255, 255,0.5)" : "rgba(30,30,30,0.5)",
                     }}
                   >
                     {t.location}
@@ -487,7 +487,7 @@ function TestimonialsSection() {
                   fontFamily: "'Satoshi', sans-serif",
                   fontSize: "0.9375rem",
                   lineHeight: 1.7,
-                  color: active === i ? "rgba(247,244,238,0.85)" : "rgba(30,30,30,0.7)",
+                  color: active === i ? "rgba(255, 255, 255,0.85)" : "rgba(30,30,30,0.7)",
                   marginBottom: "1.25rem",
                   fontStyle: "italic",
                 }}
@@ -502,7 +502,7 @@ function TestimonialsSection() {
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
                   fontWeight: 600,
-                  color: "#7A5C3E",
+                  color: "#1E1E1E",
                 }}
               >
                 {t.product}
@@ -537,7 +537,7 @@ function TestimonialsSection() {
 
 function CategorySection() {
   return (
-    <section style={{ backgroundColor: "#F7F4EE", padding: "5rem 1.5rem" }}>
+    <section style={{ backgroundColor: "#FFFFFF", padding: "5rem 1.5rem" }}>
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
         <div
           style={{
@@ -580,7 +580,7 @@ function CategorySection() {
                       fontFamily: "'Clash Display', sans-serif",
                       fontSize: "1.75rem",
                       fontWeight: 600,
-                      color: "#F7F4EE",
+                      color: "#FFFFFF",
                       marginBottom: "0.5rem",
                     }}
                   >
@@ -590,7 +590,7 @@ function CategorySection() {
                     style={{
                       fontFamily: "'Satoshi', sans-serif",
                       fontSize: "0.8125rem",
-                      color: "rgba(247,244,238,0.7)",
+                      color: "rgba(255, 255, 255,0.7)",
                       letterSpacing: "0.06em",
                       textTransform: "uppercase",
                       display: "flex",
@@ -660,7 +660,7 @@ export default function HomePage() {
       <ContainerScrollSection />
 
       {/* New Arrivals */}
-      <section style={{ backgroundColor: "#F7F4EE", padding: "6rem 1.5rem" }}>
+      <section style={{ backgroundColor: "#FFFFFF", padding: "6rem 1.5rem" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <div
             style={{
@@ -679,7 +679,7 @@ export default function HomePage() {
                   fontSize: "0.75rem",
                   letterSpacing: "0.25em",
                   textTransform: "uppercase",
-                  color: "#7A5C3E",
+                  color: "#1E1E1E",
                   marginBottom: "0.5rem",
                 }}
               >
@@ -739,7 +739,7 @@ export default function HomePage() {
               fontSize: "0.75rem",
               letterSpacing: "0.25em",
               textTransform: "uppercase",
-              color: "rgba(247,244,238,0.6)",
+              color: "rgba(255, 255, 255,0.6)",
               marginBottom: "1rem",
             }}
           >
@@ -750,7 +750,7 @@ export default function HomePage() {
               fontFamily: "'Clash Display', sans-serif",
               fontSize: "clamp(2rem, 5vw, 4rem)",
               fontWeight: 600,
-              color: "#F7F4EE",
+              color: "#FFFFFF",
               lineHeight: 1.1,
               letterSpacing: "-0.02em",
               marginBottom: "1.5rem",
@@ -762,7 +762,7 @@ export default function HomePage() {
             style={{
               fontFamily: "'Satoshi', sans-serif",
               fontSize: "1rem",
-              color: "rgba(247,244,238,0.65)",
+              color: "rgba(255, 255, 255,0.65)",
               lineHeight: 1.8,
               marginBottom: "2rem",
             }}
@@ -773,7 +773,7 @@ export default function HomePage() {
             <button
               style={{
                 padding: "0.875rem 2rem",
-                backgroundColor: "#F7F4EE",
+                backgroundColor: "#FFFFFF",
                 color: "#1E1E1E",
                 border: "none",
                 cursor: "pointer",

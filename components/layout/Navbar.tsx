@@ -160,7 +160,7 @@ export default function Navbar() {
           left: 0,
           right: 0,
           zIndex: 1000,
-          backgroundColor: scrolled ? "rgba(247, 244, 238, 0.95)" : "#F7F4EE",
+          backgroundColor: scrolled ? "rgba(255, 255, 255, 0.95)" : "#FFFFFF",
           backdropFilter: scrolled ? "blur(12px)" : "none",
           borderBottom: scrolled ? "1px solid rgba(30,30,30,0.08)" : "1px solid transparent",
           transition: "all 0.3s ease",
@@ -217,7 +217,7 @@ export default function Navbar() {
                     fontFamily: "'Satoshi', sans-serif",
                     fontSize: "0.875rem",
                     fontWeight: 500,
-                    color: pathname.startsWith(link.href) ? "#7A5C3E" : "#1E1E1E",
+                    color: pathname.startsWith(link.href) ? "#1E1E1E" : "#1E1E1E",
                     textDecoration: "none",
                     letterSpacing: "0.02em",
                     display: "flex",
@@ -238,7 +238,7 @@ export default function Navbar() {
                       top: "100%",
                       left: "50%",
                       transform: "translateX(-50%)",
-                      backgroundColor: "#F7F4EE",
+                      backgroundColor: "#FFFFFF",
                       border: "1px solid rgba(30,30,30,0.1)",
                       minWidth: "180px",
                       padding: "0.5rem 0",
@@ -261,7 +261,7 @@ export default function Navbar() {
                         }}
                         onMouseEnter={(e) => {
                           (e.target as HTMLElement).style.background = "rgba(122, 92, 62, 0.08)";
-                          (e.target as HTMLElement).style.color = "#7A5C3E";
+                          (e.target as HTMLElement).style.color = "#1E1E1E";
                         }}
                         onMouseLeave={(e) => {
                           (e.target as HTMLElement).style.background = "transparent";
@@ -300,7 +300,7 @@ export default function Navbar() {
                     height: "32px",
                     borderRadius: "50%",
                     backgroundColor: "#1E1E1E",
-                    color: "#F7F4EE",
+                    color: "#FFFFFF",
                     alignItems: "center",
                     justifyContent: "center",
                     fontFamily: "'Clash Display', sans-serif",
@@ -318,7 +318,7 @@ export default function Navbar() {
                       position: "absolute",
                       top: "100%",
                       right: 0,
-                      backgroundColor: "#F7F4EE",
+                      backgroundColor: "#FFFFFF",
                       border: "1px solid rgba(30,30,30,0.1)",
                       minWidth: "150px",
                       padding: "0.5rem 0",
@@ -397,7 +397,7 @@ export default function Navbar() {
                   width: "16px",
                   height: "16px",
                   borderRadius: "50%",
-                  backgroundColor: "#7A5C3E",
+                  backgroundColor: "#1E1E1E",
                   color: "#fff",
                   fontSize: "10px",
                   display: "flex",
@@ -436,7 +436,7 @@ export default function Navbar() {
           position: "fixed",
           inset: 0,
           zIndex: 999,
-          backgroundColor: "#F7F4EE",
+          backgroundColor: "#FFFFFF",
           transform: mobileOpen ? "translateX(0)" : "translateX(100%)",
           transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
           overflowY: "auto",
@@ -487,7 +487,7 @@ export default function Navbar() {
                             padding: "0.625rem 1rem",
                             fontFamily: "'Satoshi', sans-serif",
                             fontSize: "0.9375rem",
-                            color: "#7A5C3E",
+                            color: "#1E1E1E",
                             textDecoration: "none",
                           }}
                         >
@@ -577,7 +577,7 @@ export default function Navbar() {
           bottom: 0,
           width: "100%",
           maxWidth: "450px",
-          backgroundColor: "#F7F4EE",
+          backgroundColor: "#FFFFFF",
           boxShadow: "-10px 0 40px rgba(0,0,0,0.15)",
           zIndex: 2001,
           transform: cartOpen ? "translateX(0)" : "translateX(100%)",
@@ -643,7 +643,7 @@ export default function Navbar() {
 
                 return (
                   <div key={line.id} style={{ display: "flex", gap: "1rem", borderBottom: "1px solid rgba(30,30,30,0.05)", paddingBottom: "1.5rem" }}>
-                    <div style={{ width: "80px", aspectRatio: "3/4", overflow: "hidden", backgroundColor: "#EDE9E1", flexShrink: 0 }}>
+                    <div style={{ width: "80px", aspectRatio: "3/4", overflow: "hidden", backgroundColor: "#FFFFFF", flexShrink: 0 }}>
                       <img src={image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     </div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
@@ -694,7 +694,7 @@ export default function Navbar() {
             style={{
               padding: "1.5rem",
               borderTop: "1px solid rgba(30,30,30,0.08)",
-              backgroundColor: "#EDEAE2",
+              backgroundColor: "#FFFFFF",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }}>

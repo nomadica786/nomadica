@@ -75,7 +75,7 @@ function ProductDetailContent() {
             description: rawProduct.description || "",
             materials: rawProduct.materials || "100% Organic Material. Machine wash cold.",
             sizes: rawProduct.sizes || ["S", "M", "L", "XL"],
-            colors: rawProduct.colors || ["#7A5C3E", "#1E1E1E"],
+            colors: rawProduct.colors || ["#1E1E1E", "#1E1E1E"],
             images: rawProduct.images?.edges?.map((edge: any) => edge.node.url) || [rawProduct.image || ""],
             rating: rawProduct.rating || 4.7,
             reviews: rawProduct.reviews || 48,
@@ -103,17 +103,19 @@ function ProductDetailContent() {
               createdAt: rawProduct.createdAt || ""
             };
 
-            const otherMappedForGroup = allEdges.map((edge: any) => {
-              const node = edge.node;
-              return {
-                id: node.id,
-                name: node.title,
-                handle: node.handle,
-                price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
-                image: node.images?.edges?.[0]?.node?.url || "",
-                createdAt: node.createdAt || ""
-              };
-            });
+            const otherMappedForGroup = allEdges
+              .filter((edge: any) => edge.node.id !== rawProduct.id)
+              .map((edge: any) => {
+                const node = edge.node;
+                return {
+                  id: node.id,
+                  name: node.title,
+                  handle: node.handle,
+                  price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
+                  image: node.images?.edges?.[0]?.node?.url || "",
+                  createdAt: node.createdAt || ""
+                };
+              });
 
             const combinedProducts = [rawMappedForGroup, ...otherMappedForGroup];
             const groupedCombined = groupProducts(combinedProducts);
@@ -136,6 +138,16 @@ function ProductDetailContent() {
                   image: v.image
                 }))
               : [];
+
+            if (variations.length === 0) {
+              variations.push({
+                id: rawProduct.id,
+                handle: rawProduct.handle,
+                colorName: parsed.colorName || "Original",
+                colorHex: parsed.colorHex || "#FFFFFF",
+                image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || ""
+              });
+            }
 
             setColorVariations(variations);
 
@@ -277,10 +289,10 @@ function ProductDetailContent() {
 
   if (!product) {
     return (
-      <div style={{ paddingTop: "100px", paddingBottom: "100px", textAlign: "center", backgroundColor: "#F7F4EE", minHeight: "100vh", fontFamily: "Satoshi" }}>
+      <div style={{ paddingTop: "100px", paddingBottom: "100px", textAlign: "center", backgroundColor: "#FFFFFF", minHeight: "100vh", fontFamily: "Satoshi" }}>
         <h1 style={{ fontFamily: "Clash Display" }}>Product Not Found</h1>
         <p style={{ margin: "1rem 0" }}>The product you are looking for could not be found.</p>
-        <Link href="/shop" style={{ color: "#7A5C3E", textDecoration: "underline", fontWeight: 500 }}>Back to Shop</Link>
+        <Link href="/shop" style={{ color: "#1E1E1E", textDecoration: "underline", fontWeight: 500 }}>Back to Shop</Link>
       </div>
     );
   }
@@ -290,7 +302,7 @@ function ProductDetailContent() {
     : 0;
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
+    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
       {/* Breadcrumb */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "1.5rem 1.5rem 0" }}>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
@@ -331,10 +343,10 @@ function ProductDetailContent() {
         {/* Images */}
         <div style={{ display: "flex", gap: "1.5rem", alignItems: "start" }}>
           {/* Color Variations Stack (Vertical, on the left) */}
-          {colorVariations.length > 1 && (
+          {colorVariations.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "80px", flexShrink: 0 }}>
               <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.6875rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "rgba(30,30,30,0.5)", margin: 0, textAlign: "center" }}>
-                Colors
+                Variants
               </p>
               {colorVariations.map((v) => (
                 <button
@@ -372,7 +384,7 @@ function ProductDetailContent() {
                       height: "12px",
                       borderRadius: "50%",
                       backgroundColor: v.colorHex,
-                      border: "1px solid rgba(247,244,238,0.8)",
+                      border: "1px solid rgba(255, 255, 255,0.8)",
                       boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                     }}
                   />
@@ -389,7 +401,7 @@ function ProductDetailContent() {
                 position: "relative",
                 aspectRatio: "3/4",
                 overflow: "hidden",
-                backgroundColor: "#EDE9E1",
+                backgroundColor: "#FFFFFF",
                 marginBottom: "0.75rem",
               }}
             >
@@ -432,7 +444,7 @@ function ProductDetailContent() {
                 display: "inline-block",
                 padding: "0.25rem 0.75rem",
                 backgroundColor: "#4F6B5A",
-                color: "#F7F4EE",
+                color: "#FFFFFF",
                 fontFamily: "'Satoshi', sans-serif",
                 fontSize: "0.6875rem",
                 fontWeight: 600,
@@ -466,8 +478,8 @@ function ProductDetailContent() {
                 <Star
                   key={star}
                   size={14}
-                  fill={star <= Math.floor(product.rating) ? "#7A5C3E" : "none"}
-                  stroke="#7A5C3E"
+                  fill={star <= Math.floor(product.rating) ? "#1E1E1E" : "none"}
+                  stroke="#1E1E1E"
                 />
               ))}
             </div>
@@ -502,8 +514,8 @@ function ProductDetailContent() {
                 </span>
                 <span
                   style={{
-                    backgroundColor: "#7A5C3E",
-                    color: "#F7F4EE",
+                    backgroundColor: "#1E1E1E",
+                    color: "#FFFFFF",
                     padding: "0.2rem 0.5rem",
                     fontFamily: "'Satoshi', sans-serif",
                     fontSize: "0.75rem",
@@ -589,7 +601,7 @@ function ProductDetailContent() {
               <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E" }}>
                 Size
               </p>
-              <button style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "#7A5C3E", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+              <button style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "#1E1E1E", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
                 Size Guide
               </button>
             </div>
@@ -603,7 +615,7 @@ function ProductDetailContent() {
                     height: "48px",
                     border: selectedSize === size ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.2)",
                     backgroundColor: selectedSize === size ? "#1E1E1E" : "transparent",
-                    color: selectedSize === size ? "#F7F4EE" : "#1E1E1E",
+                    color: selectedSize === size ? "#FFFFFF" : "#1E1E1E",
                     fontFamily: "'Satoshi', sans-serif",
                     fontSize: "0.875rem",
                     fontWeight: 500,
@@ -696,11 +708,11 @@ function ProductDetailContent() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: wishlisted ? "#7A5C3E" : "#1E1E1E",
+                color: wishlisted ? "#1E1E1E" : "#1E1E1E",
                 flexShrink: 0,
               }}
             >
-              <Heart size={18} fill={wishlisted ? "#7A5C3E" : "none"} />
+              <Heart size={18} fill={wishlisted ? "#1E1E1E" : "none"} />
             </button>
           </div>
 
@@ -722,7 +734,7 @@ function ProductDetailContent() {
               { icon: Shield, label: "Secure Pay", sub: "UPI, Cards, Wallets" },
             ].map(({ icon: Icon, label, sub }) => (
               <div key={label} style={{ textAlign: "center" }}>
-                <Icon size={18} style={{ marginBottom: "0.375rem", color: "#7A5C3E" }} />
+                <Icon size={18} style={{ marginBottom: "0.375rem", color: "#1E1E1E" }} />
                 <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.125rem" }}>{label}</p>
                 <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.6875rem", color: "rgba(30,30,30,0.5)" }}>{sub}</p>
               </div>

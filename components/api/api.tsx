@@ -2,7 +2,10 @@
 
 import React from 'react';
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+const API_BASE_URL = typeof window !== 'undefined'
+  ? ''
+  : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+
 
 /**
  * Centralized API client for all backend calls
