@@ -5,6 +5,29 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { PageLoader } from "@/components/ui/PageLoader";
 
+export const metadata = {
+  title: "Nomadica",
+  description: "Travel. Wear. Live.",
+
+  openGraph: {
+    title: "Nomadica",
+    description: "Travel. Wear. Live.",
+    images: [
+      {
+        url: "/opengraph-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Nomadica",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    images: ["/opengraph-image.jpg"],
+  },
+};
+
 export default function RootLayout({
   children,
 }: {

@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: PageProps) {
 
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const canonicalUrl = `${siteUrl}/brand/journal/${slug}`;
+  const ogImageUrl = article.image?.url || `${siteUrl}/Nomadica.jpg`;
 
   return {
     title: `${article.title} | Nomadica Journal`,
