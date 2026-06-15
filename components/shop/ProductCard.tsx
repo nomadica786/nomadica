@@ -211,7 +211,7 @@ export default function ProductCard({
                 color: "#1E1E1E",
                 border: "none",
                 cursor: "pointer",
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.8125rem",
                 fontWeight: 500,
                 letterSpacing: "0.06em",
@@ -242,7 +242,7 @@ export default function ProductCard({
                 backgroundColor: currentBadge === "Sale" ? "#1E1E1E" : currentBadge === "New" ? "#4F6B5A" : "#1E1E1E",
                 color: "#FFFFFF",
                 padding: "0.25rem 0.625rem",
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.625rem",
                 fontWeight: 600,
                 letterSpacing: "0.1em",
@@ -302,7 +302,7 @@ export default function ProductCard({
         {category && (
           <p
             style={{
-              fontFamily: "'Satoshi', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.6875rem",
               color: "#1E1E1E",
               letterSpacing: "0.1em",
@@ -317,7 +317,7 @@ export default function ProductCard({
         <Link href={productHref} style={{ textDecoration: "none" }}>
           <h3
             style={{
-              fontFamily: "'Satoshi', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.9375rem",
               fontWeight: 500,
               color: "#1E1E1E",
@@ -364,7 +364,7 @@ export default function ProductCard({
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <span
             style={{
-              fontFamily: "'Satoshi', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.9375rem",
               fontWeight: 600,
               color: "#1E1E1E",
@@ -375,7 +375,7 @@ export default function ProductCard({
           {currentOriginalPrice && (
             <span
               style={{
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.875rem",
                 color: "rgba(30,30,30,0.4)",
                 textDecoration: "line-through",

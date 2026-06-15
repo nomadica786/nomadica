@@ -1,8 +1,10 @@
-@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@400,500,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @import "tailwindcss";
 
 :root {
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Montserrat", sans-serif;
   --sand: #FFFFFF;
   --charcoal: #1E1E1E;
   --leather: #1E1E1E;
@@ -23,13 +25,13 @@ html {
 body {
   background-color: var(--sand);
   color: var(--charcoal);
-  font-family: 'Satoshi', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Clash Display', sans-serif;
+  font-family: 'Playfair Display', sans-serif;
 }
 
 /* Loader animation */
@@ -269,7 +271,7 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid rgba(30, 30, 30, 0.2);
   border-radius: 0;
   padding: 0.875rem 1rem;
-  font-family: 'Satoshi', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 0.9375rem;
   color: var(--charcoal);
   transition: border-color 0.2s ease;
@@ -287,7 +289,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--charcoal);
   color: var(--white);
   padding: 0.875rem 2rem;
-  font-family: 'Satoshi', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: 0.05em;
@@ -310,7 +312,7 @@ h1, h2, h3, h4, h5, h6 {
   background: transparent;
   color: var(--charcoal);
   padding: 0.875rem 2rem;
-  font-family: 'Satoshi', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: 0.05em;
@@ -332,7 +334,7 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   font-size: 0.6875rem;
-  font-family: 'Satoshi', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -395,7 +397,7 @@ h1, h2, h3, h4, h5, h6 {
 .journal-content {
   max-width: 65ch; /* Optimal reading length */
   margin: 0 auto;
-  font-family: 'Satoshi', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 1rem;
   line-height: 1.8;
   color: rgba(30, 30, 30, 0.8);
@@ -406,7 +408,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .journal-content h2 {
-  font-family: 'Clash Display', sans-serif;
+  font-family: 'Playfair Display', sans-serif;
   font-size: 1.75rem;
   font-weight: 500;
   color: var(--charcoal);
@@ -416,7 +418,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .journal-content h3 {
-  font-family: 'Clash Display', sans-serif;
+  font-family: 'Playfair Display', sans-serif;
   font-size: 1.4rem;
   font-weight: 500;
   color: var(--charcoal);
@@ -428,7 +430,7 @@ h1, h2, h3, h4, h5, h6 {
 .journal-content blockquote {
   border-left: 3px solid var(--leather);
   padding-left: 1.5rem;
-  font-family: 'Clash Display', sans-serif;
+  font-family: 'Playfair Display', sans-serif;
   font-style: italic;
   font-size: 1.25rem;
   color: var(--charcoal);

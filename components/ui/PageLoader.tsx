@@ -41,7 +41,7 @@ export function PageLoader() {
       >
         <span
           style={{
-            fontFamily: "'Clash Display', sans-serif",
+            fontFamily: "'Playfair Display', sans-serif",
             color: "#FFFFFF",
             fontSize: phase === "hold" ? "clamp(4rem, 12vw, 9rem)" : phase === "exit" ? "clamp(1rem, 3vw, 2rem)" : "clamp(2rem, 6vw, 5rem)",
             fontWeight: 600,
@@ -58,7 +58,7 @@ export function PageLoader() {
         </span>
         <span
           style={{
-            fontFamily: "'Satoshi', sans-serif",
+            fontFamily: "'Montserrat', sans-serif",
             color: "#1E1E1E",
             fontSize: "clamp(0.75rem, 2vw, 1rem)",
             letterSpacing: "0.3em",

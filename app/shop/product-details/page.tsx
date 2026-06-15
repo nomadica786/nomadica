@@ -320,8 +320,8 @@ function ProductDetailContent() {
 
   if (!product) {
     return (
-      <div style={{ paddingTop: "100px", paddingBottom: "100px", textAlign: "center", backgroundColor: "#FFFFFF", minHeight: "100vh", fontFamily: "Satoshi" }}>
-        <h1 style={{ fontFamily: "Clash Display" }}>Product Not Found</h1>
+      <div style={{ paddingTop: "100px", paddingBottom: "100px", textAlign: "center", backgroundColor: "#FFFFFF", minHeight: "100vh", fontFamily: "Montserrat" }}>
+        <h1 style={{ fontFamily: "Playfair Display" }}>Product Not Found</h1>
         <p style={{ margin: "1rem 0" }}>The product you are looking for could not be found.</p>
         <Link href="/shop" style={{ color: "#1E1E1E", textDecoration: "underline", fontWeight: 500 }}>Back to Shop</Link>
       </div>
@@ -340,7 +340,7 @@ function ProductDetailContent() {
               <Link
                 href={i === 0 ? "/" : i === 1 ? "/shop/collections" : "#"}
                 style={{
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.8125rem",
                   color: i === arr.length - 1 ? "#1E1E1E" : "rgba(30,30,30,0.4)",
                   textDecoration: "none",
@@ -374,7 +374,7 @@ function ProductDetailContent() {
           {/* Color Variations Stack (Vertical, on the left) */}
           {colorVariations.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "80px", flexShrink: 0 }}>
-              <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.6875rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "rgba(30,30,30,0.5)", margin: 0, textAlign: "center" }}>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "rgba(30,30,30,0.5)", margin: 0, textAlign: "center" }}>
                 Variants
               </p>
               {colorVariations.map((v) => (
@@ -474,7 +474,7 @@ function ProductDetailContent() {
                 padding: "0.25rem 0.75rem",
                 backgroundColor: "#4F6B5A",
                 color: "#FFFFFF",
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.6875rem",
                 fontWeight: 600,
                 letterSpacing: "0.1em",
@@ -488,7 +488,7 @@ function ProductDetailContent() {
 
           <h1
             style={{
-              fontFamily: "'Clash Display', sans-serif",
+              fontFamily: "'Playfair Display', sans-serif",
               fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
               fontWeight: 600,
               color: "#1E1E1E",
@@ -512,7 +512,7 @@ function ProductDetailContent() {
                 />
               ))}
             </div>
-            <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)" }}>
+            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)" }}>
               {product.rating} ({product.reviews} reviews)
             </span>
           </div>
@@ -521,7 +521,7 @@ function ProductDetailContent() {
           <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
             <span
               style={{
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "1.125rem",
                 color: "rgba(30,30,30,0.35)",
                 textDecoration: "line-through",
@@ -531,7 +531,7 @@ function ProductDetailContent() {
             </span>
             <span
               style={{
-                fontFamily: "'Clash Display', sans-serif",
+                fontFamily: "'Playfair Display', sans-serif",
                 fontSize: "1.75rem",
                 fontWeight: 600,
                 color: "#1E1E1E",
@@ -544,7 +544,7 @@ function ProductDetailContent() {
                 backgroundColor: "#1E1E1E",
                 color: "#FFFFFF",
                 padding: "0.2rem 0.5rem",
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.75rem",
                 fontWeight: 600,
               }}
@@ -557,7 +557,7 @@ function ProductDetailContent() {
           <div style={{ marginBottom: "1.5rem" }}>
             {colorVariations.length > 1 ? (
               <>
-                <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E", marginBottom: "0.75rem" }}>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E", marginBottom: "0.75rem" }}>
                   Colour: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>{colorVariations.find(v => v.id === product.id)?.colorName || parseProduct({ name: product.rawName }).colorName}</span>
                 </p>
                 <div style={{ display: "flex", gap: "0.625rem" }}>
@@ -596,7 +596,7 @@ function ProductDetailContent() {
               </>
             ) : (
               <>
-                <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E", marginBottom: "0.75rem" }}>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E", marginBottom: "0.75rem" }}>
                   Colour
                 </p>
                 <div style={{ display: "flex", gap: "0.625rem" }}>
@@ -627,10 +627,10 @@ function ProductDetailContent() {
           {/* Size */}
           <div style={{ marginBottom: "2rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-              <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E" }}>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E" }}>
                 Size
               </p>
-              <button style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "#1E1E1E", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+              <button style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "#1E1E1E", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
                 Size Guide
               </button>
             </div>
@@ -645,7 +645,7 @@ function ProductDetailContent() {
                     border: selectedSize === size ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.2)",
                     backgroundColor: selectedSize === size ? "#1E1E1E" : "transparent",
                     color: selectedSize === size ? "#FFFFFF" : "#1E1E1E",
-                    fontFamily: "'Satoshi', sans-serif",
+                    fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.875rem",
                     fontWeight: 500,
                     cursor: "pointer",
@@ -689,7 +689,7 @@ function ProductDetailContent() {
                 style={{
                   width: "44px",
                   textAlign: "center",
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.9375rem",
                   fontWeight: 500,
                   color: "#1E1E1E",
@@ -764,8 +764,8 @@ function ProductDetailContent() {
             ].map(({ icon: Icon, label, sub }) => (
               <div key={label} style={{ textAlign: "center" }}>
                 <Icon size={18} style={{ marginBottom: "0.375rem", color: "#1E1E1E" }} />
-                <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.125rem" }}>{label}</p>
-                <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.6875rem", color: "rgba(30,30,30,0.5)" }}>{sub}</p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.125rem" }}>{label}</p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", color: "rgba(30,30,30,0.5)" }}>{sub}</p>
               </div>
             ))}
           </div>
@@ -787,7 +787,7 @@ function ProductDetailContent() {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.9375rem",
                   fontWeight: 500,
                   color: "#1E1E1E",
@@ -805,7 +805,7 @@ function ProductDetailContent() {
               {openSection === section.id && (
                 <p
                   style={{
-                    fontFamily: "'Satoshi', sans-serif",
+                    fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.9rem",
                     color: "rgba(30,30,30,0.65)",
                     lineHeight: 1.8,
@@ -822,7 +822,7 @@ function ProductDetailContent() {
 
       {/* Related products */}
       <div style={{ maxWidth: "1400px", margin: "4rem auto 0", padding: "0 1.5rem 5rem" }}>
-        <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "2rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem", letterSpacing: "-0.01em" }}>
+        <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "2rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem", letterSpacing: "-0.01em" }}>
           You May Also Like
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.5rem" }}>

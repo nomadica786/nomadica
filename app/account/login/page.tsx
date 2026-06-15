@@ -77,7 +77,7 @@ export default function LoginPage() {
             <img src={slide.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30,30,30,0.7) 0%, transparent 60%)" }} />
             <div style={{ position: "absolute", bottom: "3rem", left: "3rem", right: "3rem" }}>
-              <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.75rem", fontWeight: 500, color: "#FFFFFF", lineHeight: 1.3, maxWidth: "400px" }}>
+              <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 500, color: "#FFFFFF", lineHeight: 1.3, maxWidth: "400px" }}>
                 &quot;{slide.quote}&quot;
               </p>
               <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.5rem" }}>
@@ -119,7 +119,7 @@ export default function LoginPage() {
           <Link
             href="/"
             style={{
-              fontFamily: "'Clash Display', sans-serif",
+              fontFamily: "'Playfair Display', sans-serif",
               fontSize: "1.25rem",
               fontWeight: 600,
               color: "#1E1E1E",
@@ -133,7 +133,7 @@ export default function LoginPage() {
 
           <h1
             style={{
-              fontFamily: "'Clash Display', sans-serif",
+              fontFamily: "'Playfair Display', sans-serif",
               fontSize: "2.25rem",
               fontWeight: 600,
               color: "#1E1E1E",
@@ -143,13 +143,13 @@ export default function LoginPage() {
           >
             Welcome back
           </h1>
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9375rem", color: "rgba(30,30,30,0.55)", marginBottom: "2.5rem" }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9375rem", color: "rgba(30,30,30,0.55)", marginBottom: "2.5rem" }}>
             Sign in to your Nomadica account
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {error && (
-              <p style={{ fontFamily: "Satoshi", fontSize: "0.875rem", color: "#d9534f", margin: "0.5rem 0" }}>
+              <p style={{ fontFamily: "Montserrat", fontSize: "0.875rem", color: "#d9534f", margin: "0.5rem 0" }}>
                 {error}
               </p>
             )}
@@ -194,7 +194,7 @@ export default function LoginPage() {
             </div>
 
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <a href="#" style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "#1E1E1E", textDecoration: "none" }}>
+              <a href="#" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "#1E1E1E", textDecoration: "none" }}>
                 Forgot password?
               </a>
             </div>
@@ -205,7 +205,7 @@ export default function LoginPage() {
 
             <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: "0.5rem 0" }}>
               <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(30,30,30,0.1)" }} />
-              <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.4)" }}>OR</span>
+              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.4)" }}>OR</span>
               <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(30,30,30,0.1)" }} />
             </div>
 
@@ -216,7 +216,7 @@ export default function LoginPage() {
                 padding: "0.875rem",
                 border: "1px solid rgba(30,30,30,0.2)",
                 backgroundColor: "transparent",
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.875rem",
                 color: "#1E1E1E",
                 cursor: "pointer",
@@ -237,7 +237,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", textAlign: "center", marginTop: "2rem" }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", textAlign: "center", marginTop: "2rem" }}>
             Don&lsquo;t have an account?{" "}
             <Link href="/account/signup" style={{ color: "#1E1E1E", textDecoration: "none", fontWeight: 500 }}>
               Sign up

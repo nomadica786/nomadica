@@ -53,7 +53,7 @@ export default function SignupPage() {
             <img src={slide.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30,30,30,0.7) 0%, transparent 60%)" }} />
             <div style={{ position: "absolute", bottom: "3rem", left: "3rem", right: "3rem" }}>
-              <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.75rem", fontWeight: 500, color: "#FFFFFF", maxWidth: "360px" }}>&quot;{slide.quote}&quot;</p>
+              <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 500, color: "#FFFFFF", maxWidth: "360px" }}>&quot;{slide.quote}&quot;</p>
               <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.5rem" }}>
                 {slides.map((_, idx) => (
                   <button key={idx} onClick={() => setActiveSlide(idx)} style={{ width: activeSlide === idx ? "24px" : "8px", height: "3px", backgroundColor: activeSlide === idx ? "#FFFFFF" : "rgba(255, 255, 255,0.4)", border: "none", cursor: "pointer", transition: "all 0.3s ease", padding: 0 }} />
@@ -67,20 +67,20 @@ export default function SignupPage() {
       {/* Right – Form */}
       <div style={{ width: "100%", maxWidth: "480px", display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem 2rem", backgroundColor: "#FFFFFF" }}>
         <div style={{ maxWidth: "400px", margin: "0 auto", width: "100%" }}>
-          <Link href="/" style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", textDecoration: "none", display: "block", marginBottom: "3rem" }}>
+          <Link href="/" style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", textDecoration: "none", display: "block", marginBottom: "3rem" }}>
             NOMADICA
           </Link>
 
-          <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "2.25rem", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
+          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "2.25rem", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
             Create account
           </h1>
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9375rem", color: "rgba(30,30,30,0.55)", marginBottom: "2.5rem" }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9375rem", color: "rgba(30,30,30,0.55)", marginBottom: "2.5rem" }}>
             Join the Nomadica community
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {error && (
-              <p style={{ fontFamily: "Satoshi", fontSize: "0.875rem", color: "#d9534f", margin: "0.5rem 0" }}>
+              <p style={{ fontFamily: "Montserrat", fontSize: "0.875rem", color: "#d9534f", margin: "0.5rem 0" }}>
                 {error}
               </p>
             )}
@@ -107,7 +107,7 @@ export default function SignupPage() {
 
             <label style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", cursor: "pointer" }}>
               <input type="checkbox" style={{ marginTop: "2px", accentColor: "#1E1E1E" }} />
-              <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }}>
+              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }}>
                 I agree to the{" "}
                 <Link href="/support/terms" style={{ color: "#1E1E1E", textDecoration: "none" }}>Terms</Link>
                 {" "}and{" "}
@@ -120,7 +120,7 @@ export default function SignupPage() {
             </button>
           </form>
 
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", textAlign: "center", marginTop: "2rem" }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", textAlign: "center", marginTop: "2rem" }}>
             Already have an account?{" "}
             <Link href="/account/login" style={{ color: "#1E1E1E", textDecoration: "none", fontWeight: 500 }}>Sign in</Link>
           </p>

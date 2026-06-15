@@ -87,7 +87,7 @@ export default function Footer() {
           <div style={{ gridColumn: "span 2" }} className="col-span-2 sm:col-span-1">
             <div
               style={{
-                fontFamily: "'Clash Display', sans-serif",
+                fontFamily: "'Playfair Display', sans-serif",
                 fontSize: "1.75rem",
                 fontWeight: 600,
                 marginBottom: "1rem",
@@ -98,7 +98,7 @@ export default function Footer() {
             </div>
             <p
               style={{
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.875rem",
                 color: "rgba(255, 255, 255,0.55)",
                 lineHeight: 1.7,
@@ -121,7 +121,7 @@ export default function Footer() {
                   border: "1px solid rgba(255, 255, 255,0.15)",
                   borderRight: "none",
                   color: "#FFFFFF",
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.8125rem",
                   outline: "none",
                 }}
@@ -166,7 +166,7 @@ export default function Footer() {
             <div key={section}>
               <h4
                 style={{
-                  fontFamily: "'Clash Display', sans-serif",
+                  fontFamily: "'Playfair Display', sans-serif",
                   fontSize: "0.875rem",
                   fontWeight: 500,
                   letterSpacing: "0.08em",
@@ -183,7 +183,7 @@ export default function Footer() {
                     <Link
                       href={link.href}
                       style={{
-                        fontFamily: "'Satoshi', sans-serif",
+                        fontFamily: "'Montserrat', sans-serif",
                         fontSize: "0.875rem",
                         color: "rgba(255, 255, 255,0.5)",
                         textDecoration: "none",
@@ -214,7 +214,7 @@ export default function Footer() {
         >
           <p
             style={{
-              fontFamily: "'Satoshi', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.8125rem",
               color: "rgba(255, 255, 255,0.3)",
             }}
@@ -228,7 +228,7 @@ export default function Footer() {
                 style={{
                   padding: "0.25rem 0.5rem",
                   border: "1px solid rgba(255, 255, 255,0.15)",
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.625rem",
                   color: "rgba(255, 255, 255,0.35)",
                   letterSpacing: "0.05em",

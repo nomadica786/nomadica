@@ -39,10 +39,10 @@ export default function OrderTrackingPage() {
     <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
       <div style={{ maxWidth: "680px", margin: "0 auto", padding: "4rem 1.5rem" }}>
         
-        <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "1rem", textAlign: "center" }}>
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "1rem", textAlign: "center" }}>
           Shipment Tracking
         </p>
-        <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 600, color: "#1E1E1E", textAlign: "center", marginBottom: "2.5rem" }}>
+        <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 600, color: "#1E1E1E", textAlign: "center", marginBottom: "2.5rem" }}>
           Track Your Order
         </h1>
         
@@ -59,7 +59,7 @@ export default function OrderTrackingPage() {
           }}
         >
           <div>
-            <label style={{ display: "block", fontFamily: "Satoshi", fontSize: "0.875rem", fontWeight: 500, marginBottom: "0.5rem" }}>Order Number</label>
+            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.875rem", fontWeight: 500, marginBottom: "0.5rem" }}>Order Number</label>
             <input
               type="text"
               placeholder="e.g. NMD-2047"
@@ -71,7 +71,7 @@ export default function OrderTrackingPage() {
           </div>
           
           <div>
-            <label style={{ display: "block", fontFamily: "Satoshi", fontSize: "0.875rem", fontWeight: 500, marginBottom: "0.5rem" }}>Email Address</label>
+            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.875rem", fontWeight: 500, marginBottom: "0.5rem" }}>Email Address</label>
             <input
               type="email"
               placeholder="e.g. arjun.mehta@email.com"
@@ -83,7 +83,7 @@ export default function OrderTrackingPage() {
           </div>
 
           {errorMsg && (
-            <p style={{ color: "rgba(180,60,60,0.9)", fontSize: "0.875rem", fontFamily: "Satoshi", margin: 0 }}>
+            <p style={{ color: "rgba(180,60,60,0.9)", fontSize: "0.875rem", fontFamily: "Montserrat", margin: 0 }}>
               {errorMsg}
             </p>
           )}
@@ -107,38 +107,38 @@ export default function OrderTrackingPage() {
               boxShadow: "0 12px 32px rgba(30,30,30,0.04)",
             }}
           >
-            <h2 style={{ fontFamily: "Clash Display", fontSize: "1.375rem", marginBottom: "1.5rem", borderBottom: "1px solid rgba(30,30,30,0.08)", paddingBottom: "1rem" }}>
+            <h2 style={{ fontFamily: "Playfair Display", fontSize: "1.375rem", marginBottom: "1.5rem", borderBottom: "1px solid rgba(30,30,30,0.08)", paddingBottom: "1rem" }}>
               Order {trackingInfo.orderNumber} Status
             </h2>
 
             <div style={{ display: "grid", gap: "1.25rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                 <Package size={18} color="#1E1E1E" />
-                <span style={{ fontFamily: "Satoshi", fontSize: "0.9375rem" }}>
+                <span style={{ fontFamily: "Montserrat", fontSize: "0.9375rem" }}>
                   Status: <strong>{trackingInfo.status || (trackingInfo.fulfillmentStatus === "FULFILLED" ? "Delivered" : "In Transit")}</strong>
                 </span>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                 <Calendar size={18} color="#1E1E1E" />
-                <span style={{ fontFamily: "Satoshi", fontSize: "0.9375rem" }}>
+                <span style={{ fontFamily: "Montserrat", fontSize: "0.9375rem" }}>
                   Placed on: {new Date(trackingInfo.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
                 </span>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                 <DollarSign size={18} color="#1E1E1E" />
-                <span style={{ fontFamily: "Satoshi", fontSize: "0.9375rem" }}>
+                <span style={{ fontFamily: "Montserrat", fontSize: "0.9375rem" }}>
                   Total Amount: ₹{parseFloat(trackingInfo.totalPrice?.amount || '0').toLocaleString("en-IN")}
                 </span>
               </div>
             </div>
 
             <div style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid rgba(30,30,30,0.08)" }}>
-              <h3 style={{ fontFamily: "Clash Display", fontSize: "1.125rem", marginBottom: "1rem" }}>Items</h3>
+              <h3 style={{ fontFamily: "Playfair Display", fontSize: "1.125rem", marginBottom: "1rem" }}>Items</h3>
               <div style={{ display: "grid", gap: "0.75rem" }}>
                 {trackingInfo.lineItems?.edges?.map((edge: any) => (
-                  <div key={edge.node.id} style={{ display: "flex", justifyContent: "space-between", fontFamily: "Satoshi", fontSize: "0.9375rem" }}>
+                  <div key={edge.node.id} style={{ display: "flex", justifyContent: "space-between", fontFamily: "Montserrat", fontSize: "0.9375rem" }}>
                     <span>{edge.node.title} <span style={{ color: "rgba(30,30,30,0.4)" }}>x{edge.node.quantity}</span></span>
                   </div>
                 ))}

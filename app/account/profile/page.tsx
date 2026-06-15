@@ -162,12 +162,12 @@ function ProfileContent() {
                   margin: "0 auto 1rem",
                 }}
               >
-                <span style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#FFFFFF" }}>
+                <span style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#FFFFFF" }}>
                   {userInitials}
                 </span>
               </div>
-              <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.125rem", fontWeight: 600, color: "#1E1E1E" }}>{displayName}</p>
-              <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)" }}>{user?.email}</p>
+              <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.125rem", fontWeight: 600, color: "#1E1E1E" }}>{displayName}</p>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)" }}>{user?.email}</p>
             </div>
  
             {/* Nav tabs */}
@@ -185,7 +185,7 @@ function ProfileContent() {
                     backgroundColor: activeTab === id ? "#1E1E1E" : "transparent",
                     color: activeTab === id ? "#FFFFFF" : "rgba(30,30,30,0.6)",
                     cursor: "pointer",
-                    fontFamily: "'Satoshi', sans-serif",
+                    fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.875rem",
                     fontWeight: activeTab === id ? 500 : 400,
                     textAlign: "left",
@@ -210,7 +210,7 @@ function ProfileContent() {
                   backgroundColor: "transparent",
                   color: "rgba(180,60,60,0.7)",
                   cursor: "pointer",
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.875rem",
                   textAlign: "left",
                 }}
@@ -229,7 +229,7 @@ function ProfileContent() {
               <>
                 {activeTab === "overview" && (
                   <div>
-                    <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem" }}>
+                    <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem" }}>
                       My Account
                     </h2>
  
@@ -242,26 +242,26 @@ function ProfileContent() {
                         { label: "Rewards Points", value: (orders.length * 100).toString() },
                       ].map(({ label, value }) => (
                         <div key={label} style={{ backgroundColor: "#FFFFFF", padding: "1.5rem 1.25rem" }}>
-                          <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{value}</p>
-                          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", letterSpacing: "0.04em" }}>{label}</p>
+                          <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{value}</p>
+                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", letterSpacing: "0.04em" }}>{label}</p>
                         </div>
                       ))}
                     </div>
  
                     {/* Recent orders preview */}
-                    <h3 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "1.25rem" }}>Recent Orders</h3>
+                    <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "1.25rem" }}>Recent Orders</h3>
                     {orders.length === 0 ? (
-                      <p style={{ fontFamily: "Satoshi", color: "rgba(30,30,30,0.5)" }}>You have no orders yet.</p>
+                      <p style={{ fontFamily: "Montserrat", color: "rgba(30,30,30,0.5)" }}>You have no orders yet.</p>
                     ) : (
                       <div className="horizontal-scroll" style={{ display: "flex", gap: "1.5rem", paddingBottom: "1rem", overflowX: "auto" }}>
                         {orders.slice(0, 3).map((order) => (
                           <div key={order.id} style={{ flexShrink: 0, width: "260px", backgroundColor: "#fff", padding: "1.25rem", border: "1px solid rgba(30,30,30,0.07)" }}>
                             <img src={order.image} alt="" style={{ width: "100%", height: "120px", objectFit: "cover", marginBottom: "0.875rem" }} />
-                            <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{order.orderNumber}</p>
-                            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", marginBottom: "0.5rem" }}>{order.date}</p>
+                            <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{order.orderNumber}</p>
+                            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", marginBottom: "0.5rem" }}>{order.date}</p>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: statusColor(order.status), fontWeight: 600 }}>{order.status}</span>
-                              <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E" }}>₹{order.total.toLocaleString("en-IN")}</span>
+                              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: statusColor(order.status), fontWeight: 600 }}>{order.status}</span>
+                              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E" }}>₹{order.total.toLocaleString("en-IN")}</span>
                             </div>
                           </div>
                         ))}
@@ -272,9 +272,9 @@ function ProfileContent() {
  
                 {activeTab === "orders" && (
                   <div>
-                    <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem" }}>My Orders</h2>
+                    <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem" }}>My Orders</h2>
                     {orders.length === 0 ? (
-                      <p style={{ fontFamily: "Satoshi", color: "rgba(30,30,30,0.5)" }}>You have no orders yet.</p>
+                      <p style={{ fontFamily: "Montserrat", color: "rgba(30,30,30,0.5)" }}>You have no orders yet.</p>
                     ) : (
                       <div className="horizontal-scroll" style={{ display: "flex", gap: "1.5rem", overflowX: "auto" }}>
                         {orders.map((order) => (
@@ -282,11 +282,11 @@ function ProfileContent() {
                             <img src={order.image} alt="" style={{ width: "100%", height: "160px", objectFit: "cover" }} />
                             <div style={{ padding: "1.25rem" }}>
                               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                                <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E" }}>{order.orderNumber}</p>
+                                <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E" }}>{order.orderNumber}</p>
                                 <span
                                   style={{
                                     fontSize: "0.6875rem",
-                                    fontFamily: "'Satoshi', sans-serif",
+                                    fontFamily: "'Montserrat', sans-serif",
                                     fontWeight: 600,
                                     color: statusColor(order.status),
                                     backgroundColor: `${statusColor(order.status)}15`,
@@ -297,10 +297,10 @@ function ProfileContent() {
                                   {order.status}
                                 </span>
                               </div>
-                              <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.45)", marginBottom: "0.75rem" }}>{order.date} · {order.items} item{order.items > 1 ? "s" : ""}</p>
+                              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.45)", marginBottom: "0.75rem" }}>{order.date} · {order.items} item{order.items > 1 ? "s" : ""}</p>
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "1rem", fontWeight: 700, color: "#1E1E1E" }}>₹{order.total.toLocaleString("en-IN")}</span>
-                                <Link href={`/order-tracking?order=${order.orderNumber}&email=${user?.email}`} style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "#1E1E1E", textDecoration: "none", fontWeight: 500 }}>
+                                <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1rem", fontWeight: 700, color: "#1E1E1E" }}>₹{order.total.toLocaleString("en-IN")}</span>
+                                <Link href={`/order-tracking?order=${order.orderNumber}&email=${user?.email}`} style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "#1E1E1E", textDecoration: "none", fontWeight: 500 }}>
                                   Track Details
                                 </Link>
                               </div>
@@ -314,9 +314,9 @@ function ProfileContent() {
  
                 {activeTab === "wishlist" && (
                   <div>
-                    <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem" }}>My Wishlist</h2>
+                    <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem" }}>My Wishlist</h2>
                     {wishlist.length === 0 ? (
-                      <p style={{ fontFamily: "Satoshi", color: "rgba(30,30,30,0.5)" }}>Your wishlist is empty.</p>
+                      <p style={{ fontFamily: "Montserrat", color: "rgba(30,30,30,0.5)" }}>Your wishlist is empty.</p>
                     ) : (
                       <div className="horizontal-scroll" style={{ display: "flex", gap: "1.5rem", overflowX: "auto", paddingBottom: "1.5rem" }}>
                         {wishlist.map((item) => (
@@ -352,7 +352,7 @@ function ProfileContent() {
                 {activeTab === "addresses" && (
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-                      <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E" }}>Addresses</h2>
+                      <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E" }}>Addresses</h2>
                       <button
                         onClick={() => setShowAddAddress(!showAddAddress)}
                         className="btn-outline"
@@ -378,7 +378,7 @@ function ProfileContent() {
                       >
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                           <div>
-                            <label style={{ display: "block", fontFamily: "Satoshi", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Label</label>
+                            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Label</label>
                             <input
                               type="text"
                               value={newAddr.label}
@@ -389,7 +389,7 @@ function ProfileContent() {
                             />
                           </div>
                           <div>
-                            <label style={{ display: "block", fontFamily: "Satoshi", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Recipient Name</label>
+                            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Recipient Name</label>
                             <input
                               type="text"
                               value={newAddr.name}
@@ -402,7 +402,7 @@ function ProfileContent() {
                         </div>
  
                         <div>
-                          <label style={{ display: "block", fontFamily: "Satoshi", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Address Line 1</label>
+                          <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Address Line 1</label>
                           <input
                             type="text"
                             value={newAddr.address1}
@@ -414,7 +414,7 @@ function ProfileContent() {
                         </div>
  
                         <div>
-                          <label style={{ display: "block", fontFamily: "Satoshi", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Address Line 2 (Optional)</label>
+                          <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Address Line 2 (Optional)</label>
                           <input
                             type="text"
                             value={newAddr.address2}
@@ -426,7 +426,7 @@ function ProfileContent() {
  
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }} className="grid-cols-1 md:grid-cols-3">
                           <div>
-                            <label style={{ display: "block", fontFamily: "Satoshi", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>City</label>
+                            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>City</label>
                             <input
                               type="text"
                               value={newAddr.city}
@@ -436,7 +436,7 @@ function ProfileContent() {
                             />
                           </div>
                           <div>
-                            <label style={{ display: "block", fontFamily: "Satoshi", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>State / Province</label>
+                            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>State / Province</label>
                             <input
                               type="text"
                               value={newAddr.province}
@@ -446,7 +446,7 @@ function ProfileContent() {
                             />
                           </div>
                           <div>
-                            <label style={{ display: "block", fontFamily: "Satoshi", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>PIN / Zip Code</label>
+                            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>PIN / Zip Code</label>
                             <input
                               type="text"
                               value={newAddr.zip}
@@ -467,14 +467,14 @@ function ProfileContent() {
                       {addresses.map((addr) => (
                         <div key={addr.id} style={{ padding: "1.5rem", border: addr.default ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.15)", position: "relative", backgroundColor: "#fff" }}>
                           {addr.default && (
-                            <span style={{ position: "absolute", top: "0.75rem", right: "0.75rem", fontFamily: "'Satoshi', sans-serif", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", backgroundColor: "#1E1E1E", color: "#FFFFFF", padding: "0.2rem 0.5rem" }}>
+                            <span style={{ position: "absolute", top: "0.75rem", right: "0.75rem", fontFamily: "'Montserrat', sans-serif", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", backgroundColor: "#1E1E1E", color: "#FFFFFF", padding: "0.2rem 0.5rem" }}>
                               Default
                             </span>
                           )}
-                          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.625rem" }}>{addr.label}</p>
-                          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9375rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{addr.name}</p>
-                          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }}>{addr.address1} {addr.address2 ? `, ${addr.address2}` : ""}</p>
-                          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.6)" }}>{addr.city}, {addr.province} {addr.zip}</p>
+                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.625rem" }}>{addr.label}</p>
+                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9375rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{addr.name}</p>
+                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }}>{addr.address1} {addr.address2 ? `, ${addr.address2}` : ""}</p>
+                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.6)" }}>{addr.city}, {addr.province} {addr.zip}</p>
                         </div>
                       ))}
                     </div>

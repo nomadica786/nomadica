@@ -39,7 +39,7 @@ export default function SearchInput({ value, onChange, placeholder = "Search sto
           backgroundColor: "rgba(255, 255, 255,0.95)",
           border: "1px solid rgba(30,30,30,0.1)",
           boxShadow: "0 8px 30px rgba(0,0,0,0.06)",
-          fontFamily: "'Satoshi', sans-serif",
+          fontFamily: "'Montserrat', sans-serif",
           fontSize: "0.95rem",
           color: "#1E1E1E",
         }}

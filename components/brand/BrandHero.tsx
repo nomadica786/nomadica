@@ -47,7 +47,7 @@ export default function BrandHero() {
       >
         <span
           style={{
-            fontFamily: "'Satoshi', sans-serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontSize: "0.8rem",
             letterSpacing: "0.25em",
             textTransform: "uppercase",
@@ -58,7 +58,7 @@ export default function BrandHero() {
         </span>
         <h1
           style={{
-            fontFamily: "'Clash Display', sans-serif",
+            fontFamily: "'Playfair Display', sans-serif",
             fontSize: "clamp(3rem, 5vw, 5.5rem)",
             lineHeight: 0.95,
             letterSpacing: "-0.05em",
@@ -69,7 +69,7 @@ export default function BrandHero() {
         </h1>
         <p
           style={{
-            fontFamily: "'Satoshi', sans-serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontSize: "1rem",
             maxWidth: "680px",
             margin: "0 auto",
@@ -87,7 +87,7 @@ export default function BrandHero() {
                 background: "transparent",
                 color: "#FFFFFF",
                 padding: "0.95rem 2rem",
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.9rem",
                 cursor: "pointer",
                 letterSpacing: "0.08em",
@@ -103,7 +103,7 @@ export default function BrandHero() {
                 color: "#1E1E1E",
                 border: "none",
                 padding: "0.95rem 2rem",
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.9rem",
                 cursor: "pointer",
                 letterSpacing: "0.08em",

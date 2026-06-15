@@ -36,13 +36,13 @@ export default function BrandLandingPage() {
       <section style={{ padding: "4rem 1.5rem 2rem" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginBottom: "2rem", textAlign: "center" }}>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E1E1E" }}>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E1E1E" }}>
               Discover the brand
             </p>
-            <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2rem, 4vw, 3.4rem)", margin: 0, color: "#1E1E1E" }}>
+            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 4vw, 3.4rem)", margin: 0, color: "#1E1E1E" }}>
               Crafted narratives, sustainable design, and thoughtful travelwear.
             </h2>
-            <p style={{ maxWidth: "760px", margin: "0 auto", fontFamily: "'Satoshi', sans-serif", fontSize: "1rem", lineHeight: 1.8, color: "rgba(30,30,30,0.7)" }}>
+            <p style={{ maxWidth: "760px", margin: "0 auto", fontFamily: "'Montserrat', sans-serif", fontSize: "1rem", lineHeight: 1.8, color: "rgba(30,30,30,0.7)" }}>
               Explore the pillars that shape Nomadica — from our origin story and editorial journal to the sustainability practices behind every collection.
             </p>
           </div>
@@ -71,8 +71,8 @@ export default function BrandLandingPage() {
                   (event.currentTarget as HTMLElement).style.boxShadow = "none";
                 }}
               >
-                <h3 style={{ margin: 0, fontFamily: "'Clash Display', sans-serif", fontSize: "1.25rem", marginBottom: "0.75rem" }}>{item.title}</h3>
-                <p style={{ margin: 0, fontFamily: "'Satoshi', sans-serif", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(30,30,30,0.75)" }}>{item.description}</p>
+                <h3 style={{ margin: 0, fontFamily: "'Playfair Display', sans-serif", fontSize: "1.25rem", marginBottom: "0.75rem" }}>{item.title}</h3>
+                <p style={{ margin: 0, fontFamily: "'Montserrat', sans-serif", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(30,30,30,0.75)" }}>{item.description}</p>
               </Link>
             ))}
           </div>
@@ -82,7 +82,7 @@ export default function BrandLandingPage() {
       <section style={{ padding: "0 1.5rem 4rem" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ marginBottom: "2rem", textAlign: "center" }}>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.75rem" }}>Search the journal</p>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.75rem" }}>Search the journal</p>
             <SearchInput placeholder="Search Nomadica journal entries" />
           </div>
 

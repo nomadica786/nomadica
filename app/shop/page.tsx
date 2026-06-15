@@ -126,10 +126,10 @@ function CollectionsPageContent() {
         }}
       >
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
             {pageLabel}
           </p>
-          <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
+          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
             {pageTitle}
           </h1>
         </div>
@@ -171,7 +171,7 @@ function CollectionsPageContent() {
                     border: isSelected ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.2)",
                     backgroundColor: isSelected ? "#1E1E1E" : "transparent",
                     color: isSelected ? "#FFFFFF" : "#1E1E1E",
-                    fontFamily: "'Satoshi', sans-serif",
+                    fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.8125rem",
                     fontWeight: 500,
                     cursor: "pointer",
@@ -187,14 +187,14 @@ function CollectionsPageContent() {
 
           {/* Sort */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
-            <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)" }}>
+            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)" }}>
               Sort:
             </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               style={{
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.8125rem",
                 color: "#1E1E1E",
                 background: "transparent",
@@ -213,7 +213,7 @@ function CollectionsPageContent() {
 
       {/* Products grid */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "3rem 1.5rem" }}>
-        <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", marginBottom: "2rem" }}>
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", marginBottom: "2rem" }}>
           {finalProducts.length} items
         </p>
         <div

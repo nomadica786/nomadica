@@ -117,7 +117,7 @@ function HeroSection() {
         >
           <span
             style={{
-              fontFamily: "'Satoshi', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.75rem",
               fontWeight: 500,
               letterSpacing: "0.25em",
@@ -132,7 +132,7 @@ function HeroSection() {
           </span>
           <h1
             style={{
-              fontFamily: "'Clash Display', sans-serif",
+              fontFamily: "'Playfair Display', sans-serif",
               fontSize: "clamp(3rem, 8vw, 7rem)",
               fontWeight: 600,
               color: "#FFFFFF",
@@ -156,7 +156,7 @@ function HeroSection() {
                   color: "#1E1E1E",
                   border: "none",
                   cursor: "pointer",
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.875rem",
                   fontWeight: 500,
                   letterSpacing: "0.06em",
@@ -186,7 +186,7 @@ function HeroSection() {
                   color: "#FFFFFF",
                   border: "1px solid rgba(255, 255, 255, 0.5)",
                   cursor: "pointer",
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.875rem",
                   fontWeight: 500,
                   letterSpacing: "0.06em",
@@ -215,7 +215,7 @@ function HeroSection() {
         >
           <span
             style={{
-              fontFamily: "'Satoshi', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.6875rem",
               color: "#FFFFFF",
               letterSpacing: "0.15em",
@@ -265,7 +265,7 @@ function ProductGridSection({
           <div>
             <p
               style={{
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.75rem",
                 letterSpacing: "0.25em",
                 textTransform: "uppercase",
@@ -277,7 +277,7 @@ function ProductGridSection({
             </p>
             <h2
               style={{
-                fontFamily: "'Clash Display', sans-serif",
+                fontFamily: "'Playfair Display', sans-serif",
                 fontSize: "clamp(2rem, 4vw, 3rem)",
                 fontWeight: 600,
                 color: "#1E1E1E",
@@ -360,7 +360,7 @@ function ImageBanner({
       >
         <h2
           style={{
-            fontFamily: "'Clash Display', sans-serif",
+            fontFamily: "'Playfair Display', sans-serif",
             fontSize: "clamp(2rem, 5vw, 3.5rem)",
             fontWeight: 600,
             color: "#FFFFFF",
@@ -374,7 +374,7 @@ function ImageBanner({
         </h2>
         <p
           style={{
-            fontFamily: "'Satoshi', sans-serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontSize: "1rem",
             color: "rgba(255, 255, 255, 0.75)",
             maxWidth: "600px",
@@ -392,7 +392,7 @@ function ImageBanner({
               color: "#1E1E1E",
               border: "none",
               cursor: "pointer",
-              fontFamily: "'Satoshi', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.875rem",
               fontWeight: 500,
               letterSpacing: "0.06em",
@@ -436,7 +436,7 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
         <div style={{ textAlign: "center", marginBottom: "4rem" }}>
           <p
             style={{
-              fontFamily: "'Satoshi', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.75rem",
               letterSpacing: "0.25em",
               textTransform: "uppercase",
@@ -448,7 +448,7 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
           </p>
           <h2
             style={{
-              fontFamily: "'Clash Display', sans-serif",
+              fontFamily: "'Playfair Display', sans-serif",
               fontSize: "clamp(2rem, 5vw, 3.5rem)",
               fontWeight: 600,
               color: "#1E1E1E",
@@ -502,7 +502,7 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
                 <div>
                   <p
                     style={{
-                      fontFamily: "'Clash Display', sans-serif",
+                      fontFamily: "'Playfair Display', sans-serif",
                       fontSize: "0.9375rem",
                       fontWeight: 500,
                       color: active === i ? "#FFFFFF" : "#1E1E1E",
@@ -512,7 +512,7 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
                   </p>
                   <p
                     style={{
-                      fontFamily: "'Satoshi', sans-serif",
+                      fontFamily: "'Montserrat', sans-serif",
                       fontSize: "0.75rem",
                       color: active === i ? "rgba(255, 255, 255, 0.5)" : "rgba(30,30,30,0.5)",
                     }}
@@ -524,7 +524,7 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
 
               <p
                 style={{
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.9375rem",
                   lineHeight: 1.7,
                   color: active === i ? "rgba(255, 255, 255, 0.85)" : "rgba(30,30,30,0.7)",
@@ -537,7 +537,7 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
 
               <span
                 style={{
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.6875rem",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
@@ -717,10 +717,10 @@ export default function HomePage() {
       <section style={{ backgroundColor: "#FFFFFF", padding: "6rem 1.5rem", borderBottom: "1px solid rgba(30,30,30,0.05)" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "0.75rem" }}>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "0.75rem" }}>
               Explore Categories
             </p>
-            <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
               Shop by Collection
             </h2>
           </div>
@@ -740,10 +740,10 @@ export default function HomePage() {
                       />
                       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30,30,30,0.6) 0%, transparent 60%)" }} />
                       <div style={{ position: "absolute", bottom: "1.5rem", left: "1.5rem" }}>
-                        <h3 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#FFFFFF", marginBottom: "0.3rem" }}>
+                        <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#FFFFFF", marginBottom: "0.3rem" }}>
                           {col.title}
                         </h3>
-                        <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", color: "rgba(255,255,255,0.8)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(255,255,255,0.8)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "0.25rem" }}>
                           Explore Collection <ArrowRight size={12} />
                         </span>
                       </div>
@@ -876,10 +876,10 @@ export default function HomePage() {
             }}
           >
             <div>
-              <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "0.5rem" }}>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "0.5rem" }}>
                 Editorial
               </p>
-              <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
+              <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
                 The Nomad Journal
               </h2>
             </div>
@@ -902,13 +902,13 @@ export default function HomePage() {
                         <img src={art.image?.url} alt={art.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       </div>
                       <div style={{ padding: "1.5rem" }}>
-                        <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.6875rem", color: "rgba(30,30,30,0.4)", textTransform: "uppercase", display: "block", marginBottom: "0.5rem" }}>
+                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", color: "rgba(30,30,30,0.4)", textTransform: "uppercase", display: "block", marginBottom: "0.5rem" }}>
                           {new Date(art.publishedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                         </span>
-                        <h3 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.2rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.5rem", lineHeight: 1.3 }}>
+                        <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.2rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.5rem", lineHeight: 1.3 }}>
                           {art.title}
                         </h3>
-                        <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.85rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }} className="line-clamp-2">
+                        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }} className="line-clamp-2">
                           {art.excerpt}
                         </p>
                       </div>
@@ -923,13 +923,13 @@ export default function HomePage() {
       <section style={{ backgroundColor: "#FFFFFF", padding: "6rem 1.5rem" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "4rem", alignItems: "center" }}>
           <div>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "1rem" }}>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "1rem" }}>
               Our Story
             </p>
-            <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 600, color: "#1E1E1E", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>
+            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 600, color: "#1E1E1E", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>
               Apparel for the Modern Explorer.
             </h2>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "1rem", color: "rgba(30,30,30,0.7)", lineHeight: 1.8, marginBottom: "2rem" }}>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1rem", color: "rgba(30,30,30,0.7)", lineHeight: 1.8, marginBottom: "2rem" }}>
               Nomadica was born out of a desire to create a wardrobe that works anywhere in the world. We design premium travel lifestyle apparel that balances functional utility with refined, modern aesthetics. Made for adventurers, creatives, and global citizens.
             </p>
             <Link href="/brand/about" style={{ textDecoration: "none" }}>

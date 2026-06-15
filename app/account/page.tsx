@@ -7,13 +7,13 @@ export default function AccountPage() {
     <div style={{ paddingTop: "64px", minHeight: "100vh", backgroundColor: "#FFFFFF" }}>
       <section style={{ padding: "5rem 1.5rem" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.85rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "1rem" }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "1rem" }}>
             Account
           </p>
-          <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", margin: 0, color: "#1E1E1E", marginBottom: "1.5rem" }}>
+          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", margin: 0, color: "#1E1E1E", marginBottom: "1.5rem" }}>
             Your account hub.
           </h1>
-          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "1rem", lineHeight: 1.8, color: "rgba(30,30,30,0.72)", marginBottom: "2.5rem" }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1rem", lineHeight: 1.8, color: "rgba(30,30,30,0.72)", marginBottom: "2.5rem" }}>
             Access your profile, orders, wish list, and account settings all from one place.
           </p>
 
@@ -41,8 +41,8 @@ export default function AccountPage() {
                 onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-3px)")}
                 onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
               >
-                <h2 style={{ margin: 0, fontFamily: "'Clash Display', sans-serif", fontSize: "1.25rem", marginBottom: "0.75rem" }}>{item.label}</h2>
-                <p style={{ margin: 0, fontFamily: "'Satoshi', sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: item.accent ? "rgba(255, 255, 255,0.88)" : "rgba(30,30,30,0.72)" }}>
+                <h2 style={{ margin: 0, fontFamily: "'Playfair Display', sans-serif", fontSize: "1.25rem", marginBottom: "0.75rem" }}>{item.label}</h2>
+                <p style={{ margin: 0, fontFamily: "'Montserrat', sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: item.accent ? "rgba(255, 255, 255,0.88)" : "rgba(30,30,30,0.72)" }}>
                   {item.description}
                 </p>
               </Link>

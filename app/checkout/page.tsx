@@ -208,8 +208,8 @@ function CheckoutContent() {
 
   if (!cartId || !cart || cart.lines?.edges?.length === 0) {
     return (
-      <div style={{ paddingTop: "100px", paddingBottom: "100px", textAlign: "center", backgroundColor: "#FFFFFF", minHeight: "100vh", fontFamily: "Satoshi" }}>
-        <h1 style={{ fontFamily: "Clash Display", fontSize: "2rem", marginBottom: "1rem" }}>Checkout Not Active</h1>
+      <div style={{ paddingTop: "100px", paddingBottom: "100px", textAlign: "center", backgroundColor: "#FFFFFF", minHeight: "100vh", fontFamily: "Montserrat" }}>
+        <h1 style={{ fontFamily: "Playfair Display", fontSize: "2rem", marginBottom: "1rem" }}>Checkout Not Active</h1>
         <p style={{ color: "rgba(30,30,30,0.6)", marginBottom: "2rem" }}>You don&apos;t have an active cart session to checkout.</p>
         <Link href="/shop" style={{ color: "#1E1E1E", textDecoration: "underline", fontWeight: 500 }}>Back to Shop</Link>
       </div>
@@ -222,10 +222,10 @@ function CheckoutContent() {
 
   if (checkoutSuccess) {
     return (
-      <div style={{ backgroundColor: "#FFFFFF", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Satoshi" }}>
+      <div style={{ backgroundColor: "#FFFFFF", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Montserrat" }}>
         <div style={{ backgroundColor: "#fff", border: "1px solid rgba(30,30,30,0.08)", padding: "3rem 2rem", maxWidth: "500px", width: "100%", textAlign: "center", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
           <CheckCircle size={64} color="#4F6B5A" style={{ margin: "0 auto 1.5rem" }} />
-          <h1 style={{ fontFamily: "Clash Display", fontSize: "2rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.5rem" }}>Order Confirmed!</h1>
+          <h1 style={{ fontFamily: "Playfair Display", fontSize: "2rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.5rem" }}>Order Confirmed!</h1>
           <p style={{ color: "#1E1E1E", fontWeight: 600, fontSize: "1.125rem", marginBottom: "1rem" }}>Order Number: {orderInfo?.orderNumber}</p>
           <p style={{ color: "rgba(30,30,30,0.6)", lineHeight: 1.6, marginBottom: "2rem" }}>
             Thank you for shopping with Nomadica. We have successfully processed your payment. You will be redirected to your profile dashboard shortly to track your shipment.
@@ -253,10 +253,10 @@ function CheckoutContent() {
       {/* Checkout Navbar */}
       <header style={{ borderBottom: "1px solid rgba(30,30,30,0.08)", height: "64px", display: "flex", alignItems: "center", padding: "0 2rem", backgroundColor: "#FFFFFF" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto", width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Link href="/" style={{ fontFamily: "Clash Display", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", textDecoration: "none", letterSpacing: "-0.01em" }}>
+          <Link href="/" style={{ fontFamily: "Playfair Display", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", textDecoration: "none", letterSpacing: "-0.01em" }}>
             NOMADICA
           </Link>
-          <Link href="/shop" style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "Satoshi", fontSize: "0.875rem", color: "rgba(30,30,30,0.6)", textDecoration: "none" }}>
+          <Link href="/shop" style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "Montserrat", fontSize: "0.875rem", color: "rgba(30,30,30,0.6)", textDecoration: "none" }}>
             <ChevronLeft size={16} />
             Back to shop
           </Link>
@@ -265,10 +265,10 @@ function CheckoutContent() {
 
       {/* Main Checkout Container */}
       <main style={{ maxWidth: "1200px", margin: "3rem auto 0", padding: "0 1.5rem" }}>
-        <h1 style={{ fontFamily: "Clash Display", fontSize: "2.25rem", fontWeight: 600, marginBottom: "2.5rem" }}>Checkout</h1>
+        <h1 style={{ fontFamily: "Playfair Display", fontSize: "2.25rem", fontWeight: 600, marginBottom: "2.5rem" }}>Checkout</h1>
 
         {errorMessage && (
-          <div style={{ backgroundColor: "rgba(180,60,60,0.1)", borderLeft: "4px solid rgb(180,60,60)", color: "rgb(180,60,60)", padding: "1rem", marginBottom: "2rem", fontFamily: "Satoshi" }}>
+          <div style={{ backgroundColor: "rgba(180,60,60,0.1)", borderLeft: "4px solid rgb(180,60,60)", color: "rgb(180,60,60)", padding: "1rem", marginBottom: "2rem", fontFamily: "Montserrat" }}>
             {errorMessage}
           </div>
         )}
@@ -280,7 +280,7 @@ function CheckoutContent() {
             {/* Shipping Addresses (Authenticated) */}
             {isAuthenticated && addresses.length > 0 && (
               <div style={{ backgroundColor: "#fff", padding: "2rem", border: "1px solid rgba(30,30,30,0.08)" }}>
-                <h3 style={{ fontFamily: "Clash Display", fontSize: "1.25rem", fontWeight: 600, marginBottom: "1rem" }}>Saved Shipping Addresses</h3>
+                <h3 style={{ fontFamily: "Playfair Display", fontSize: "1.25rem", fontWeight: 600, marginBottom: "1rem" }}>Saved Shipping Addresses</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
                   {addresses.map((addr) => (
                     <div
@@ -306,7 +306,7 @@ function CheckoutContent() {
 
             {/* Customer Details Form */}
             <div style={{ backgroundColor: "#fff", padding: "2rem", border: "1px solid rgba(30,30,30,0.08)", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              <h3 style={{ fontFamily: "Clash Display", fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.5rem" }}>Shipping Details</h3>
+              <h3 style={{ fontFamily: "Playfair Display", fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.5rem" }}>Shipping Details</h3>
               
               <div>
                 <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>Email Address</label>
@@ -402,7 +402,7 @@ function CheckoutContent() {
             {/* Payment Gateway Form */}
             <div style={{ backgroundColor: "#fff", padding: "2rem", border: "1px solid rgba(30,30,30,0.08)", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                <h3 style={{ fontFamily: "Clash Display", fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>Payment Method</h3>
+                <h3 style={{ fontFamily: "Playfair Display", fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>Payment Method</h3>
                 <span style={{ fontSize: "0.75rem", color: "#1E1E1E", border: "1px solid #1E1E1E", padding: "0.2rem 0.5rem", fontWeight: 600 }}>MOCK TEST GATEWAY</span>
               </div>
 
@@ -425,7 +425,7 @@ function CheckoutContent() {
                       backgroundColor: paymentMethod === tab.id ? "#1E1E1E" : "transparent",
                       color: paymentMethod === tab.id ? "#FFFFFF" : "rgba(30,30,30,0.6)",
                       border: "1px solid rgba(30,30,30,0.15)",
-                      fontFamily: "Satoshi",
+                      fontFamily: "Montserrat",
                       fontSize: "0.8125rem",
                       fontWeight: 600,
                       cursor: "pointer",
@@ -503,7 +503,7 @@ function CheckoutContent() {
 
                   <div style={{ height: "1px", backgroundColor: "rgba(30,30,30,0.08)", width: "100%", margin: "0.5rem 0" }} />
                   
-                  <p style={{ fontFamily: "Satoshi", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)", margin: 0 }}>OR SCAN MOCK QR CODE</p>
+                  <p style={{ fontFamily: "Montserrat", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)", margin: 0 }}>OR SCAN MOCK QR CODE</p>
                   
                   {/* Mock UPI QR Code Visualizer */}
                   <div style={{ border: "1px solid rgba(30,30,30,0.1)", padding: "1rem", backgroundColor: "#fff", display: "inline-block", position: "relative" }}>
@@ -515,7 +515,7 @@ function CheckoutContent() {
                     <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", backgroundColor: "#1E1E1E", animation: "scan-bar 2s linear infinite" }} />
                   </div>
                   
-                  <p style={{ fontFamily: "Satoshi", fontSize: "0.75rem", color: "#1E1E1E", fontWeight: 600 }}>
+                  <p style={{ fontFamily: "Montserrat", fontSize: "0.75rem", color: "#1E1E1E", fontWeight: 600 }}>
                     Scan QR using Google Pay, PhonePe, or Paytm to pay ₹{total.toLocaleString("en-IN")} (Mock simulation).
                   </p>
                 </div>
@@ -524,8 +524,8 @@ function CheckoutContent() {
               {/* Cash on Delivery (COD) Form */}
               {paymentMethod === "cod" && (
                 <div style={{ padding: "1.25rem", backgroundColor: "rgba(79, 107, 90, 0.08)", borderLeft: "4px solid #4F6B5A", display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%" }}>
-                  <p style={{ margin: 0, fontFamily: "Satoshi", fontWeight: 600, fontSize: "0.875rem", color: "#4F6B5A", textAlign: "left" }}>Cash on Delivery Selected</p>
-                  <p style={{ margin: 0, fontFamily: "Satoshi", fontSize: "0.8125rem", color: "rgba(30,30,30,0.7)", lineHeight: 1.5, textAlign: "left" }}>
+                  <p style={{ margin: 0, fontFamily: "Montserrat", fontWeight: 600, fontSize: "0.875rem", color: "#4F6B5A", textAlign: "left" }}>Cash on Delivery Selected</p>
+                  <p style={{ margin: 0, fontFamily: "Montserrat", fontSize: "0.8125rem", color: "rgba(30,30,30,0.7)", lineHeight: 1.5, textAlign: "left" }}>
                     Pay with cash, UPI, or card when your order is delivered to your doorstep. A shipping confirmation and receipt will be generated immediately.
                   </p>
                 </div>
@@ -545,7 +545,7 @@ function CheckoutContent() {
           {/* Right Column: Order Summary */}
           <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
             <div style={{ backgroundColor: "#fff", padding: "2rem", border: "1px solid rgba(30,30,30,0.08)", position: "sticky", top: "100px" }}>
-              <h3 style={{ fontFamily: "Clash Display", fontSize: "1.25rem", fontWeight: 600, borderBottom: "1px solid rgba(30,30,30,0.08)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
+              <h3 style={{ fontFamily: "Playfair Display", fontSize: "1.25rem", fontWeight: 600, borderBottom: "1px solid rgba(30,30,30,0.08)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
                 Order Summary
               </h3>
 
@@ -595,7 +595,7 @@ function CheckoutContent() {
 
               {/* Total */}
               <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid rgba(30,30,30,0.08)", paddingTop: "1.25rem", fontSize: "1.125rem", fontWeight: 700, color: "#1E1E1E" }}>
-                <span style={{ fontFamily: "Clash Display" }}>Total</span>
+                <span style={{ fontFamily: "Playfair Display" }}>Total</span>
                 <span>₹{total.toLocaleString("en-IN")}</span>
               </div>
 

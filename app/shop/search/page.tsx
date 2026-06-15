@@ -87,7 +87,7 @@ export default function SearchPage() {
       {/* Search hero */}
       <div style={{ backgroundColor: "#1E1E1E", padding: "4rem 1.5rem 3rem" }}>
         <div style={{ maxWidth: "700px", margin: "0 auto" }}>
-          <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 600, color: "#FFFFFF", textAlign: "center", marginBottom: "2rem", letterSpacing: "-0.02em" }}>
+          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 600, color: "#FFFFFF", textAlign: "center", marginBottom: "2rem", letterSpacing: "-0.02em" }}>
             What are you looking for?
           </h1>
           <div style={{ position: "relative" }}>
@@ -104,7 +104,7 @@ export default function SearchPage() {
                 backgroundColor: "rgba(255, 255, 255,0.07)",
                 border: "1px solid rgba(255, 255, 255,0.15)",
                 color: "#FFFFFF",
-                fontFamily: "'Satoshi', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: "1rem",
                 outline: "none",
               }}
@@ -131,7 +131,7 @@ export default function SearchPage() {
                     border: "1px solid rgba(255, 255, 255,0.2)",
                     backgroundColor: "transparent",
                     color: "rgba(255, 255, 255,0.7)",
-                    fontFamily: "'Satoshi', sans-serif",
+                    fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.8125rem",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
@@ -157,7 +157,7 @@ export default function SearchPage() {
           <SnowballLoader />
         ) : query.length > 1 ? (
           <>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", marginBottom: "2rem" }}>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", marginBottom: "2rem" }}>
               {results.length} result{results.length !== 1 ? "s" : ""} for &quot;{query}&quot;
             </p>
             {results.length > 0 ? (
@@ -166,8 +166,8 @@ export default function SearchPage() {
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "4rem 0" }}>
-                <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.5rem", color: "#1E1E1E", marginBottom: "0.75rem" }}>No results found</p>
-                <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9375rem", color: "rgba(30,30,30,0.5)" }}>Try a different search term.</p>
+                <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.5rem", color: "#1E1E1E", marginBottom: "0.75rem" }}>No results found</p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9375rem", color: "rgba(30,30,30,0.5)" }}>Try a different search term.</p>
               </div>
             )}
           </>

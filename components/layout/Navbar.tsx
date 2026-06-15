@@ -38,7 +38,7 @@ const navLinks = [
 const dropdownItemStyle = {
   display: "block",
   padding: "0.625rem 1.25rem",
-  fontFamily: "'Satoshi', sans-serif",
+  fontFamily: "'Montserrat', sans-serif",
   fontSize: "0.8125rem",
   color: "#1E1E1E",
   textDecoration: "none",
@@ -184,7 +184,7 @@ export default function Navbar() {
           <Link
             href="/"
             style={{
-              fontFamily: "'Clash Display', sans-serif",
+              fontFamily: "'Playfair Display', sans-serif",
               fontSize: "1.375rem",
               fontWeight: 600,
               color: "#1E1E1E",
@@ -217,7 +217,7 @@ export default function Navbar() {
                 <Link
                   href={link.href}
                   style={{
-                    fontFamily: "'Satoshi', sans-serif",
+                    fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.875rem",
                     fontWeight: 500,
                     color: pathname.startsWith(link.href) ? "#1E1E1E" : "#1E1E1E",
@@ -256,7 +256,7 @@ export default function Navbar() {
                         style={{
                           display: "block",
                           padding: "0.625rem 1.25rem",
-                          fontFamily: "'Satoshi', sans-serif",
+                          fontFamily: "'Montserrat', sans-serif",
                           fontSize: "0.875rem",
                           color: "#1E1E1E",
                           textDecoration: "none",
@@ -306,7 +306,7 @@ export default function Navbar() {
                     color: "#FFFFFF",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontFamily: "'Clash Display', sans-serif",
+                    fontFamily: "'Playfair Display', sans-serif",
                     fontSize: "0.8125rem",
                     fontWeight: 600,
                     textDecoration: "none",
@@ -406,7 +406,7 @@ export default function Navbar() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontFamily: "'Satoshi', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontWeight: 600,
                 }}
               >
@@ -463,7 +463,7 @@ export default function Navbar() {
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      fontFamily: "'Clash Display', sans-serif",
+                      fontFamily: "'Playfair Display', sans-serif",
                       fontSize: "1.375rem",
                       fontWeight: 500,
                       color: "#1E1E1E",
@@ -488,7 +488,7 @@ export default function Navbar() {
                           style={{
                             display: "block",
                             padding: "0.625rem 1rem",
-                            fontFamily: "'Satoshi', sans-serif",
+                            fontFamily: "'Montserrat', sans-serif",
                             fontSize: "0.9375rem",
                             color: "#1E1E1E",
                             textDecoration: "none",
@@ -506,7 +506,7 @@ export default function Navbar() {
                   style={{
                     display: "block",
                     padding: "1.125rem 0",
-                    fontFamily: "'Clash Display', sans-serif",
+                    fontFamily: "'Playfair Display', sans-serif",
                     fontSize: "1.375rem",
                     fontWeight: 500,
                     color: "#1E1E1E",
@@ -599,7 +599,7 @@ export default function Navbar() {
             alignItems: "center",
           }}
         >
-          <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", margin: 0 }}>
+          <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", margin: 0 }}>
             Shopping Bag ({totalItems})
           </h2>
           <button
@@ -614,14 +614,14 @@ export default function Navbar() {
         <div style={{ flex: 1, overflowY: "auto", padding: "1.5rem" }}>
           {cartLoading && !cart ? (
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-              <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30, 30, 30, 0.5)" }}>Loading bag...</span>
+              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30, 30, 30, 0.5)" }}>Loading bag...</span>
             </div>
           ) : !cart || cart.lines?.edges?.length === 0 ? (
             <>
               {console.log("[NAVBAR RENDER] Cart empty state:", { cart: !!cart, itemCount: cart?.lines?.edges?.length || 0 })}
               <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", textAlign: "center" }}>
                 <ShoppingBag size={48} style={{ color: "rgba(30,30,30,0.2)", marginBottom: "1rem" }} />
-                <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.9375rem", fontWeight: 500, color: "#1E1E1E", margin: "0 0 1.5rem" }}>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9375rem", fontWeight: 500, color: "#1E1E1E", margin: "0 0 1.5rem" }}>
                   Your shopping bag is empty.
                 </p>
                 <button
@@ -651,9 +651,9 @@ export default function Navbar() {
                     </div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                       <div>
-                        <h4 style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", fontWeight: 500, color: "#1E1E1E", margin: "0 0 0.25rem" }}>{title}</h4>
-                        <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", margin: "0 0 0.5rem" }}>Size: {size}</p>
-                        <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E", margin: 0 }}>₹{price.toLocaleString("en-IN")}</p>
+                        <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", fontWeight: 500, color: "#1E1E1E", margin: "0 0 0.25rem" }}>{title}</h4>
+                        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", margin: "0 0 0.5rem" }}>Size: {size}</p>
+                        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E", margin: 0 }}>₹{price.toLocaleString("en-IN")}</p>
                       </div>
                       
                       {/* Quantity Controls */}
@@ -665,7 +665,7 @@ export default function Navbar() {
                           >
                             −
                           </button>
-                          <span style={{ width: "28px", textAlign: "center", fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500 }}>
+                          <span style={{ width: "28px", textAlign: "center", fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 500 }}>
                             {line.quantity}
                           </span>
                           <button
@@ -677,7 +677,7 @@ export default function Navbar() {
                         </div>
                         <button
                           onClick={() => handleUpdateQuantity(line.id, 0, line.merchandise.id)}
-                          style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(180,60,60,0.8)", textDecoration: "underline" }}
+                          style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(180,60,60,0.8)", textDecoration: "underline" }}
                         >
                           Remove
                         </button>
@@ -701,12 +701,12 @@ export default function Navbar() {
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }}>
-              <span style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30, 30, 30, 0.6)" }}>Subtotal</span>
-              <span style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "1.125rem", fontWeight: 600, color: "#1E1E1E" }}>
+              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30, 30, 30, 0.6)" }}>Subtotal</span>
+              <span style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.125rem", fontWeight: 600, color: "#1E1E1E" }}>
                 ₹{parseFloat(cart.cost?.subtotalAmount?.amount || "0").toLocaleString("en-IN")}
               </span>
             </div>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", color: "rgba(30, 30, 30, 0.45)", margin: "0 0 1.5rem" }}>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30, 30, 30, 0.45)", margin: "0 0 1.5rem" }}>
               Shipping and taxes calculated at checkout.
             </p>
             <Link href={`/checkout?cartId=${cart.id}`} onClick={() => setCartOpen(false)} style={{ textDecoration: "none" }}>
