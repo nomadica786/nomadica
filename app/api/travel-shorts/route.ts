@@ -100,7 +100,6 @@ const VERIFIED_YOUTUBE_VIDEOS: VerifiedVideo[] = [
   { id: "6e5xhivGMxU", title: "Most beautiful places in the world #travel #adventure", author: "iSmartOli" },
   { id: "qqU9AgS7qZ0", title: "Most Beautiful Places in Japan 🇯🇵 | #shorts #travel #explore #nature #viral #adventure", author: "Wonderland Network" },
   { id: "fACwnYswQmo", title: "Most beautiful places on Earth🌎❣️#shorts #travel #beautiful #trending #nature #scenery", author: "swapan_4.o" },
-  { id: "HuKJXHnCEHM", title: "The Most Beautiful Places in Iceland 🤩✨ #nature #adventure #shorts #explore", author: "The Places You Seek" },
   { id: "lXO_fDZrQ3E", title: "Most beautiful places on Earth #world #nature #ytshorts #shortvideo #shorts", author: " daily Nature Views " },
   { id: "bsLUPPZBEwQ", title: "🤯 Top 3 Most Beautiful Places You Must See 🌍✨ #shorts", author: "VYROX 143" },
   { id: "P5Aae4Bhg2Q", title: "Dangerous roads #traveling#beautiful places#viral#youtubeshorts#shorts", author: "UH travel" },
@@ -152,7 +151,6 @@ const VERIFIED_YOUTUBE_VIDEOS: VerifiedVideo[] = [
   { id: "7hZJxAQmpZ0", title: "Petite Hiking and Camping Outfits. Short Girls Hiking And Camping Outfits. #womenwhohike #petite", author: "With Sunshine Sol" },
   { id: "vmYzS5pIUKo", title: "Hiking boots or hiking shoes shoes? 🥾👟", author: "Columbia Sportswear" },
   { id: "r70PoH5_umE", title: "Ootd for a hike! #hiking #outfitideas #ootd #outfitoftheday #workout", author: "Mar S." },
-  { id: "zTMJDvWkOK4", title: "POV: Low budget hiking 🥾🏕️🏔️🚶‍♂️🚶‍♀️ #reels #shorts #budgettravel #mountains #trip #trekking", author: "Riya ki Reels" },
   { id: "JEGGE4V4LOc", title: "Trek Pants vs. Track Pants #shorts", author: "Indiahikes" },
   { id: "vnxqqgDCA64", title: "Hiking SHORTS Recs: 5’9” Curvy, Athletic Body Type👇🏻", author: "Quin Gable" },
   { id: "KqLo2vvI0I0", title: "This is how hiking Videos are filmed #hike #travel #solo", author: "Wothius" },
@@ -205,7 +203,6 @@ const VERIFIED_YOUTUBE_VIDEOS: VerifiedVideo[] = [
   { id: "FaT6Bp2innQ", title: "Rio De Janeiro Beach Beyond The View", author: "Best beaches and cities" },
   { id: "dC9eMWyW6Sc", title: "Different ways of bikini hacks, provide you the most confidence boosting ever! ✨ #cupshe #hacks", author: "Cupshe" },
   { id: "It2bYtVpLBg", title: "What’s in my beach bag 🌺🌴🏄🏼‍♀️#shorts #beachbag #vacation #summer #summervibes", author: "Cary Ashley" },
-  { id: "NIx4NVhEGv8", title: "☀️Summer Happiness! 🏖️ #shorts #beach #sunset  #short", author: "Quiner Sisters" },
   { id: "-tsRN693nYk", title: "Do we even have “beach wear” section? 😂 #ytshorts #shorts #goa #travel #funny", author: "Gavarchi Sheng" },
   { id: "PVzFUicZ4JM", title: "Vizag Beach 🌊🩵 #beach #vizag #trendingnow #reels #shorts #latest #travel #vlog #transition #capcut", author: "Groove and Giggle" },
   { id: "iONMcMaRxW4", title: "That Couple on Beach #shorts #couple #couplegoals #beach #comedy #funny #explore #love #nostalgia", author: "Baccha Mat Bolna" },
@@ -219,6 +216,141 @@ const VERIFIED_YOUTUBE_VIDEOS: VerifiedVideo[] = [
   { id: "qImmym5KG-s", title: "Beach Pose ideas ✨ #shorts #viral", author: "Trendyistic" },
   { id: "8NuQdX5cmjE", title: "beach wear haul, beach wear haul meesho#beach #beachwear #outfit #goals #fashion #meesho #shorts #1k", author: " Susmita official " },
   { id: "iWLVZ5Xd4kE", title: "Pose idea to try at beach.🌊 #howtopose #posesideas #poses #posing #posingtips #shorts #viralshorts", author: "WanderessKriti" }
+];
+
+const POSITIVE_KEYWORDS = [
+  "scenery",
+  "landscape",
+  "nature",
+  "mountain",
+  "mountains",
+  "waterfall",
+  "waterfalls",
+  "forest",
+  "lake",
+  "lakes",
+  "river",
+  "rivers",
+  "ocean",
+  "sea",
+  "beach",
+  "sunrise",
+  "sunset",
+  "drone",
+  "aerial",
+  "4k",
+  "cinematic",
+  "earth",
+  "planet",
+  "wilderness",
+  "national park",
+  "valley",
+  "fjord",
+  "alps",
+  "nature sounds",
+  "nature view",
+  "beautiful places",
+  "places on earth",
+  "landscape photography",
+  "nature cinematic",
+  "drone footage",
+  "scenic drive",
+  "nature relax"
+];
+
+const NEGATIVE_KEYWORDS = [
+  // humans
+  "girl",
+  "girls",
+  "boy",
+  "boys",
+  "man",
+  "men",
+  "woman",
+  "women",
+  "person",
+  "people",
+  "human",
+  "humans",
+  "couple",
+  "friend",
+  "friends",
+
+  // creators
+  "vlog",
+  "vlogger",
+  "travel vlog",
+  "traveling",
+  "travelling",
+  "my trip",
+  "day in my life",
+
+  // influencers
+  "outfit",
+  "fashion",
+  "style",
+  "model",
+  "posing",
+  "photo shoot",
+
+  // faces
+  "selfie",
+  "portrait",
+  "reaction",
+
+  // tourism
+  "things to do",
+  "travel tips",
+  "travel hack",
+  "guide",
+  "itinerary",
+
+  // food
+  "food",
+  "restaurant",
+  "cafe",
+  "street food",
+  "eat",
+  "eating",
+
+  // transportation
+  "flight",
+  "airplane",
+  "airport",
+  "business class",
+
+  // social
+  "wife",
+  "husband",
+  "girlfriend",
+  "boyfriend",
+  "dating",
+
+  // camera creators
+  "shot on iphone",
+  "camera test",
+  "cinematographer",
+  "filmmaker",
+  "photographer",
+
+  // shorts bait
+  "wait for it",
+  "you won't believe",
+  "must visit",
+  "top 10"
+];
+
+const COUNTRY_KEYWORDS = [
+  "iceland",
+  "norway",
+  "switzerland",
+  "new zealand",
+  "canada",
+  "alaska",
+  "finland",
+  "japan",
+  "scotland",
+  "bhutan"
 ];
 
 // Simple deterministic seeded random generator
@@ -253,8 +385,28 @@ export async function GET(request: NextRequest) {
 
     const pageSize = 24;
     
-    // Shuffle the verified video list deterministically using a fixed seed (e.g. 42)
-    const shuffledVideos = seededShuffle(VERIFIED_YOUTUBE_VIDEOS, 42);
+    // Filter the verified videos based on scoring system
+    const filteredVideos = VERIFIED_YOUTUBE_VIDEOS.filter(video => {
+      const title = video.title.toLowerCase();
+      let score = 0;
+
+      for (const word of POSITIVE_KEYWORDS) {
+        if (title.includes(word)) score += 3;
+      }
+
+      for (const word of COUNTRY_KEYWORDS) {
+        if (title.includes(word)) score += 5;
+      }
+
+      for (const word of NEGATIVE_KEYWORDS) {
+        if (title.includes(word)) score -= 10;
+      }
+
+      return score >= 5;
+    });
+
+    // Shuffle the filtered video list deterministically using a fixed seed (e.g. 42)
+    const shuffledVideos = seededShuffle(filteredVideos, 42);
     
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;

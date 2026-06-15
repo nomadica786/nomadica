@@ -3,6 +3,7 @@ import { useState } from "react";
 import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { groupProducts } from "@/utils/productGroup";
 import { Filter, ChevronDown, X } from "lucide-react";
 
 const categories = ["All", "Tops", "Bottoms", "Outerwear", "Knits"];
@@ -34,7 +35,9 @@ export default function CollectionsPage() {
     };
   }) || [];
 
-  const filtered = allProducts
+  const groupedProducts = groupProducts(allProducts);
+
+  const filtered = groupedProducts
     .filter((p: any ) => activeCategory === "All" || p.category === activeCategory)
     .sort((a: any, b: any) => {
       if (sortBy === "Price: Low to High") return a.price - b.price;

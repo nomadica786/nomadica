@@ -4,6 +4,7 @@ import { Search, X } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import SnowballLoader from "@/components/ui/SnowBallLoader";
 import { api } from "@/components/api/api";
+import { groupProducts } from "@/utils/productGroup";
 
 const suggestions = ["Linen", "Jacket", "Trousers", "Wool", "Summer", "Travel"];
 
@@ -18,7 +19,7 @@ export default function SearchPage() {
     const initProducts = async () => {
       setLoadingInitial(true);
       try {
-        const cached = localStorage.getItem("nomadica_cached_products");
+        const cached = localStorage.getItem("nomadica_cached_products_grouped");
         if (cached) {
           setAllProducts(JSON.parse(cached));
           setLoadingInitial(false);
@@ -43,9 +44,11 @@ export default function SearchPage() {
           };
         }) || [];
 
-        if (mappedProducts.length > 0) {
-          localStorage.setItem("nomadica_cached_products", JSON.stringify(mappedProducts));
-          setAllProducts(mappedProducts);
+        const grouped = groupProducts(mappedProducts);
+
+        if (grouped.length > 0) {
+          localStorage.setItem("nomadica_cached_products_grouped", JSON.stringify(grouped));
+          setAllProducts(grouped);
         }
       } catch (err) {
         console.error("Failed to load products for search cache:", err);
@@ -64,7 +67,8 @@ export default function SearchPage() {
       const filtered = allProducts.filter((p) => 
         p.name.toLowerCase().includes(queryLower) ||
         p.category.toLowerCase().includes(queryLower) ||
-        p.description.toLowerCase().includes(queryLower)
+        p.description.toLowerCase().includes(queryLower) ||
+        p.colorVariants?.some((v: any) => v.colorName.toLowerCase().includes(queryLower))
       );
       setResults(filtered);
     } else {

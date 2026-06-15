@@ -6,6 +6,7 @@ import { Heart, ShoppingBag, Star, ChevronDown, Truck, RotateCcw, Shield } from 
 import ProductCard from "@/components/shop/ProductCard";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { parseProduct, groupProducts } from "@/utils/productGroup";
 import { useAuth } from "@/utils/hooks/useAuth";
 
 interface ProductDetails {
@@ -42,6 +43,7 @@ function ProductDetailContent() {
   const [openSection, setOpenSection] = useState<string | null>("description");
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [cartAdding, setCartAdding] = useState(false);
+  const [colorVariations, setColorVariations] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -79,19 +81,58 @@ function ProductDetailContent() {
           setSelectedSize(mappedProduct.sizes[0] || "");
           setSelectedImage(0);
 
-          // Fetch related products
-          const listRes = await api.products.list(6);
-          const listMapped = listRes?.products?.edges?.map((edge: any) => {
-            const node = edge.node;
-            return {
-              id: node.id,
-              name: node.title,
-              price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
-              image: node.images?.edges?.[0]?.node?.url || "",
-              category: node.category || "Tops",
-            };
-          }).filter((p: any) => p.id !== rawProduct.id) || [];
-          setRelatedProducts(listMapped.slice(0, 4));
+          // Query all products to find matching color variations of the same base cloth name
+          try {
+            const allRes = await api.products.list(50);
+            const allEdges = allRes?.products?.edges || [];
+            const currentParsed = parseProduct({ name: rawProduct.title, colors: rawProduct.colors });
+            const variations: any[] = [];
+            
+            for (const edge of allEdges) {
+              const node = edge.node;
+              const parsed = parseProduct({ name: node.title, colors: node.colors });
+              if (parsed.baseName === currentParsed.baseName) {
+                variations.push({
+                  id: node.id,
+                  handle: node.handle,
+                  colorName: parsed.colorName,
+                  colorHex: parsed.colorHex,
+                });
+              }
+            }
+            setColorVariations(variations);
+
+            // Fetch related products and group them
+            const listRes = await api.products.list(24);
+            const listMapped = listRes?.products?.edges?.map((edge: any) => {
+              const node = edge.node;
+              return {
+                id: node.id,
+                name: node.title,
+                price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
+                image: node.images?.edges?.[0]?.node?.url || "",
+                category: node.category || "Tops",
+              };
+            }) || [];
+            
+            const groupedList = groupProducts(listMapped).filter((p: any) => p.id !== rawProduct.id && p.name !== currentParsed.baseName);
+            setRelatedProducts(groupedList.slice(0, 4));
+          } catch (err) {
+            console.error("Failed to fetch variations or related products:", err);
+            // Fallback related products
+            const listRes = await api.products.list(6);
+            const listMapped = listRes?.products?.edges?.map((edge: any) => {
+              const node = edge.node;
+              return {
+                id: node.id,
+                name: node.title,
+                price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
+                image: node.images?.edges?.[0]?.node?.url || "",
+                category: node.category || "Tops",
+              };
+            }).filter((p: any) => p.id !== rawProduct.id) || [];
+            setRelatedProducts(listMapped.slice(0, 4));
+          }
         }
       } catch (err) {
         console.error("Failed to load product:", err);
@@ -385,28 +426,67 @@ function ProductDetailContent() {
 
           {/* Color */}
           <div style={{ marginBottom: "1.5rem" }}>
-            <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E", marginBottom: "0.75rem" }}>
-              Colour
-            </p>
-            <div style={{ display: "flex", gap: "0.625rem" }}>
-              {product.colors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  style={{
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "50%",
-                    backgroundColor: color,
-                    border: selectedColor === color ? "2px solid #1E1E1E" : "2px solid transparent",
-                    outline: selectedColor === color ? "1px solid #1E1E1E" : "none",
-                    outlineOffset: "2px",
-                    cursor: "pointer",
-                    padding: 0,
-                  }}
-                />
-              ))}
-            </div>
+            {colorVariations.length > 1 ? (
+              <>
+                <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E", marginBottom: "0.75rem" }}>
+                  Colour: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>{parseProduct({ name: product.name }).colorName}</span>
+                </p>
+                <div style={{ display: "flex", gap: "0.625rem" }}>
+                  {colorVariations.map((v) => (
+                    <button
+                      key={v.id}
+                      onClick={() => {
+                        router.push(`/shop/product-details?id=${v.id}`);
+                      }}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        backgroundColor: v.colorHex,
+                        border: product.id === v.id ? "2px solid #1E1E1E" : "2px solid transparent",
+                        outline: product.id === v.id ? "1px solid #1E1E1E" : "none",
+                        outlineOffset: "2px",
+                        cursor: "pointer",
+                        padding: 0,
+                        transition: "transform 0.15s ease",
+                      }}
+                      title={v.colorName}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E", marginBottom: "0.75rem" }}>
+                  Colour
+                </p>
+                <div style={{ display: "flex", gap: "0.625rem" }}>
+                  {product.colors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        backgroundColor: color,
+                        border: selectedColor === color ? "2px solid #1E1E1E" : "2px solid transparent",
+                        outline: selectedColor === color ? "1px solid #1E1E1E" : "none",
+                        outlineOffset: "2px",
+                        cursor: "pointer",
+                        padding: 0,
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Size */}

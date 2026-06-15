@@ -6,6 +6,18 @@ import { Heart, ShoppingBag } from "lucide-react";
 import { api } from "@/components/api/api";
 import { useAuth } from "@/utils/hooks/useAuth";
 
+interface ColorVariant {
+  id: string;
+  colorName: string;
+  colorHex: string;
+  image: string;
+  hoverImage?: string;
+  price: number;
+  originalPrice?: number;
+  handle: string;
+  badge?: string;
+}
+
 interface ProductCardProps {
   id?: string;
   name: string;
@@ -16,6 +28,7 @@ interface ProductCardProps {
   badge?: string;
   category?: string;
   href?: string;
+  colorVariants?: ColorVariant[];
 }
 
 export default function ProductCard({
@@ -28,25 +41,49 @@ export default function ProductCard({
   badge,
   category,
   href,
+  colorVariants,
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [hovered, setHovered] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
-  const productHref = href || `/shop/product-details?id=${id}`;
+
+  const [activeVariant, setActiveVariant] = useState<ColorVariant | null>(null);
+
+  useEffect(() => {
+    if (colorVariants && colorVariants.length > 0) {
+      const match = colorVariants.find(v => v.id === id);
+      setActiveVariant(match || colorVariants[0]);
+    } else {
+      setActiveVariant(null);
+    }
+  }, [id, colorVariants]);
+
+  const currentId = activeVariant ? activeVariant.id : id;
+  const currentName = activeVariant && activeVariant.colorName !== "Original"
+    ? `${activeVariant.colorName} ${name}`
+    : name;
+  const currentPrice = activeVariant ? activeVariant.price : price;
+  const currentOriginalPrice = activeVariant ? activeVariant.originalPrice : originalPrice;
+  const currentImage = activeVariant
+    ? (hovered && activeVariant.hoverImage ? activeVariant.hoverImage : activeVariant.image)
+    : (hovered && hoverImage ? hoverImage : image);
+  const currentBadge = activeVariant ? (activeVariant.badge || badge) : badge;
+
+  const productHref = href || `/shop/product-details?id=${currentId}`;
 
   useEffect(() => {
     const checkWishlist = async () => {
-      if (!id) return;
+      if (!currentId) return;
       try {
         const res = await api.wishlist.list();
-        const isInWishlist = res?.wishlist?.some((item: any) => item.id === id);
+        const isInWishlist = res?.wishlist?.some((item: any) => item.id === currentId);
         setWishlisted(!!isInWishlist);
       } catch {}
     };
     checkWishlist();
-  }, [id]);
+  }, [currentId]);
 
   return (
     <div
@@ -65,8 +102,8 @@ export default function ProductCard({
           }}
         >
           <img
-            src={hovered && hoverImage ? hoverImage : image}
-            alt={name}
+            src={currentImage}
+            alt={currentName}
             style={{
               width: "100%",
               height: "100%",
@@ -104,11 +141,11 @@ export default function ProductCard({
                   console.log("========================================");
                   console.log("[CHECKOUT FLOW] STEP 1: Customer adding to cart");
                   console.log("========================================");
-                  console.log(`  Product: ${name} (${price} INR)`);
+                  console.log(`  Product: ${currentName} (${currentPrice} INR)`);
                   
                   // Fetch product to get actual variant ID
-                  console.log(`  Fetching product ${id} to get variant ID...`);
-                  const productRes = await api.products.get(id || "1");
+                  console.log(`  Fetching product ${currentId} to get variant ID...`);
+                  const productRes = await api.products.get(currentId || "1");
                   const product = productRes?.product || productRes?.productByHandle;
                   
                   if (!product) {
@@ -133,9 +170,9 @@ export default function ProductCard({
                       merchandiseId: variantId,
                       quantity: 1,
                       title: "Default Size",
-                      price,
-                      productTitle: name,
-                      image
+                      price: currentPrice,
+                      productTitle: currentName,
+                      image: currentImage
                     }]);
                     const newCart = res?.cartCreate?.cart || res?.cart;
                     if (newCart?.id) {
@@ -148,9 +185,9 @@ export default function ProductCard({
                         merchandiseId: variantId,
                         quantity: 1,
                         title: "Default Size",
-                        price,
-                        productTitle: name,
-                        image
+                        price: currentPrice,
+                        productTitle: currentName,
+                        image: currentImage
                       }]
                     });
                     console.log(`  ✅ Updated existing cart: ${cartId}`);
@@ -192,13 +229,13 @@ export default function ProductCard({
           </div>
 
           {/* Badge */}
-          {badge && (
+          {currentBadge && (
             <div
               style={{
                 position: "absolute",
                 top: "0.75rem",
                 left: "0.75rem",
-                backgroundColor: badge === "Sale" ? "#7A5C3E" : badge === "New" ? "#4F6B5A" : "#1E1E1E",
+                backgroundColor: currentBadge === "Sale" ? "#7A5C3E" : currentBadge === "New" ? "#4F6B5A" : "#1E1E1E",
                 color: "#F7F4EE",
                 padding: "0.25rem 0.625rem",
                 fontFamily: "'Satoshi', sans-serif",
@@ -208,7 +245,7 @@ export default function ProductCard({
                 textTransform: "uppercase",
               }}
             >
-              {badge}
+              {currentBadge}
             </div>
           )}
 
@@ -223,10 +260,10 @@ export default function ProductCard({
               }
               try {
                 if (wishlisted) {
-                  await api.wishlist.remove(id);
+                  await api.wishlist.remove(currentId);
                   setWishlisted(false);
                 } else {
-                  await api.wishlist.add(id);
+                  await api.wishlist.add(currentId);
                   setWishlisted(true);
                 }
               } catch (err) {
@@ -284,9 +321,40 @@ export default function ProductCard({
               lineHeight: 1.4,
             }}
           >
-            {name}
+            {currentName}
           </h3>
         </Link>
+
+        {/* Color Swatches */}
+        {colorVariants && colorVariants.length > 1 && (
+          <div style={{ display: "flex", gap: "0.375rem", marginTop: "0.25rem", marginBottom: "0.55rem", flexWrap: "wrap" }}>
+            {colorVariants.map((v) => (
+              <button
+                key={v.id}
+                onMouseEnter={() => setActiveVariant(v)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActiveVariant(v);
+                }}
+                style={{
+                  width: "14px",
+                  height: "14px",
+                  borderRadius: "50%",
+                  backgroundColor: v.colorHex,
+                  border: activeVariant?.id === v.id ? "1.5px solid #1E1E1E" : "1px solid rgba(30, 30, 30, 0.2)",
+                  boxShadow: activeVariant?.id === v.id ? "0 0 0 1.5px #F7F4EE inset" : "none",
+                  cursor: "pointer",
+                  padding: 0,
+                  transition: "transform 0.15s ease",
+                  transform: activeVariant?.id === v.id ? "scale(1.15)" : "scale(1)",
+                }}
+                title={v.colorName}
+              />
+            ))}
+          </div>
+        )}
+
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <span
             style={{
@@ -296,9 +364,9 @@ export default function ProductCard({
               color: "#1E1E1E",
             }}
           >
-            ₹{price.toLocaleString("en-IN")}
+            ₹{currentPrice.toLocaleString("en-IN")}
           </span>
-          {originalPrice && (
+          {currentOriginalPrice && (
             <span
               style={{
                 fontFamily: "'Satoshi', sans-serif",
@@ -307,7 +375,7 @@ export default function ProductCard({
                 textDecoration: "line-through",
               }}
             >
-              ₹{originalPrice.toLocaleString("en-IN")}
+              ₹{currentOriginalPrice.toLocaleString("en-IN")}
             </span>
           )}
         </div>

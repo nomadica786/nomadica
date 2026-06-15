@@ -2,6 +2,7 @@
 import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { groupProducts } from "@/utils/productGroup";
 
 export default function BestSellersPage() {
   const { data, loading } = useApi(() => api.products.list(50));
@@ -26,8 +27,9 @@ export default function BestSellersPage() {
     };
   }) || [];
 
-  const bestSellers = allProducts.filter((p: any) => p.badge?.toLowerCase() === 'best seller');
-  const displayProducts = bestSellers.length > 0 ? bestSellers : allProducts.slice(0, 4);
+  const groupedProducts = groupProducts(allProducts);
+  const bestSellers = groupedProducts.filter((p: any) => p.badge?.toLowerCase() === 'best seller');
+  const displayProducts = bestSellers.length > 0 ? bestSellers : groupedProducts.slice(0, 4);
 
   return (
     <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>

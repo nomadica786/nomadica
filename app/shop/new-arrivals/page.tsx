@@ -2,6 +2,7 @@
 import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { groupProducts } from "@/utils/productGroup";
 
 export default function NewArrivalsPage() {
   const { data, loading } = useApi(() => api.products.list(50));
@@ -26,8 +27,9 @@ export default function NewArrivalsPage() {
     };
   }) || [];
 
-  const newArrivals = allProducts.filter((p: any) => p.badge?.toLowerCase() === 'new');
-  const displayProducts = newArrivals.length > 0 ? newArrivals : allProducts.slice(0, 6);
+  const groupedProducts = groupProducts(allProducts);
+  const newArrivals = groupedProducts.filter((p: any) => p.badge?.toLowerCase() === 'new');
+  const displayProducts = newArrivals.length > 0 ? newArrivals : groupedProducts.slice(0, 6);
 
   return (
     <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>

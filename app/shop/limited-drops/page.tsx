@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { groupProducts } from "@/utils/productGroup";
 
 function Countdown({ targetDate }: { targetDate: Date }) {
   const [time, setTime] = useState({ h: 0, m: 0, s: 0 });
@@ -56,8 +57,9 @@ export default function LimitedDropsPage() {
     };
   }) || [];
 
-  const drops = allProducts.filter((p: any) => p.badge?.toLowerCase() === 'limited');
-  const displayProducts = drops.length > 0 ? drops : allProducts.slice(0, 3);
+  const groupedProducts = groupProducts(allProducts);
+  const drops = groupedProducts.filter((p: any) => p.badge?.toLowerCase() === 'limited');
+  const displayProducts = drops.length > 0 ? drops : groupedProducts.slice(0, 3);
 
   return (
     <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>

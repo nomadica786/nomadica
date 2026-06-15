@@ -5,6 +5,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import { CardSkeleton } from "@/components/ui/SnowBallLoader";
 import { api } from "@/components/api/api";
+import { groupProducts } from "@/utils/productGroup";
 
 const heroImage =
   "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80";
@@ -616,10 +617,10 @@ export default function HomePage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const data = await api.products.list(4);
+        const data = await api.products.list(16);
         const edges = data?.products?.edges || [];
         if (edges.length > 0) {
-          setProducts(edges.map((edge: any) => {
+          const mapped = edges.map((edge: any) => {
             const node = edge.node;
             const price = parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
             const firstImage = node.images?.edges?.[0]?.node?.url || 'https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80';
@@ -635,7 +636,9 @@ export default function HomePage() {
               category: node.productType || 'Apparel',
               handle: node.handle
             };
-          }));
+          });
+          const grouped = groupProducts(mapped);
+          setProducts(grouped.slice(0, 4));
         } else {
           setProducts(featuredProducts);
         }
