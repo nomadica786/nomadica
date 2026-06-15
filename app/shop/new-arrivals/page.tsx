@@ -2,6 +2,7 @@
 import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
+import Image from "next/image";
 import { groupProducts } from "@/utils/productGroup";
 
 export default function NewArrivalsPage() {
@@ -51,10 +52,13 @@ export default function NewArrivalsPage() {
           backgroundColor: "#1E1E1E",
         }}
       >
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600&q=80"
           alt="New Arrivals"
-          style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.45 }}
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectFit: "cover", opacity: 0.45 }}
         />
         <div
           style={{

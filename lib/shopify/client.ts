@@ -36,7 +36,8 @@ export class ShopifyClient {
   async request<T = any>(
     query: string,
     variables?: Record<string, any>,
-    api: 'storefront' | 'admin' = 'storefront'
+    api: 'storefront' | 'admin' = 'storefront',
+    options?: { cache?: RequestCache; next?: { revalidate?: number | false; tags?: string[] } }
   ): Promise<T> {
     const endpoint = this.getEndpoint(api);
 
@@ -51,15 +52,31 @@ export class ShopifyClient {
       headers['X-Shopify-Access-Token'] = this.accessToken;
     }
 
+    const isMutation = query.trim().startsWith('mutation');
+    const isCart = query.includes('cart') || query.includes('Cart');
+    const isCustomer = query.includes('customer') || query.includes('Customer');
+
+    const fetchOptions: any = {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        query,
+        variables: variables || {},
+      }),
+    };
+
+    // Set custom cache or default next revalidate option for read-only storefront requests
+    if (options?.cache) {
+      fetchOptions.cache = options.cache;
+    }
+    if (options?.next) {
+      fetchOptions.next = options.next;
+    } else if (api === 'storefront' && !isMutation && !isCart && !isCustomer) {
+      fetchOptions.next = { revalidate: 3600 }; // default 1 hour cache
+    }
+
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          query,
-          variables: variables || {},
-        }),
-      });
+      const response = await fetch(endpoint, fetchOptions);
 
       if (!response.ok) {
         throw new Error(
@@ -88,9 +105,11 @@ export class ShopifyClient {
 export class ShopifyStorefrontClient extends ShopifyClient {
   async request<T = any>(
     query: string,
-    variables?: Record<string, any>
+    variables?: Record<string, any>,
+    api: 'storefront' | 'admin' = 'storefront',
+    options?: { cache?: RequestCache; next?: { revalidate?: number | false; tags?: string[] } }
   ): Promise<T> {
-    return super.request<T>(query, variables, 'storefront');
+    return super.request<T>(query, variables, 'storefront', options);
   }
 }
 
@@ -100,8 +119,10 @@ export class ShopifyStorefrontClient extends ShopifyClient {
 export class ShopifyAdminClient extends ShopifyClient {
   async request<T = any>(
     query: string,
-    variables?: Record<string, any>
+    variables?: Record<string, any>,
+    api: 'storefront' | 'admin' = 'admin',
+    options?: { cache?: RequestCache; next?: { revalidate?: number | false; tags?: string[] } }
   ): Promise<T> {
-    return super.request<T>(query, variables, 'admin');
+    return super.request<T>(query, variables, 'admin', options);
   }
 }

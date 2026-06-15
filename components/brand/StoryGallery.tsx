@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const tiles = [
   {
@@ -61,10 +62,12 @@ export default function StoryGallery() {
               }}
               className="img-hover-zoom"
             >
-              <img
+              <Image
                 src={tile.image}
                 alt={tile.title}
-                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                style={{ objectFit: "cover", objectPosition: "center" }}
               />
               <div
                 style={{

@@ -6,6 +6,8 @@ import ProductCard from "@/components/shop/ProductCard";
 import { CardSkeleton } from "@/components/ui/SnowBallLoader";
 import { api } from "@/components/api/api";
 import { groupProducts } from "@/utils/productGroup";
+import Image from "next/image";
+import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 
 const heroImage =
   "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80";
@@ -75,14 +77,13 @@ function HeroSection() {
         marginTop: 0,
       }}
     >
-      <img
+      <Image
         src={heroImage}
         alt="Nomadica Hero"
+        fill
+        priority
+        sizes="100vw"
         style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
           objectFit: "cover",
           objectPosition: "center",
           transform: loaded ? "scale(1)" : "scale(1.08)",
@@ -334,14 +335,12 @@ function ImageBanner({
         backgroundColor: "#1E1E1E",
       }}
     >
-      <img
+      <Image
         src={image}
         alt=""
+        fill
+        sizes="100vw"
         style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
           objectFit: "cover",
           opacity: 0.5,
         }}
@@ -488,12 +487,12 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
-                <img
+                <Image
                   src={t.image}
                   alt={t.name}
+                  width={48}
+                  height={48}
                   style={{
-                    width: "48px",
-                    height: "48px",
                     borderRadius: "50%",
                     objectFit: "cover",
                     border: `2px solid ${active === i ? "#1E1E1E" : "transparent"}`,
@@ -733,10 +732,12 @@ export default function HomePage() {
               : collections.map((col: any) => (
                   <Link key={col.id} href={`/collections/${encodeURIComponent(col.handle)}`} style={{ textDecoration: "none", display: "block" }}>
                     <div style={{ position: "relative", aspectRatio: "16/10", overflow: "hidden" }} className="img-hover-zoom">
-                      <img
-                        src={col.image?.url || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
+                      <Image
+                        src={getShopifyImageUrl(col.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
                         alt={col.title}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        style={{ objectFit: "cover" }}
                       />
                       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30,30,30,0.6) 0%, transparent 60%)" }} />
                       <div style={{ position: "absolute", bottom: "1.5rem", left: "1.5rem" }}>
@@ -898,8 +899,8 @@ export default function HomePage() {
               : journalArticles.map((art: any) => (
                   <Link key={art.id} href={`/journal/${art.handle}`} style={{ textDecoration: "none", display: "block" }}>
                     <div style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(30,30,30,0.08)", boxShadow: "0 12px 32px rgba(30,30,30,0.04)" }}>
-                      <div style={{ aspectRatio: "16/10", overflow: "hidden" }}>
-                        <img src={art.image?.url} alt={art.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <div style={{ aspectRatio: "16/10", overflow: "hidden", position: "relative" }}>
+                        <Image src={getShopifyImageUrl(art.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"} alt={art.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" style={{ objectFit: "cover" }} />
                       </div>
                       <div style={{ padding: "1.5rem" }}>
                         <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", color: "rgba(30,30,30,0.4)", textTransform: "uppercase", display: "block", marginBottom: "0.5rem" }}>
@@ -939,10 +940,12 @@ export default function HomePage() {
             </Link>
           </div>
           <div style={{ aspectRatio: "1", overflow: "hidden", position: "relative" }}>
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?w=800&q=80"
               alt="Nomad desk with maps"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              style={{ objectFit: "cover" }}
             />
           </div>
         </div>

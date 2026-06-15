@@ -8,6 +8,8 @@ import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { parseProduct, groupProducts } from "@/utils/productGroup";
 import { useAuth } from "@/utils/hooks/useAuth";
+import Image from "next/image";
+import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 
 function getMarkupPrice(id: string, price: number) {
   let hash = 0;
@@ -439,7 +441,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                   }}
                   title={v.colorName}
                 >
-                  <img src={v.image} alt={v.colorName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <Image src={getShopifyImageUrl(v.image, 160)} alt={v.colorName} fill sizes="80px" style={{ objectFit: "cover" }} />
                   {/* Small Color Dot Indicator in bottom-right corner of thumbnail */}
                   <div
                     style={{
@@ -471,10 +473,13 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                 marginBottom: "0.75rem",
               }}
             >
-              <img
-                src={hoveredColorImage || product.images[selectedImage]}
+              <Image
+                src={getShopifyImageUrl(hoveredColorImage || product.images[selectedImage], 800)}
                 alt={product.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover", transition: "opacity 0.3s ease" }}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 600px"
+                style={{ objectFit: "cover", transition: "opacity 0.3s ease" }}
               />
             </div>
 
@@ -493,9 +498,10 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                     cursor: "pointer",
                     padding: 0,
                     background: "none",
+                    position: "relative",
                   }}
                 >
-                  <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <Image src={getShopifyImageUrl(img, 160)} alt="" fill sizes="80px" style={{ objectFit: "cover" }} />
                 </button>
               ))}
             </div>

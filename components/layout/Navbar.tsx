@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/utils/hooks/useAuth";
 import { api } from "@/components/api/api";
+import Image from "next/image";
+import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -646,8 +648,14 @@ export default function Navbar() {
 
                 return (
                   <div key={line.id} style={{ display: "flex", gap: "1rem", borderBottom: "1px solid rgba(30,30,30,0.05)", paddingBottom: "1.5rem" }}>
-                    <div style={{ width: "80px", aspectRatio: "3/4", overflow: "hidden", backgroundColor: "#FFFFFF", flexShrink: 0 }}>
-                      <img src={image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <div style={{ position: "relative", width: "80px", aspectRatio: "3/4", overflow: "hidden", backgroundColor: "#FFFFFF", flexShrink: 0 }}>
+                      <Image
+                        src={getShopifyImageUrl(image, 160)}
+                        alt={title}
+                        fill
+                        sizes="80px"
+                        style={{ objectFit: "cover" }}
+                      />
                     </div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                       <div>

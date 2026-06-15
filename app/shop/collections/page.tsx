@@ -3,6 +3,8 @@
 import { api, useApi } from '@/components/api/api';
 import { PageLoader } from '@/components/ui/PageLoader';
 import Link from 'next/link';
+import Image from 'next/image';
+import { getShopifyImageUrl } from '@/lib/images/shopifyImage';
 
 export default function CollectionsPage() {
   const { data, loading, error } = useApi(() => api.collections.list());
@@ -42,11 +44,13 @@ export default function CollectionsPage() {
                 onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-3px)')}
                 onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
               >
-                <div style={{ aspectRatio: '16/10', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
-                  <img
-                    src={collection.image?.url || 'https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80'}
+                <div style={{ aspectRatio: '16/10', overflow: 'hidden', backgroundColor: '#FFFFFF', position: 'relative' }}>
+                  <Image
+                    src={getShopifyImageUrl(collection.image?.url, 600) || 'https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80'}
                     alt={collection.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: 'cover' }}
                   />
                 </div>
                 <div style={{ padding: '1.5rem' }}>

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Heart, ShoppingBag } from "lucide-react";
 import { api } from "@/components/api/api";
 import { useAuth } from "@/utils/hooks/useAuth";
+import Image from "next/image";
+import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 
 const isWhiteColor = (colorHex: string) => {
   if (!colorHex) return false;
@@ -80,6 +82,8 @@ export default function ProductCard({
 
   const productHref = href || (currentHandle ? `/products/${currentHandle}` : `/shop/product-details?id=${currentId}`);
 
+  const sizedImage = getShopifyImageUrl(currentImage, 600);
+
   useEffect(() => {
     const checkWishlist = async () => {
       if (!currentId) return;
@@ -108,12 +112,12 @@ export default function ProductCard({
             backgroundColor: "#FFFFFF",
           }}
         >
-          <img
-            src={currentImage}
+          <Image
+            src={sizedImage}
             alt={currentName}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 250px"
             style={{
-              width: "100%",
-              height: "100%",
               objectFit: "cover",
               transition: "transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
               transform: hovered ? "scale(1.06)" : "scale(1)",

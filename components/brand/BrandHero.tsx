@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function BrandHero() {
   return (
@@ -21,14 +22,13 @@ export default function BrandHero() {
           pointerEvents: "none",
         }}
       />
-      <img
-        src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80"
+      <Image
+        src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80"
         alt="Travel lifestyle"
+        fill
+        priority
+        sizes="100vw"
         style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
           objectFit: "cover",
           objectPosition: "center",
           filter: "brightness(0.9)",
