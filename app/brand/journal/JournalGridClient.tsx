@@ -16,7 +16,15 @@ interface JournalGridClientProps {
   };
 }
 
-function JournalCard({ article, formatDate, priority = false }: { article: ShopifyArticle; formatDate: (d: string) => string; priority?: boolean }) {
+const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
+
+export function JournalCard({ article, priority = false }: { article: ShopifyArticle; priority?: boolean }) {
   const [isHovered, setIsHovered] = useState(false);
   const category = article.tags?.[0] || 'Travel';
   const readingTime = getReadingTime(article.contentHtml);
@@ -162,14 +170,6 @@ export default function JournalGridClient({
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
   return (
     <div className="w-full flex flex-col items-center justify-center">
       {/* Article Grid - 4 in 1 grid layout */}
@@ -178,7 +178,6 @@ export default function JournalGridClient({
           <JournalCard 
             key={article.id} 
             article={article}
-            formatDate={formatDate}
             priority={idx < 4}
           />
         ))}

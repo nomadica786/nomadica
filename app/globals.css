@@ -398,49 +398,60 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 65ch; /* Optimal reading length */
   margin: 0 auto;
   font-family: 'Montserrat', sans-serif;
-  font-size: 1rem;
-  line-height: 1.8;
+  font-size: 1.05rem;
+  line-height: 1.9;
   color: rgba(30, 30, 30, 0.8);
+  text-align: center;
 }
 
 .journal-content p {
   margin-bottom: 1.75rem;
+  text-align: center;
 }
 
 .journal-content h2 {
   font-family: 'Playfair Display', sans-serif;
-  font-size: 1.75rem;
+  font-size: 1.85rem;
+  font-weight: 500;
+  color: var(--charcoal);
+  margin-top: 3rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.journal-content h3 {
+  font-family: 'Playfair Display', sans-serif;
+  font-size: 1.45rem;
   font-weight: 500;
   color: var(--charcoal);
   margin-top: 2.5rem;
   margin-bottom: 1rem;
   line-height: 1.3;
-}
-
-.journal-content h3 {
-  font-family: 'Playfair Display', sans-serif;
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: var(--charcoal);
-  margin-top: 2rem;
-  margin-bottom: 0.8rem;
-  line-height: 1.3;
+  text-align: center;
 }
 
 .journal-content blockquote {
-  border-left: 3px solid var(--leather);
-  padding-left: 1.5rem;
+  border-top: 1px solid rgba(30, 30, 30, 0.1);
+  border-bottom: 1px solid rgba(30, 30, 30, 0.1);
+  border-left: none;
+  padding: 2rem 0;
   font-family: 'Playfair Display', sans-serif;
   font-style: italic;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   color: var(--charcoal);
-  margin: 2.5rem 0;
-  line-height: 1.5;
+  margin: 3rem auto;
+  max-width: 85%;
+  line-height: 1.6;
+  text-align: center;
 }
 
 .journal-content ul, .journal-content ol {
-  margin-bottom: 1.75rem;
-  padding-left: 1.5rem;
+  margin-bottom: 2rem;
+  padding-left: 2rem;
+  display: inline-block;
+  text-align: left;
+  max-width: 100%;
 }
 
 .journal-content ul {
@@ -452,7 +463,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .journal-content li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .journal-content a {
@@ -468,14 +479,14 @@ h1, h2, h3, h4, h5, h6 {
 .journal-content img {
   max-width: 100%;
   height: auto;
-  border-radius: 1rem;
-  margin: 2.5rem auto;
+  border-radius: 1.5rem;
+  margin: 3rem auto;
   display: block;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .journal-content figure {
-  margin: 2.5rem auto;
+  margin: 3rem auto;
   text-align: center;
 }
 
