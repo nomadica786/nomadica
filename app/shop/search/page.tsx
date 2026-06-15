@@ -41,6 +41,7 @@ export default function SearchPage() {
             badge: node.badge,
             category: node.category || 'Tops',
             description: node.description || '',
+            createdAt: node.createdAt || '',
           };
         }) || [];
 

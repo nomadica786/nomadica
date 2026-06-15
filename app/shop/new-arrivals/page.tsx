@@ -24,12 +24,20 @@ export default function NewArrivalsPage() {
       hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
       badge: node.badge,
       category: node.category || 'Tops',
+      createdAt: node.createdAt || '',
     };
   }) || [];
 
   const groupedProducts = groupProducts(allProducts);
-  const newArrivals = groupedProducts.filter((p: any) => p.badge?.toLowerCase() === 'new');
-  const displayProducts = newArrivals.length > 0 ? newArrivals : groupedProducts.slice(0, 6);
+  
+  // Sort by createdAt descending (newest first, then second, then third)
+  const displayProducts = [...groupedProducts].sort((a: any, b: any) => {
+    const timeA = new Date(a.createdAt || 0).getTime();
+    const timeB = new Date(b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+
+  const newestId = displayProducts[0]?.id || '';
 
   return (
     <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
@@ -74,7 +82,13 @@ export default function NewArrivalsPage() {
       {/* Grid */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.5rem" }}>
-          {displayProducts.map((p: any) => <ProductCard key={p.id} {...p} />)}
+          {displayProducts.map((p: any) => (
+            <ProductCard
+              key={p.id}
+              {...p}
+              badge={p.id === newestId ? "New" : p.badge}
+            />
+          ))}
         </div>
       </div>
     </div>

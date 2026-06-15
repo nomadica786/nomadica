@@ -21,6 +21,7 @@ export const STOREFRONT_QUERIES = {
             title
             description
             handle
+            createdAt
             images(first: 5) {
               edges {
                 node {

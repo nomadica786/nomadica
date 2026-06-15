@@ -91,22 +91,52 @@ function ProductDetailContent() {
           try {
             const allRes = await api.products.list(50);
             const allEdges = allRes?.products?.edges || [];
-            const currentParsed = parseProduct({ name: rawProduct.title, colors: rawProduct.colors });
-            const variations: any[] = [];
             
-            for (const edge of allEdges) {
+            // Map raw product and all other products for suffix matching
+            const rawMappedForGroup = {
+              id: rawProduct.id,
+              name: rawProduct.title,
+              handle: rawProduct.handle,
+              price: priceVal,
+              originalPrice: origPriceVal,
+              image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
+              createdAt: rawProduct.createdAt || ""
+            };
+
+            const otherMappedForGroup = allEdges.map((edge: any) => {
               const node = edge.node;
-              const parsed = parseProduct({ name: node.title, colors: node.colors });
-              if (parsed.baseName === currentParsed.baseName) {
-                variations.push({
-                  id: node.id,
-                  handle: node.handle,
-                  colorName: parsed.colorName,
-                  colorHex: parsed.colorHex,
-                  image: node.images?.edges?.[0]?.node?.url || "",
-                });
-              }
+              return {
+                id: node.id,
+                name: node.title,
+                handle: node.handle,
+                price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
+                image: node.images?.edges?.[0]?.node?.url || "",
+                createdAt: node.createdAt || ""
+              };
+            });
+
+            const combinedProducts = [rawMappedForGroup, ...otherMappedForGroup];
+            const groupedCombined = groupProducts(combinedProducts);
+
+            // Find the group containing the current product
+            const currentGroup = groupedCombined.find(g => g.colorVariants.some(v => v.id === rawProduct.id));
+            const baseName = currentGroup ? currentGroup.name : parsed.baseName;
+
+            // Update product name to base name from the group
+            if (baseName) {
+              setProduct(prev => prev ? { ...prev, name: baseName } : null);
             }
+
+            const variations = currentGroup
+              ? currentGroup.colorVariants.map(v => ({
+                  id: v.id,
+                  handle: v.handle,
+                  colorName: v.colorName,
+                  colorHex: v.colorHex,
+                  image: v.image
+                }))
+              : [];
+
             setColorVariations(variations);
 
             // Fetch related products and group them
@@ -122,7 +152,7 @@ function ProductDetailContent() {
               };
             }) || [];
             
-            const groupedList = groupProducts(listMapped).filter((p: any) => p.id !== rawProduct.id && p.name !== currentParsed.baseName);
+            const groupedList = groupProducts(listMapped).filter((p: any) => p.id !== rawProduct.id && p.name.toLowerCase() !== baseName.toLowerCase());
             setRelatedProducts(groupedList.slice(0, 4));
           } catch (err) {
             console.error("Failed to fetch variations or related products:", err);
@@ -491,7 +521,7 @@ function ProductDetailContent() {
             {colorVariations.length > 1 ? (
               <>
                 <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E", marginBottom: "0.75rem" }}>
-                  Colour: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>{parseProduct({ name: product.rawName }).colorName}</span>
+                  Colour: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>{colorVariations.find(v => v.id === product.id)?.colorName || parseProduct({ name: product.rawName }).colorName}</span>
                 </p>
                 <div style={{ display: "flex", gap: "0.625rem" }}>
                   {colorVariations.map((v) => (

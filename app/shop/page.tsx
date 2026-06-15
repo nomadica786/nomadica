@@ -32,6 +32,7 @@ export default function CollectionsPage() {
       hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
       badge: node.badge,
       category: node.category || 'Tops',
+      createdAt: node.createdAt || '',
     };
   }) || [];
 
@@ -42,8 +43,25 @@ export default function CollectionsPage() {
     .sort((a: any, b: any) => {
       if (sortBy === "Price: Low to High") return a.price - b.price;
       if (sortBy === "Price: High to Low") return b.price - a.price;
+      if (sortBy === "Newest") return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
       return 0;
     });
+
+  const newestId = (() => {
+    if (filtered.length === 0) return '';
+    let newest = filtered[0];
+    let maxTime = 0;
+    for (const p of filtered) {
+      if (p.createdAt) {
+        const time = new Date(p.createdAt).getTime();
+        if (time > maxTime) {
+          maxTime = time;
+          newest = p;
+        }
+      }
+    }
+    return maxTime > 0 ? newest.id : '';
+  })();
 
   return (
     <div style={{ paddingTop: "64px", minHeight: "100vh", backgroundColor: "#F7F4EE" }}>
@@ -150,8 +168,12 @@ export default function CollectionsPage() {
             gap: "1.5rem",
           }}
         >
-          {filtered.map((product: any) => (
-            <ProductCard key={product.id} {...product} />
+           {filtered.map((product: any) => (
+            <ProductCard
+              key={product.id}
+              {...product}
+              badge={product.id === newestId ? "New" : product.badge}
+            />
           ))}
         </div>
       </div>

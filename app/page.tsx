@@ -632,9 +632,10 @@ export default function HomePage() {
               originalPrice: price * 1.3,
               image: firstImage,
               hoverImage: secondImage || firstImage,
-              badge: "New",
+              badge: node.badge || "New",
               category: node.productType || 'Apparel',
-              handle: node.handle
+              handle: node.handle,
+              createdAt: node.createdAt || '',
             };
           });
           const grouped = groupProducts(mapped);

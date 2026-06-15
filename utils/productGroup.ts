@@ -11,6 +11,7 @@ export interface ColorVariant {
   handle: string;
   badge?: string;
   category?: string;
+  createdAt?: string;
 }
 
 export interface GroupedProduct {
@@ -24,6 +25,7 @@ export interface GroupedProduct {
   category: string;
   handle: string;
   colorVariants: ColorVariant[];
+  createdAt?: string;
 }
 
 export const COLOR_HEX_MAP: Record<string, string> = {
@@ -92,47 +94,131 @@ export function parseProduct(product: any) {
 }
 
 export function groupProducts(products: any[]): GroupedProduct[] {
-  const groups: Record<string, GroupedProduct> = {};
-
-  for (const product of products) {
-    const { colorName, colorHex, baseName } = parseProduct(product);
-
-    const variant: ColorVariant = {
-      id: product.id,
-      colorName,
-      colorHex,
-      image: product.image || product.images?.[0] || "",
-      hoverImage: product.hoverImage || product.images?.[1] || product.image || "",
-      price: product.price,
-      originalPrice: product.originalPrice,
-      handle: product.handle,
-      badge: product.badge,
-      category: product.category
+  // 1. Prepare word arrays for suffix matching
+  const items = products.map((product) => {
+    const name = (product.name || product.title || "").trim();
+    const words = name.split(/\s+/);
+    return {
+      product,
+      name,
+      words,
+      maxSuffixLength: 0,
     };
+  });
 
-    if (!groups[baseName]) {
-      groups[baseName] = {
-        id: product.id,
-        name: baseName,
-        price: product.price,
-        originalPrice: product.originalPrice,
-        image: product.image || product.images?.[0] || "",
-        hoverImage: product.hoverImage || product.images?.[1] || product.image || "",
-        badge: product.badge,
-        category: product.category || "Tops",
-        handle: product.handle,
-        colorVariants: [variant]
-      };
-    } else {
-      // Add variant
-      groups[baseName].colorVariants.push(variant);
-      // Bubble up badge if the group doesn't have one but a variant does
-      if (!groups[baseName].badge && variant.badge) {
-        groups[baseName].badge = variant.badge;
+  // 2. Perform pairwise suffix matching to find the maximum suffix match for each product
+  for (let i = 0; i < items.length; i++) {
+    for (let j = i + 1; j < items.length; j++) {
+      const itemA = items[i];
+      const itemB = items[j];
+
+      let suffixLen = 0;
+      let idxA = itemA.words.length - 1;
+      let idxB = itemB.words.length - 1;
+
+      while (idxA >= 0 && idxB >= 0) {
+        if (itemA.words[idxA].toLowerCase() === itemB.words[idxB].toLowerCase()) {
+          suffixLen++;
+          idxA--;
+          idxB--;
+        } else {
+          break;
+        }
+      }
+
+      if (suffixLen > 0) {
+        if (suffixLen > itemA.maxSuffixLength) {
+          itemA.maxSuffixLength = suffixLen;
+        }
+        if (suffixLen > itemB.maxSuffixLength) {
+          itemB.maxSuffixLength = suffixLen;
+        }
       }
     }
   }
 
-  // Convert back to array
+  // 3. Construct groups based on suffix match or fallback
+  const groups: Record<string, GroupedProduct> = {};
+
+  for (const item of items) {
+    let baseName = "";
+    let colorName = "";
+
+    if (item.maxSuffixLength > 0) {
+      // Base name is the matching suffix words (preserve case of the original name)
+      const suffixWords = item.words.slice(item.words.length - item.maxSuffixLength);
+      baseName = suffixWords.join(" ");
+
+      // Color name is the remaining prefix words
+      const prefixWords = item.words.slice(0, item.words.length - item.maxSuffixLength);
+      colorName = prefixWords.join(" ");
+
+      if (!colorName) {
+        colorName = "Original";
+      }
+    } else {
+      // Standalone product fallback
+      const parsed = parseProduct(item.product);
+      baseName = parsed.baseName;
+      colorName = parsed.colorName;
+    }
+
+    // Resolve color hex code case-insensitively
+    const cleanColor = colorName.trim();
+    const mapKey = Object.keys(COLOR_HEX_MAP).find(k => k.toLowerCase() === cleanColor.toLowerCase());
+    let colorHex = mapKey ? COLOR_HEX_MAP[mapKey] : undefined;
+
+    if (!colorHex) {
+      const lastWord = cleanColor.split(" ").pop() || "";
+      const wordKey = Object.keys(COLOR_HEX_MAP).find(k => k.toLowerCase() === lastWord.toLowerCase());
+      colorHex = wordKey ? COLOR_HEX_MAP[wordKey] : "#EDEAE2";
+    }
+
+    const variant: ColorVariant = {
+      id: item.product.id,
+      colorName,
+      colorHex,
+      image: item.product.image || item.product.images?.[0] || "",
+      hoverImage: item.product.hoverImage || item.product.images?.[1] || item.product.image || "",
+      price: item.product.price,
+      originalPrice: item.product.originalPrice,
+      handle: item.product.handle,
+      badge: item.product.badge,
+      category: item.product.category,
+      createdAt: item.product.createdAt
+    };
+
+    const groupKey = baseName.toLowerCase();
+
+    if (!groups[groupKey]) {
+      groups[groupKey] = {
+        id: item.product.id,
+        name: baseName,
+        price: item.product.price,
+        originalPrice: item.product.originalPrice,
+        image: item.product.image || item.product.images?.[0] || "",
+        hoverImage: item.product.hoverImage || item.product.images?.[1] || item.product.image || "",
+        badge: item.product.badge,
+        category: item.product.category || "Tops",
+        handle: item.product.handle,
+        colorVariants: [variant],
+        createdAt: item.product.createdAt
+      };
+    } else {
+      // Add variant
+      groups[groupKey].colorVariants.push(variant);
+      // Bubble up badge if the group doesn't have one but a variant does
+      if (!groups[groupKey].badge && variant.badge) {
+        groups[groupKey].badge = variant.badge;
+      }
+      // Bubble up the newest/latest createdAt date
+      if (item.product.createdAt) {
+        if (!groups[groupKey].createdAt || new Date(item.product.createdAt).getTime() > new Date(groups[groupKey].createdAt || 0).getTime()) {
+          groups[groupKey].createdAt = item.product.createdAt;
+        }
+      }
+    }
+  }
+
   return Object.values(groups);
 }

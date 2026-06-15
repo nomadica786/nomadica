@@ -17,6 +17,7 @@ export interface MockProduct {
   images: string[];
   rating: number;
   reviews: number;
+  createdAt?: string;
 }
 
 export const MOCK_PRODUCTS: MockProduct[] = [
@@ -42,6 +43,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     ],
     rating: 4.8,
     reviews: 124,
+    createdAt: "2025-05-10T10:00:00Z",
   },
   {
     id: "2",
@@ -58,6 +60,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     images: ["https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80"],
     rating: 4.6,
     reviews: 82,
+    createdAt: "2025-05-12T12:00:00Z",
   },
   {
     id: "3",
@@ -74,6 +77,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     images: ["https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80"],
     rating: 4.9,
     reviews: 43,
+    createdAt: "2025-05-15T15:00:00Z",
   },
   {
     id: "4",
@@ -91,6 +95,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     images: ["https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&q=80"],
     rating: 4.7,
     reviews: 57,
+    createdAt: "2025-05-18T18:00:00Z",
   },
   {
     id: "5",
@@ -106,6 +111,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     images: ["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80"],
     rating: 4.5,
     reviews: 190,
+    createdAt: "2025-05-20T20:00:00Z",
   },
   {
     id: "6",
@@ -121,6 +127,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     images: ["https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&q=80"],
     rating: 4.4,
     reviews: 29,
+    createdAt: "2025-05-22T22:00:00Z",
   },
   {
     id: "7",
@@ -136,6 +143,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     images: ["https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=800&q=80"],
     rating: 4.7,
     reviews: 64,
+    createdAt: "2025-05-25T08:00:00Z",
   },
   {
     id: "8",
@@ -151,6 +159,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     images: ["https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=800&q=80"],
     rating: 4.8,
     reviews: 73,
+    createdAt: "2025-05-28T09:00:00Z",
   },
   {
     id: "9",
@@ -167,6 +176,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     images: ["https://images.unsplash.com/photo-1612825173281-9a193378527e?w=800&q=80"],
     rating: 4.5,
     reviews: 18,
+    createdAt: "2025-05-30T11:00:00Z",
   }
 ];
 
@@ -185,6 +195,7 @@ export function formatProductGraphQL(product: MockProduct) {
     colors: product.colors,
     price: product.price, // Include raw price for search filtering/sorting
     originalPrice: product.originalPrice,
+    createdAt: product.createdAt,
     images: {
       edges: product.images.map((img) => ({
         node: { url: img, altText: product.name }

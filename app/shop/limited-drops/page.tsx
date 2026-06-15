@@ -54,12 +54,29 @@ export default function LimitedDropsPage() {
       hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
       badge: node.badge,
       category: node.category || 'Tops',
+      createdAt: node.createdAt || '',
     };
   }) || [];
 
   const groupedProducts = groupProducts(allProducts);
   const drops = groupedProducts.filter((p: any) => p.badge?.toLowerCase() === 'limited');
   const displayProducts = drops.length > 0 ? drops : groupedProducts.slice(0, 3);
+
+  const newestId = (() => {
+    if (displayProducts.length === 0) return '';
+    let newest = displayProducts[0];
+    let maxTime = 0;
+    for (const p of displayProducts) {
+      if (p.createdAt) {
+        const time = new Date(p.createdAt).getTime();
+        if (time > maxTime) {
+          maxTime = time;
+          newest = p;
+        }
+      }
+    }
+    return maxTime > 0 ? newest.id : '';
+  })();
 
   return (
     <div style={{ paddingTop: "64px", backgroundColor: "#F7F4EE", minHeight: "100vh" }}>
@@ -77,7 +94,13 @@ export default function LimitedDropsPage() {
 
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
-          {displayProducts.map((p: any) => <ProductCard key={p.id} {...p} />)}
+          {displayProducts.map((p: any) => (
+            <ProductCard
+              key={p.id}
+              {...p}
+              badge={p.id === newestId ? "New" : p.badge}
+            />
+          ))}
         </div>
       </div>
     </div>
