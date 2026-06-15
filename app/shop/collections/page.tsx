@@ -29,7 +29,7 @@ export default function CollectionsPage() {
             {collections.map((collection: any) => (
               <Link
                 key={collection.id}
-                href={`/shop?category=${encodeURIComponent(collection.title)}`}
+                href={`/shop?category=${encodeURIComponent(collection.handle)}`}
                 style={{
                   textDecoration: 'none',
                   display: 'block',

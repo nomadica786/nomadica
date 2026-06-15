@@ -1,25 +1,78 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
-import { groupProducts } from "@/utils/productGroup";
+import { groupProducts, sortNewArrivalsFirst } from "@/utils/productGroup";
 import { Filter, ChevronDown, X } from "lucide-react";
 
-const categories = ["All", "Tops", "Bottoms", "Outerwear", "Knits"];
 const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
 
-export default function CollectionsPage() {
-  const [activeCategory, setActiveCategory] = useState("All");
+function CollectionsPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category") || "all";
+
+  const [categories, setCategories] = useState<{ title: string; handle: string }[]>([
+    { title: "All", handle: "all" }
+  ]);
   const [sortBy, setSortBy] = useState("Featured");
-  const { data, loading } = useApi(() => api.products.list(50));
+
+  // Fetch collections from Shopify for filter tabs
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.collections.list();
+        const edges = res?.collections?.edges || [];
+        const list = edges.map((edge: any) => ({
+          title: edge.node.title,
+          handle: edge.node.handle
+        }));
+        setCategories([{ title: "All", handle: "all" }, ...list]);
+      } catch (err) {
+        console.error("Failed to fetch collections:", err);
+        // Fallback static categories
+        setCategories([
+          { title: "All", handle: "all" },
+          { title: "Tops", handle: "tops" },
+          { title: "Bottoms", handle: "bottoms" },
+          { title: "Outerwear", handle: "outerwear" },
+          { title: "Knits", handle: "knits" }
+        ]);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const isAll = categoryParam.toLowerCase() === "all";
+
+  // Call the api dynamically based on whether it is a custom collection or static category
+  const { data, loading } = useApi(() => {
+    if (isAll) {
+      return api.products.list(50);
+    } else {
+      return api.collections.getByHandle(categoryParam, 50);
+    }
+  }, [categoryParam, isAll]);
+
+  const handleCategoryChange = (handle: string) => {
+    if (handle === "all") {
+      router.push("/shop");
+    } else {
+      router.push(`/shop?category=${encodeURIComponent(handle)}`);
+    }
+  };
 
   if (loading) {
     return <PageLoader />;
   }
 
+  // Resolve the edges depending on API response structure
+  const edges = data?.collectionByHandle?.products?.edges || data?.products?.edges || [];
+
   // Map Shopify GraphQL product nodes back to standard ProductCard props
-  const allProducts = data?.products?.edges?.map((edge: any) => {
+  const allProducts = edges.map((edge: any) => {
     const node = edge.node;
     const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
     const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
@@ -31,37 +84,36 @@ export default function CollectionsPage() {
       image: node.images?.edges?.[0]?.node?.url || '',
       hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
       badge: node.badge,
-      category: node.category || 'Tops',
+      category: node.productType || node.category || 'Tops',
       createdAt: node.createdAt || '',
     };
   }) || [];
 
   const groupedProducts = groupProducts(allProducts);
 
-  const filtered = groupedProducts
-    .filter((p: any ) => activeCategory === "All" || p.category === activeCategory)
-    .sort((a: any, b: any) => {
-      if (sortBy === "Price: Low to High") return a.price - b.price;
-      if (sortBy === "Price: High to Low") return b.price - a.price;
-      if (sortBy === "Newest") return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-      return 0;
-    });
+  // Apply "new arrivals first" partition and badge mapping
+  const { sorted: sortedProducts, newestIds } = sortNewArrivalsFirst(groupedProducts, 3);
 
-  const newestId = (() => {
-    if (filtered.length === 0) return '';
-    let newest = filtered[0];
-    let maxTime = 0;
-    for (const p of filtered) {
-      if (p.createdAt) {
-        const time = new Date(p.createdAt).getTime();
-        if (time > maxTime) {
-          maxTime = time;
-          newest = p;
-        }
-      }
+  // Sort other products (not in the top 3 newest) based on user's sorting option
+  const finalProducts = (() => {
+    const newestPart = sortedProducts.filter(p => newestIds.has(p.id));
+    const otherPart = sortedProducts.filter(p => !newestIds.has(p.id));
+
+    if (sortBy === "Price: Low to High") {
+      otherPart.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "Price: High to Low") {
+      otherPart.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "Newest") {
+      otherPart.sort((a, b) => {
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      });
     }
-    return maxTime > 0 ? newest.id : '';
+
+    return [...newestPart, ...otherPart];
   })();
+
+  const pageTitle = isAll ? "All Collections" : (data?.collectionByHandle?.title || "Collection");
+  const pageLabel = isAll ? "Explore" : "Collection";
 
   return (
     <div style={{ paddingTop: "64px", minHeight: "100vh", backgroundColor: "#F7F4EE" }}>
@@ -75,10 +127,10 @@ export default function CollectionsPage() {
       >
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#7A5C3E", marginBottom: "0.5rem" }}>
-            Explore
+            {pageLabel}
           </p>
           <h1 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
-            All Collections
+            {pageTitle}
           </h1>
         </div>
       </div>
@@ -108,26 +160,29 @@ export default function CollectionsPage() {
         >
           {/* Category tabs */}
           <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                style={{
-                  padding: "0.5rem 1rem",
-                  border: activeCategory === cat ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.2)",
-                  backgroundColor: activeCategory === cat ? "#1E1E1E" : "transparent",
-                  color: activeCategory === cat ? "#F7F4EE" : "#1E1E1E",
-                  fontFamily: "'Satoshi', sans-serif",
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {cat}
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const isSelected = categoryParam.toLowerCase() === cat.handle.toLowerCase();
+              return (
+                <button
+                  key={cat.handle}
+                  onClick={() => handleCategoryChange(cat.handle)}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    border: isSelected ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.2)",
+                    backgroundColor: isSelected ? "#1E1E1E" : "transparent",
+                    color: isSelected ? "#F7F4EE" : "#1E1E1E",
+                    fontFamily: "'Satoshi', sans-serif",
+                    fontSize: "0.8125rem",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {cat.title}
+                </button>
+              );
+            })}
           </div>
 
           {/* Sort */}
@@ -159,7 +214,7 @@ export default function CollectionsPage() {
       {/* Products grid */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "3rem 1.5rem" }}>
         <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", marginBottom: "2rem" }}>
-          {filtered.length} items
+          {finalProducts.length} items
         </p>
         <div
           style={{
@@ -168,15 +223,23 @@ export default function CollectionsPage() {
             gap: "1.5rem",
           }}
         >
-           {filtered.map((product: any) => (
+          {finalProducts.map((product: any) => (
             <ProductCard
               key={product.id}
               {...product}
-              badge={product.id === newestId ? "New" : product.badge}
+              badge={newestIds.has(product.id) ? "New" : product.badge}
             />
           ))}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CollectionsPage() {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <CollectionsPageContent />
+    </Suspense>
   );
 }

@@ -39,7 +39,7 @@ export default function SearchPage() {
             image: node.images?.edges?.[0]?.node?.url || '',
             hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
             badge: node.badge,
-            category: node.category || 'Tops',
+            category: node.productType || node.category || 'Tops',
             description: node.description || '',
             createdAt: node.createdAt || '',
           };

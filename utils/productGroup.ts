@@ -222,3 +222,39 @@ export function groupProducts(products: any[]): GroupedProduct[] {
 
   return Object.values(groups);
 }
+
+export function sortNewArrivalsFirst(products: GroupedProduct[], count: number = 3): { sorted: GroupedProduct[], newestIds: Set<string> } {
+  if (products.length === 0) return { sorted: [], newestIds: new Set() };
+
+  // 1. Find the newest products by date
+  const sortedByDate = [...products].sort((a, b) => {
+    const timeA = new Date(a.createdAt || 0).getTime();
+    const timeB = new Date(b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+
+  const newestIds = new Set<string>();
+  let markedCount = 0;
+  for (const p of sortedByDate) {
+    if (p.createdAt && markedCount < count) {
+      newestIds.add(p.id);
+      markedCount++;
+    }
+  }
+
+  // 2. Separate into newest and other products
+  const newestList = products.filter(p => newestIds.has(p.id));
+  const otherList = products.filter(p => !newestIds.has(p.id));
+
+  // Sort the newest subset descending so the absolute newest is index 0
+  newestList.sort((a, b) => {
+    const timeA = new Date(a.createdAt || 0).getTime();
+    const timeB = new Date(b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+
+  return {
+    sorted: [...newestList, ...otherList],
+    newestIds
+  };
+}

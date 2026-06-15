@@ -148,7 +148,7 @@ function ProductDetailContent() {
                 name: node.title,
                 price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
                 image: node.images?.edges?.[0]?.node?.url || "",
-                category: node.category || "Tops",
+                category: node.productType || node.category || "Tops",
               };
             }) || [];
             
@@ -165,7 +165,7 @@ function ProductDetailContent() {
                 name: node.title,
                 price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
                 image: node.images?.edges?.[0]?.node?.url || "",
-                category: node.category || "Tops",
+                category: node.productType || node.category || "Tops",
               };
             }).filter((p: any) => p.id !== rawProduct.id) || [];
             setRelatedProducts(listMapped.slice(0, 4));

@@ -22,6 +22,7 @@ export const STOREFRONT_QUERIES = {
             description
             handle
             createdAt
+            productType
             images(first: 5) {
               edges {
                 node {
@@ -144,21 +145,28 @@ export const STOREFRONT_QUERIES = {
             node {
               id
               title
+              description
               handle
-              images(first: 1) {
+              createdAt
+              productType
+              images(first: 5) {
                 edges {
                   node {
                     url
+                    altText
                   }
                 }
               }
-              variants(first: 1) {
+              variants(first: 10) {
                 edges {
                   node {
+                    id
+                    title
                     price {
                       amount
                       currencyCode
                     }
+                    available: availableForSale
                   }
                 }
               }

@@ -30,6 +30,7 @@ export async function GET() {
               title
               description
               handle
+              productType
               images(first: 1) {
                 edges {
                   node {
@@ -63,7 +64,7 @@ export async function GET() {
           name: node.title,
           price: parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0'),
           image: node.images?.edges?.[0]?.node?.url || '',
-          category: node.category || 'Tops',
+          category: node.productType || node.category || 'Tops',
           handle: node.handle
         }));
       return NextResponse.json({

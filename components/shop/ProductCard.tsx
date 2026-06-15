@@ -66,9 +66,7 @@ export default function ProductCard({
     : name;
   const currentPrice = activeVariant ? activeVariant.price : price;
   const currentOriginalPrice = activeVariant ? activeVariant.originalPrice : originalPrice;
-  const currentImage = activeVariant
-    ? (hovered && activeVariant.hoverImage ? activeVariant.hoverImage : activeVariant.image)
-    : (hovered && hoverImage ? hoverImage : image);
+  const currentImage = activeVariant ? activeVariant.image : image;
   const currentBadge = activeVariant ? (activeVariant.badge || badge) : badge;
 
   const productHref = href || `/shop/product-details?id=${currentId}`;

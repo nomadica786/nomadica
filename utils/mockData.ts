@@ -187,6 +187,7 @@ export function formatProductGraphQL(product: MockProduct) {
     description: product.description,
     handle: product.handle,
     category: product.category,
+    productType: product.category,
     badge: product.badge,
     rating: product.rating,
     reviews: product.reviews,

@@ -20,6 +20,7 @@ export async function GET(
     if (env.shopUrl && storefrontToken) {
       const client = new ShopifyStorefrontClient(env.shopUrl, storefrontToken);
       const data = await client.request(STOREFRONT_QUERIES.GET_COLLECTION_BY_HANDLE, { handle, first });
+      console.log('Shopify Response:', JSON.stringify(data))
       return NextResponse.json(data);
     }
   } catch (error) {
