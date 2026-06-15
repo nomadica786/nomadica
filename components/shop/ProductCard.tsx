@@ -35,6 +35,7 @@ interface ProductCardProps {
   category?: string;
   href?: string;
   colorVariants?: ColorVariant[];
+  handle?: string;
 }
 
 export default function ProductCard({
@@ -48,6 +49,7 @@ export default function ProductCard({
   category,
   href,
   colorVariants,
+  handle,
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -74,8 +76,9 @@ export default function ProductCard({
   const currentOriginalPrice = activeVariant ? activeVariant.originalPrice : originalPrice;
   const currentImage = activeVariant ? activeVariant.image : image;
   const currentBadge = activeVariant ? (activeVariant.badge || badge) : badge;
+  const currentHandle = activeVariant ? activeVariant.handle : handle;
 
-  const productHref = href || `/shop/product-details?id=${currentId}`;
+  const productHref = href || (currentHandle ? `/products/${currentHandle}` : `/shop/product-details?id=${currentId}`);
 
   useEffect(() => {
     const checkWishlist = async () => {

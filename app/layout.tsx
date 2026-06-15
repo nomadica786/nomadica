@@ -1,47 +1,23 @@
 import "./globals.css";
+import { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ClientLayout from "./ClientLayout";
+import { constructMetadata } from "@/lib/seo/metadata";
+import { getOrganizationSchema } from "@/lib/schema/organization";
+import { getWebsiteSchema } from "@/lib/schema/website";
+import JsonLd from "@/components/seo/JsonLd";
+import GoogleAnalytics from "@/components/seo/GoogleAnalytics";
 
-export const metadata = {
-  metadataBase: new URL("https://nomadica-orcin.vercel.app/"),
-
-  title: "Nomadica | Premium Travel Lifestyle Apparel & Adventure Wear",
-
-  description:
-    "Discover premium travel-inspired apparel, adventure wear, and lifestyle essentials crafted for explorers, creators, and modern nomads.",
-
-  openGraph: {
-    title:
-      "Nomadica | Premium Travel Lifestyle Apparel & Adventure Wear",
-
-    description:
-      "Travel-inspired apparel and lifestyle essentials designed for modern explorers. Wear your journey with Nomadica.",
-
-    siteName: "Nomadica",
-
-    images: [
-      {
-        url: "/opengraph-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Nomadica Travel Lifestyle Collection",
-      },
-    ],
-
-    type: "website",
-  },
-
-  twitter: {
-    card: "summary_large_image",
-
-    title:
-      "Nomadica | Premium Travel Lifestyle Apparel & Adventure Wear",
-
-    description:
-      "Travel-inspired apparel and lifestyle essentials designed for modern explorers.",
-
-    images: ["/opengraph-image.jpg"],
+export const metadata: Metadata = {
+  ...constructMetadata({
+    title: "Nomadica | Premium Travel Lifestyle Apparel & Adventure Wear",
+    description: "Discover premium travel-inspired apparel, adventure wear, and lifestyle essentials crafted for explorers, creators, and modern nomads.",
+    path: "/",
+    ogImage: "/opengraph-image.jpg",
+  }),
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "google-site-verification-placeholder",
   },
 };
 
@@ -50,6 +26,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const organizationSchema = getOrganizationSchema();
+  const websiteSchema = getWebsiteSchema();
+
   return (
     <html lang="en">
       <head>
@@ -61,6 +40,9 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <GoogleAnalytics />
+        <JsonLd schema={organizationSchema} />
+        <JsonLd schema={websiteSchema} />
         <ClientLayout>
           <Navbar />
           <main>{children}</main>

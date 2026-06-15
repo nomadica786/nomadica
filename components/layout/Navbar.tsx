@@ -20,7 +20,7 @@ const navLinks = [
       { label: "Limited Drops", href: "/shop/limited-drops" },
     ],
   },
-  { label: "Blogs", href: "/brand/journal" },
+  { label: "Blogs", href: "/journal" },
   { label: "Stories", href: "/brand/story" },
   {
     label: "Brand",
@@ -28,7 +28,7 @@ const navLinks = [
     children: [
       { label: "About Us", href: "/brand/about" },
       { label: "Our Story", href: "/brand/story" },
-      { label: "Journal", href: "/brand/journal" },
+      { label: "Journal", href: "/journal" },
       { label: "Sustainability", href: "/brand/sustainability" },
     ],
   },

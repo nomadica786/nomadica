@@ -731,7 +731,7 @@ export default function HomePage() {
                   <div key={i} style={{ aspectRatio: "16/10", backgroundColor: "#F0F0F0", animation: "shimmer 1.5s infinite" }} />
                 ))
               : collections.map((col: any) => (
-                  <Link key={col.id} href={`/shop?category=${encodeURIComponent(col.handle)}`} style={{ textDecoration: "none", display: "block" }}>
+                  <Link key={col.id} href={`/collections/${encodeURIComponent(col.handle)}`} style={{ textDecoration: "none", display: "block" }}>
                     <div style={{ position: "relative", aspectRatio: "16/10", overflow: "hidden" }} className="img-hover-zoom">
                       <img
                         src={col.image?.url || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
@@ -793,7 +793,7 @@ export default function HomePage() {
           products={collectionProducts[collectionConfigs[0].handle] || []}
           loading={loading}
           bgTint={true}
-          viewAllLink={`/shop?category=${encodeURIComponent(collectionConfigs[0].handle)}`}
+          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[0].handle)}`}
           viewAllText={`Explore ${collectionConfigs[0].title}`}
         />
       )}
@@ -806,7 +806,7 @@ export default function HomePage() {
           products={collectionProducts[collectionConfigs[1].handle] || []}
           loading={loading}
           bgTint={false}
-          viewAllLink={`/shop?category=${encodeURIComponent(collectionConfigs[1].handle)}`}
+          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[1].handle)}`}
           viewAllText={`Explore ${collectionConfigs[1].title}`}
         />
       )}
@@ -822,7 +822,7 @@ export default function HomePage() {
           products={collectionProducts[collectionConfigs[2].handle] || []}
           loading={loading}
           bgTint={false}
-          viewAllLink={`/shop?category=${encodeURIComponent(collectionConfigs[2].handle)}`}
+          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[2].handle)}`}
           viewAllText={`Explore ${collectionConfigs[2].title}`}
         />
       )}
@@ -835,7 +835,7 @@ export default function HomePage() {
           products={collectionProducts[collectionConfigs[3].handle] || []}
           loading={loading}
           bgTint={true}
-          viewAllLink={`/shop?category=${encodeURIComponent(collectionConfigs[3].handle)}`}
+          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[3].handle)}`}
           viewAllText={`Explore ${collectionConfigs[3].title}`}
         />
       )}
@@ -857,7 +857,7 @@ export default function HomePage() {
           products={collectionProducts[collectionConfigs[4].handle] || []}
           loading={loading}
           bgTint={false}
-          viewAllLink={`/shop?category=${encodeURIComponent(collectionConfigs[4].handle)}`}
+          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[4].handle)}`}
           viewAllText={`Explore ${collectionConfigs[4].title}`}
         />
       )}
@@ -883,7 +883,7 @@ export default function HomePage() {
                 The Nomad Journal
               </h2>
             </div>
-            <Link href="/brand/journal" style={{ textDecoration: "none" }}>
+            <Link href="/journal" style={{ textDecoration: "none" }}>
               <button className="btn-outline">
                 Read the Journal <ArrowRight size={14} />
               </button>
@@ -896,7 +896,7 @@ export default function HomePage() {
                   <div key={i} style={{ aspectRatio: "16/10", backgroundColor: "#F0F0F0", animation: "shimmer 1.5s infinite" }} />
                 ))
               : journalArticles.map((art: any) => (
-                  <Link key={art.id} href={`/brand/journal/${art.handle}`} style={{ textDecoration: "none", display: "block" }}>
+                  <Link key={art.id} href={`/journal/${art.handle}`} style={{ textDecoration: "none", display: "block" }}>
                     <div style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(30,30,30,0.08)", boxShadow: "0 12px 32px rgba(30,30,30,0.04)" }}>
                       <div style={{ aspectRatio: "16/10", overflow: "hidden" }}>
                         <img src={art.image?.url} alt={art.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />

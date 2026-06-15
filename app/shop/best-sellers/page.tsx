@@ -25,6 +25,7 @@ export default function BestSellersPage() {
       badge: node.badge,
       category: node.productType || node.category || 'Tops',
       createdAt: node.createdAt || '',
+      handle: node.handle,
     };
   }) || [];
 

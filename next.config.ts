@@ -20,6 +20,20 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/brand/journal",
+        destination: "/journal",
+        permanent: true,
+      },
+      {
+        source: "/brand/journal/:slug*",
+        destination: "/journal/:slug*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

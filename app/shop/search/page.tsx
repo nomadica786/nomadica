@@ -42,6 +42,7 @@ export default function SearchPage() {
             category: node.productType || node.category || 'Tops',
             description: node.description || '',
             createdAt: node.createdAt || '',
+            handle: node.handle,
           };
         }) || [];
 

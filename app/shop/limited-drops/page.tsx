@@ -55,6 +55,7 @@ export default function LimitedDropsPage() {
       badge: node.badge,
       category: node.productType || node.category || 'Tops',
       createdAt: node.createdAt || '',
+      handle: node.handle,
     };
   }) || [];
 

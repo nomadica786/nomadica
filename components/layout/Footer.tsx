@@ -37,16 +37,16 @@ const footerLinks = {
     { label: "Limited Drops", href: "/shop/limited-drops" },
   ],
   Collections: [
-    { label: "Destination", href: "/shop?category=destination-collection" },
-    { label: "Wildlife & Safari", href: "/shop?category=wildlife-and-safari" },
-    { label: "Adventure & Trekking", href: "/shop?category=adventure-and-trekking-collections" },
-    { label: "Travel Quotes", href: "/shop?category=travel-quotes" },
-    { label: "Beach Vibes", href: "/shop?category=beach-vibes" },
+    { label: "Destination", href: "/collections/destination-collection" },
+    { label: "Wildlife & Safari", href: "/collections/wildlife-and-safari" },
+    { label: "Adventure & Trekking", href: "/collections/adventure-and-trekking-collections" },
+    { label: "Travel Quotes", href: "/collections/travel-quotes" },
+    { label: "Beach Vibes", href: "/collections/beach-vibes" },
   ],
   Brand: [
     { label: "About Us", href: "/brand/about" },
     { label: "Our Story", href: "/brand/story" },
-    { label: "Journal", href: "/brand/journal" },
+    { label: "Journal", href: "/journal" },
     { label: "Sustainability", href: "/brand/sustainability" },
   ],
   Support: [
