@@ -12,6 +12,7 @@ import { useAuth } from "@/utils/hooks/useAuth";
 interface ProductDetails {
   id: string;
   name: string;
+  rawName: string;
   price: number;
   originalPrice?: number;
   category: string;
@@ -44,6 +45,7 @@ function ProductDetailContent() {
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [cartAdding, setCartAdding] = useState(false);
   const [colorVariations, setColorVariations] = useState<any[]>([]);
+  const [hoveredColorImage, setHoveredColorImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -58,11 +60,13 @@ function ProductDetailContent() {
 
         const rawProduct = res?.product || res?.productByHandle;
         if (rawProduct) {
+          const parsed = parseProduct({ name: rawProduct.title, colors: rawProduct.colors });
           const priceVal = rawProduct.price || parseFloat(rawProduct.variants?.edges?.[0]?.node?.price?.amount || "0");
           const origPriceVal = rawProduct.originalPrice || (rawProduct.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(rawProduct.variants?.edges?.[0]?.node?.compareAtPrice?.amount || "0") : undefined);
           const mappedProduct: ProductDetails = {
             id: rawProduct.id,
-            name: rawProduct.title,
+            name: parsed.baseName,
+            rawName: rawProduct.title,
             price: priceVal,
             originalPrice: origPriceVal,
             category: rawProduct.category || "Tops",
@@ -97,6 +101,7 @@ function ProductDetailContent() {
                   handle: node.handle,
                   colorName: parsed.colorName,
                   colorHex: parsed.colorHex,
+                  image: node.images?.edges?.[0]?.node?.url || "",
                 });
               }
             }
@@ -292,43 +297,98 @@ function ProductDetailContent() {
         }}
       >
         {/* Images */}
-        <div>
-          {/* Main image */}
-          <div
-            style={{
-              aspectRatio: "3/4",
-              overflow: "hidden",
-              backgroundColor: "#EDE9E1",
-              marginBottom: "0.75rem",
-            }}
-          >
-            <img
-              src={product.images[selectedImage]}
-              alt={product.name}
-              style={{ width: "100%", height: "100%", objectFit: "cover", transition: "opacity 0.3s ease" }}
-            />
-          </div>
+        <div style={{ display: "flex", gap: "1.5rem", alignItems: "start" }}>
+          {/* Color Variations Stack (Vertical, on the left) */}
+          {colorVariations.length > 1 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "80px", flexShrink: 0 }}>
+              <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.6875rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "rgba(30,30,30,0.5)", margin: 0, textAlign: "center" }}>
+                Colors
+              </p>
+              {colorVariations.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => {
+                    router.push(`/shop/product-details?id=${v.id}`);
+                  }}
+                  onMouseEnter={() => {
+                    setHoveredColorImage(v.image);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredColorImage(null);
+                  }}
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    aspectRatio: "3/4",
+                    overflow: "hidden",
+                    border: product.id === v.id ? "2px solid #1E1E1E" : "1px solid rgba(30, 30, 30, 0.15)",
+                    cursor: "pointer",
+                    padding: 0,
+                    background: "none",
+                    transition: "all 0.2s ease",
+                  }}
+                  title={v.colorName}
+                >
+                  <img src={v.image} alt={v.colorName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  {/* Small Color Dot Indicator in bottom-right corner of thumbnail */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "4px",
+                      right: "4px",
+                      width: "12px",
+                      height: "12px",
+                      borderRadius: "50%",
+                      backgroundColor: v.colorHex,
+                      border: "1px solid rgba(247,244,238,0.8)",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
 
-          {/* Thumbnails */}
-          <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto" }}>
-            {product.images.map((img, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedImage(i)}
-                style={{
-                  flexShrink: 0,
-                  width: "80px",
-                  aspectRatio: "1",
-                  overflow: "hidden",
-                  border: selectedImage === i ? "2px solid #1E1E1E" : "2px solid transparent",
-                  cursor: "pointer",
-                  padding: 0,
-                  background: "none",
-                }}
-              >
-                <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              </button>
-            ))}
+          {/* Main Image + Standard Thumbnails */}
+          <div style={{ flexGrow: 1, minWidth: 0 }}>
+            {/* Main image */}
+            <div
+              style={{
+                position: "relative",
+                aspectRatio: "3/4",
+                overflow: "hidden",
+                backgroundColor: "#EDE9E1",
+                marginBottom: "0.75rem",
+              }}
+            >
+              <img
+                src={hoveredColorImage || product.images[selectedImage]}
+                alt={product.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover", transition: "opacity 0.3s ease" }}
+              />
+            </div>
+
+            {/* Thumbnails (for standard photos of current color product) */}
+            <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto" }}>
+              {product.images.map((img, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelectedImage(i)}
+                  style={{
+                    flexShrink: 0,
+                    width: "80px",
+                    aspectRatio: "1",
+                    overflow: "hidden",
+                    border: selectedImage === i ? "2px solid #1E1E1E" : "2px solid transparent",
+                    cursor: "pointer",
+                    padding: 0,
+                    background: "none",
+                  }}
+                >
+                  <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -429,7 +489,7 @@ function ProductDetailContent() {
             {colorVariations.length > 1 ? (
               <>
                 <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "0.8125rem", fontWeight: 500, color: "#1E1E1E", marginBottom: "0.75rem" }}>
-                  Colour: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>{parseProduct({ name: product.name }).colorName}</span>
+                  Colour: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>{parseProduct({ name: product.rawName }).colorName}</span>
                 </p>
                 <div style={{ display: "flex", gap: "0.625rem" }}>
                   {colorVariations.map((v) => (
@@ -453,9 +513,11 @@ function ProductDetailContent() {
                       title={v.colorName}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
+                        setHoveredColorImage(v.image);
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                        setHoveredColorImage(null);
                       }}
                     />
                   ))}
