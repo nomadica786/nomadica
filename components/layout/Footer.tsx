@@ -36,6 +36,13 @@ const footerLinks = {
     { label: "Collections", href: "/shop/collections" },
     { label: "Limited Drops", href: "/shop/limited-drops" },
   ],
+  Collections: [
+    { label: "Destination", href: "/shop?category=destination-collection" },
+    { label: "Wildlife & Safari", href: "/shop?category=wildlife-and-safari" },
+    { label: "Adventure & Trekking", href: "/shop?category=adventure-and-trekking-collections" },
+    { label: "Travel Quotes", href: "/shop?category=travel-quotes" },
+    { label: "Beach Vibes", href: "/shop?category=beach-vibes" },
+  ],
   Brand: [
     { label: "About Us", href: "/brand/about" },
     { label: "Our Story", href: "/brand/story" },

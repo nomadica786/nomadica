@@ -6,6 +6,12 @@ import { Heart, ShoppingBag } from "lucide-react";
 import { api } from "@/components/api/api";
 import { useAuth } from "@/utils/hooks/useAuth";
 
+const isWhiteColor = (colorHex: string) => {
+  if (!colorHex) return false;
+  const normalized = colorHex.trim().toLowerCase();
+  return normalized === "#ffffff" || normalized === "white" || normalized === "#fff";
+};
+
 interface ColorVariant {
   id: string;
   colorName: string;
@@ -340,7 +346,9 @@ export default function ProductCard({
                   height: "14px",
                   borderRadius: "50%",
                   backgroundColor: v.colorHex,
-                  border: activeVariant?.id === v.id ? "1.5px solid #1E1E1E" : "1px solid rgba(30, 30, 30, 0.2)",
+                  border: activeVariant?.id === v.id
+                    ? "1.5px solid #1E1E1E"
+                    : (isWhiteColor(v.colorHex) ? "1.5px solid #1E1E1E" : "1px solid rgba(30, 30, 30, 0.2)"),
                   boxShadow: activeVariant?.id === v.id ? "0 0 0 1.5px #FFFFFF inset" : "none",
                   cursor: "pointer",
                   padding: 0,

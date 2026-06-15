@@ -9,6 +9,37 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { parseProduct, groupProducts } from "@/utils/productGroup";
 import { useAuth } from "@/utils/hooks/useAuth";
 
+function getMarkupPrice(id: string, price: number) {
+  let hash = 0;
+  const str = String(id || "");
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const percent = 30 + Math.abs(hash % 11); // 30-40%
+  const rawOriginalPrice = price * (1 + percent / 100);
+  
+  // Round to nearest 50 and subtract 1 (e.g., 149, 199, 249, 299)
+  let roundedOriginalPrice = Math.round(rawOriginalPrice / 50) * 50 - 1;
+  
+  // Ensure it's higher than the actual price
+  if (roundedOriginalPrice <= price) {
+    roundedOriginalPrice = Math.ceil(rawOriginalPrice / 10) * 10 - 1;
+  }
+  
+  const discountPercent = Math.round(((roundedOriginalPrice - price) / roundedOriginalPrice) * 100);
+  
+  return {
+    originalPrice: roundedOriginalPrice,
+    discount: discountPercent
+  };
+}
+
+const isWhiteColor = (colorHex: string) => {
+  if (!colorHex) return false;
+  const normalized = colorHex.trim().toLowerCase();
+  return normalized === "#ffffff" || normalized === "white" || normalized === "#fff";
+};
+
 interface ProductDetails {
   id: string;
   name: string;
@@ -297,9 +328,7 @@ function ProductDetailContent() {
     );
   }
 
-  const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+  const { originalPrice: markupPrice, discount: markupDiscount } = getMarkupPrice(product.id, product.price);
 
   return (
     <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
@@ -384,7 +413,7 @@ function ProductDetailContent() {
                       height: "12px",
                       borderRadius: "50%",
                       backgroundColor: v.colorHex,
-                      border: "1px solid rgba(255, 255, 255,0.8)",
+                      border: isWhiteColor(v.colorHex) ? "1px solid #1E1E1E" : "1px solid rgba(255, 255, 255,0.8)",
                       boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                     }}
                   />
@@ -492,6 +521,16 @@ function ProductDetailContent() {
           <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
             <span
               style={{
+                fontFamily: "'Satoshi', sans-serif",
+                fontSize: "1.125rem",
+                color: "rgba(30,30,30,0.35)",
+                textDecoration: "line-through",
+              }}
+            >
+              ₹{markupPrice.toLocaleString("en-IN")}
+            </span>
+            <span
+              style={{
                 fontFamily: "'Clash Display', sans-serif",
                 fontSize: "1.75rem",
                 fontWeight: 600,
@@ -500,32 +539,18 @@ function ProductDetailContent() {
             >
               ₹{product.price.toLocaleString("en-IN")}
             </span>
-            {product.originalPrice && (
-              <>
-                <span
-                  style={{
-                    fontFamily: "'Satoshi', sans-serif",
-                    fontSize: "1.125rem",
-                    color: "rgba(30,30,30,0.35)",
-                    textDecoration: "line-through",
-                  }}
-                >
-                  ₹{product.originalPrice.toLocaleString("en-IN")}
-                </span>
-                <span
-                  style={{
-                    backgroundColor: "#1E1E1E",
-                    color: "#FFFFFF",
-                    padding: "0.2rem 0.5rem",
-                    fontFamily: "'Satoshi', sans-serif",
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  {discount}% OFF
-                </span>
-              </>
-            )}
+            <span
+              style={{
+                backgroundColor: "#1E1E1E",
+                color: "#FFFFFF",
+                padding: "0.2rem 0.5rem",
+                fontFamily: "'Satoshi', sans-serif",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+              }}
+            >
+              {markupDiscount}% OFF
+            </span>
           </div>
 
           {/* Color */}
@@ -547,7 +572,9 @@ function ProductDetailContent() {
                         height: "28px",
                         borderRadius: "50%",
                         backgroundColor: v.colorHex,
-                        border: product.id === v.id ? "2px solid #1E1E1E" : "2px solid transparent",
+                        border: product.id === v.id
+                          ? "2px solid #1E1E1E"
+                          : (isWhiteColor(v.colorHex) ? "1px solid #1E1E1E" : "2px solid transparent"),
                         outline: product.id === v.id ? "1px solid #1E1E1E" : "none",
                         outlineOffset: "2px",
                         cursor: "pointer",
@@ -582,7 +609,9 @@ function ProductDetailContent() {
                         height: "28px",
                         borderRadius: "50%",
                         backgroundColor: color,
-                        border: selectedColor === color ? "2px solid #1E1E1E" : "2px solid transparent",
+                        border: selectedColor === color
+                          ? "2px solid #1E1E1E"
+                          : (isWhiteColor(color) ? "1px solid #1E1E1E" : "2px solid transparent"),
                         outline: selectedColor === color ? "1px solid #1E1E1E" : "none",
                         outlineOffset: "2px",
                         cursor: "pointer",

@@ -9,6 +9,7 @@ import { useAuth } from "@/utils/hooks/useAuth";
 import { api } from "@/components/api/api";
 
 const navLinks = [
+  { label: "Home", href: "/" },
   {
     label: "Shop",
     href: "/shop",
@@ -19,6 +20,8 @@ const navLinks = [
       { label: "Limited Drops", href: "/shop/limited-drops" },
     ],
   },
+  { label: "Blogs", href: "/brand/journal" },
+  { label: "Stories", href: "/brand/story" },
   {
     label: "Brand",
     href: "/brand",
