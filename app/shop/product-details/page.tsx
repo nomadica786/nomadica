@@ -49,7 +49,9 @@ function ProductDetailContent() {
 
   useEffect(() => {
     const fetchProduct = async () => {
-      setLoading(true);
+      if (!product) {
+        setLoading(true);
+      }
       try {
         let res;
         if (handle) {
