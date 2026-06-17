@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import Image from "next/image";
 
 const slides = [
   {
@@ -124,11 +125,20 @@ export default function LoginPage() {
               fontWeight: 600,
               color: "#1E1E1E",
               textDecoration: "none",
-              display: "block",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
               marginBottom: "3rem",
             }}
           >
-            NOMADICA
+            <Image
+              src="/Logo.png"
+              alt="Nomadica Logo"
+              width={28}
+              height={28}
+              style={{ objectFit: "contain" }}
+            />
+            <span>NOMADICA</span>
           </Link>
 
           <h1

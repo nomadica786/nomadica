@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import Image from "next/image";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -67,8 +68,28 @@ export default function SignupPage() {
       {/* Right – Form */}
       <div style={{ width: "100%", maxWidth: "480px", display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem 2rem", backgroundColor: "#FFFFFF" }}>
         <div style={{ maxWidth: "400px", margin: "0 auto", width: "100%" }}>
-          <Link href="/" style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", textDecoration: "none", display: "block", marginBottom: "3rem" }}>
-            NOMADICA
+          <Link
+            href="/"
+            style={{
+              fontFamily: "'Playfair Display', sans-serif",
+              fontSize: "1.25rem",
+              fontWeight: 600,
+              color: "#1E1E1E",
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              marginBottom: "3rem",
+            }}
+          >
+            <Image
+              src="/Logo.png"
+              alt="Nomadica Logo"
+              width={28}
+              height={28}
+              style={{ objectFit: "contain" }}
+            />
+            <span>NOMADICA</span>
           </Link>
 
           <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "2.25rem", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>

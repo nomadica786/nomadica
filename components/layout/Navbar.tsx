@@ -158,45 +158,59 @@ export default function Navbar() {
 
   return (
     <>
-      <nav
+<nav
+  style={{
+    position: "sticky",
+    top: 0,
+    width: "100%",
+    background: "#fff",
+    borderBottom: "1px solid #eee",
+    zIndex: 100,
+  }}
+>
+  <div
+    style={{
+      maxWidth: "1400px",
+      margin: "0 auto",
+      padding: "0 1.5rem",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      height: "64px",
+    }}
+  >
+    <Link
+      href="/"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem",
+        textDecoration: "none",
+        color: "#1E1E1E",
+      }}
+    >
+      <Image
+        src="/Logo.png"
+        alt="Nomadica Logo"
+        width={40}
+        height={40}
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          backgroundColor: scrolled ? "rgba(255, 255, 255, 0.95)" : "#FFFFFF",
-          backdropFilter: scrolled ? "blur(12px)" : "none",
-          borderBottom: scrolled ? "1px solid rgba(30,30,30,0.08)" : "1px solid transparent",
-          transition: "all 0.3s ease",
+          objectFit: "contain",
+          display: "block",
+        }}
+      />
+
+      <span
+        style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: "1.375rem",
+          fontWeight: 600,
+          lineHeight: 1,
         }}
       >
-        <div
-          style={{
-            maxWidth: "1400px",
-            margin: "0 auto",
-            padding: "0 1.5rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            height: "64px",
-          }}
-        >
-          {/* Logo */}
-          <Link
-            href="/"
-            style={{
-              fontFamily: "'Playfair Display', sans-serif",
-              fontSize: "1.375rem",
-              fontWeight: 600,
-              color: "#1E1E1E",
-              textDecoration: "none",
-              letterSpacing: "-0.01em",
-              flexShrink: 0,
-            }}
-          >
-            NOMADICA
-          </Link>
+        NOMADICA
+      </span>
+    </Link>
 
           {/* Desktop Nav */}
           <div
