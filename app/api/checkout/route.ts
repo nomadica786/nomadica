@@ -4,14 +4,96 @@ import { cookies } from 'next/headers';
 import { NextResponse, NextRequest } from 'next/server';
 import { ShopifyAdminClient } from '@/lib/shopify/client';
 import { getShopifySession } from '@/utils/shopifySession';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+
+function verifySignature(
+  orderId: string,
+  paymentId: string,
+  signature: string,
+  secret: string
+): boolean {
+  try {
+    const generated = crypto
+      .createHmac('sha256', secret)
+      .update(`${orderId}|${paymentId}`)
+      .digest('hex');
+    return generated === signature;
+  } catch (error) {
+    console.error('Error verifying signature:', error);
+    return false;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const env = getEnvironment();
+    const { action, paymentMethod } = body;
 
-    // Process checkout using mock payment gateway and sync with Shopify Admin API
-    if (true) {
+    // 1. Razorpay Order Creation action
+    if (action === 'create') {
+      const { totalPrice, currency } = body;
+      if (!totalPrice) {
+        return NextResponse.json({ error: 'Missing total price' }, { status: 400 });
+      }
+
+      const keyId = process.env.RAZORPAY_KEY_ID;
+      const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+      if (!keyId || !keySecret) {
+        console.error('Razorpay API keys are not configured in environment variables');
+        return NextResponse.json({ error: 'Razorpay keys not configured on server' }, { status: 500 });
+      }
+
+      const razorpay = new Razorpay({
+        key_id: keyId,
+        key_secret: keySecret,
+      });
+
+      const amountInPaise = Math.round(totalPrice * 100);
+      const receipt = `rcpt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+      const options = {
+        amount: amountInPaise,
+        currency: currency || 'INR',
+        receipt,
+      };
+
+      const razorpayOrder = await razorpay.orders.create(options);
+
+      return NextResponse.json({
+        success: true,
+        orderId: razorpayOrder.id,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        keyId,
+      });
+    }
+
+    // 2. Razorpay Payment Verification OR Cash on Delivery OR Legacy Flow
+    let isPaymentVerified = false;
+
+    if (action === 'verify') {
+      const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = body;
+      const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+      if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+        return NextResponse.json({ error: 'Missing Razorpay signature verification parameters' }, { status: 400 });
+      }
+
+      if (!keySecret) {
+        return NextResponse.json({ error: 'Razorpay secret not configured on server' }, { status: 500 });
+      }
+
+      isPaymentVerified = verifySignature(razorpay_order_id, razorpay_payment_id, razorpay_signature, keySecret);
+
+      if (!isPaymentVerified) {
+        return NextResponse.json({ error: 'Payment verification failed: signature mismatch' }, { status: 400 });
+      }
+    } else if (paymentMethod === 'cod' || paymentMethod === 'COD') {
+      isPaymentVerified = true;
+    } else {
+      // Fallback/Mock payment gateway check for old flow
       const paymentResult = await MockPaymentGateway.processPayment({
         orderId: body.orderId || `MOCK_ORDER_${Date.now()}`,
         amount: body.totalPrice || body.amount || 0,
@@ -21,82 +103,122 @@ export async function POST(request: NextRequest) {
         expiry: body.expiry,
         cvv: body.cvv
       });
+      isPaymentVerified = paymentResult.success;
+      if (!isPaymentVerified) {
+        return NextResponse.json(paymentResult);
+      }
+    }
 
-      if (paymentResult.success) {
-        console.log('================================================================');
-        console.log('[ORDER UPDATE PROCESS] STARTING ORDER CREATION AND UPDATE FLOW');
-        console.log('================================================================');
-        
-        const cookieStore = await cookies();
-        const customerEmail = cookieStore.get('customer_email')?.value;
-        const session = getShopifySession();
-        const accessToken = session?.accessToken || cookieStore.get('shopify_access_token')?.value;
-        const shop = session?.shop || cookieStore.get('shopify_shop')?.value;
+    if (isPaymentVerified) {
+      console.log('================================================================');
+      console.log('[ORDER UPDATE PROCESS] STARTING ORDER CREATION AND UPDATE FLOW');
+      console.log('================================================================');
+      
+      const cookieStore = await cookies();
+      const customerEmail = cookieStore.get('customer_email')?.value;
+      const session = getShopifySession();
+      const accessToken = session?.accessToken || cookieStore.get('shopify_access_token')?.value;
+      const shop = session?.shop || cookieStore.get('shopify_shop')?.value;
 
-        console.log('[STEP 1: SESSION CHECK] Checking credentials for Shopify and Local stores:');
-        console.log('  - Active customer email session:', customerEmail || 'GUEST / NONE');
-        console.log('  - Server-side cached Shopify session loaded:', session ? 'YES (Valid)' : 'NO');
-        console.log('  - Shopify Admin Access Token found:', accessToken ? `YES (${accessToken.slice(0, 8)}...)` : 'NO');
-        console.log('  - Shopify Merchant Shop Domain:', shop || 'NONE');
+      console.log('[STEP 1: SESSION CHECK] Checking credentials for Shopify and Local stores:');
+      console.log('  - Active customer email session:', customerEmail || 'GUEST / NONE');
+      console.log('  - Server-side cached Shopify session loaded:', session ? 'YES (Valid)' : 'NO');
+      console.log('  - Shopify Admin Access Token found:', accessToken ? `YES (${accessToken.slice(0, 8)}...)` : 'NO');
+      console.log('  - Shopify Merchant Shop Domain:', shop || 'NONE');
 
-        let shopifyOrderId = null;
-        let shopifyOrderNumber = null;
+      let shopifyOrderId = null;
+      let shopifyOrderNumber = null;
 
-        if (accessToken && shop) {
-          console.log('\n[STEP 2: SHOPIFY UPDATE - START] Initiating order sync with Shopify Merchant Dashboard');
-          try {
-            console.log('  - Initializing ShopifyAdminClient for shop:', shop);
-            const adminClient = new ShopifyAdminClient(shop, accessToken);
-            
-            console.log('  - Preparing line items from cart...');
-            const draftLineItems = (body.lineItems || []).map((item: any) => {
-              let cleanVariantId = item.variantId;
-              if (cleanVariantId && !cleanVariantId.startsWith('gid://')) {
-                try {
-                  const decoded = Buffer.from(cleanVariantId, 'base64').toString('utf8');
-                  if (decoded.startsWith('gid://')) {
-                    console.log(`    - Decoded Base64 Storefront variant ID to Admin GID: ${cleanVariantId} -> ${decoded}`);
-                    cleanVariantId = decoded;
-                  }
-                } catch (e: any) {
-                  console.log(`    - Failed to decode variant ID ${cleanVariantId}:`, e.message);
+      if (accessToken && shop) {
+        console.log('\n[STEP 2: SHOPIFY UPDATE - START] Initiating order sync with Shopify Merchant Dashboard');
+        try {
+          console.log('  - Initializing ShopifyAdminClient for shop:', shop);
+          const adminClient = new ShopifyAdminClient(shop, accessToken);
+          
+          console.log('  - Preparing line items from cart...');
+          const draftLineItems = (body.lineItems || []).map((item: any) => {
+            let cleanVariantId = item.variantId;
+            if (cleanVariantId && !cleanVariantId.startsWith('gid://')) {
+              try {
+                const decoded = Buffer.from(cleanVariantId, 'base64').toString('utf8');
+                if (decoded.startsWith('gid://')) {
+                  console.log(`    - Decoded Base64 Storefront variant ID to Admin GID: ${cleanVariantId} -> ${decoded}`);
+                  cleanVariantId = decoded;
+                }
+              } catch (e: any) {
+                console.log(`    - Failed to decode variant ID ${cleanVariantId}:`, e.message);
+              }
+            }
+            return {
+              variantId: cleanVariantId,
+              quantity: item.quantity
+            };
+          });
+
+          const draftInput = {
+            email: customerEmail || body.email || 'customer@example.com',
+            shippingAddress: {
+              firstName: body.firstName || 'Traveler',
+              lastName: body.lastName || 'Guest',
+              address1: body.address1 || '123 Main St',
+              address2: body.address2 || '',
+              city: body.city || 'Mumbai',
+              province: body.province || 'Maharashtra',
+              zip: body.zip || '400001',
+              countryCode: 'IN'
+            },
+            billingAddress: {
+              firstName: body.firstName || 'Traveler',
+              lastName: body.lastName || 'Guest',
+              address1: body.address1 || '123 Main St',
+              address2: body.address2 || '',
+              city: body.city || 'Mumbai',
+              province: body.province || 'Maharashtra',
+              zip: body.zip || '400001',
+              countryCode: 'IN'
+            },
+            lineItems: draftLineItems
+          };
+
+          console.log('  - [SHOPIFY MUTATION 1/2] Sending draftOrderCreate mutation...');
+          console.log('    - Payload sent to Shopify:', JSON.stringify(draftInput, null, 2));
+
+          let draftData = await adminClient.request(
+            `mutation DraftOrderCreate($input: DraftOrderInput!) {
+              draftOrderCreate(input: $input) {
+                draftOrder {
+                  id
+                }
+                userErrors {
+                  field
+                  message
                 }
               }
-              return {
-                variantId: cleanVariantId,
-                quantity: item.quantity
-              };
-            });
+            }`,
+            { input: draftInput }
+          );
 
-            const draftInput = {
-              email: customerEmail || body.email || 'customer@example.com',
-              shippingAddress: {
-                firstName: body.firstName || 'Traveler',
-                lastName: body.lastName || 'Guest',
-                address1: body.address1 || '123 Main St',
-                address2: body.address2 || '',
-                city: body.city || 'Mumbai',
-                province: body.province || 'Maharashtra',
-                zip: body.zip || '400001',
-                countryCode: 'IN'
-              },
-              billingAddress: {
-                firstName: body.firstName || 'Traveler',
-                lastName: body.lastName || 'Guest',
-                address1: body.address1 || '123 Main St',
-                address2: body.address2 || '',
-                city: body.city || 'Mumbai',
-                province: body.province || 'Maharashtra',
-                zip: body.zip || '400001',
-                countryCode: 'IN'
-              },
-              lineItems: draftLineItems
+          let draftPayload = draftData?.draftOrderCreate;
+          console.log('  - [SHOPIFY RESPONSE] draftOrderCreate raw API response:', JSON.stringify(draftData, null, 2));
+
+          if ((!draftPayload?.draftOrder?.id || (draftPayload?.userErrors && draftPayload.userErrors.length > 0)) && body.lineItems) {
+            console.warn('\n  - [SHOPIFY FALLBACK TRIGGERED] Draft order creation failed or has validation errors (e.g., variant IDs do not exist in merchant catalog). Retrying with custom line items...');
+            
+            const customLineItems = (body.lineItems || []).map((item: any) => ({
+              title: item.title || 'Product',
+              originalUnitPrice: String(item.price || 0),
+              quantity: item.quantity
+            }));
+
+            const retryInput = {
+              ...draftInput,
+              lineItems: customLineItems
             };
 
-            console.log('  - [SHOPIFY MUTATION 1/2] Sending draftOrderCreate mutation...');
-            console.log('    - Payload sent to Shopify:', JSON.stringify(draftInput, null, 2));
+            console.log('  - [SHOPIFY MUTATION RETRY] Retrying draftOrderCreate with custom line items...');
+            console.log('    - Fallback Payload sent to Shopify:', JSON.stringify(retryInput, null, 2));
 
-            let draftData = await adminClient.request(
+            const retryData = await adminClient.request(
               `mutation DraftOrderCreate($input: DraftOrderInput!) {
                 draftOrderCreate(input: $input) {
                   draftOrder {
@@ -108,189 +230,154 @@ export async function POST(request: NextRequest) {
                   }
                 }
               }`,
-              { input: draftInput }
+              { input: retryInput }
             );
 
-            let draftPayload = draftData?.draftOrderCreate;
-            console.log('  - [SHOPIFY RESPONSE] draftOrderCreate raw API response:', JSON.stringify(draftData, null, 2));
+            console.log('  - [SHOPIFY RESPONSE] Fallback draftOrderCreate raw API response:', JSON.stringify(retryData, null, 2));
 
-            if ((!draftPayload?.draftOrder?.id || (draftPayload?.userErrors && draftPayload.userErrors.length > 0)) && body.lineItems) {
-              console.warn('\n  - [SHOPIFY FALLBACK TRIGGERED] Draft order creation failed or has validation errors (e.g., variant IDs do not exist in merchant catalog). Retrying with custom line items...');
-              
-              const customLineItems = (body.lineItems || []).map((item: any) => ({
-                title: item.title || 'Product',
-                originalUnitPrice: String(item.price || 0),
-                quantity: item.quantity
-              }));
-
-              const retryInput = {
-                ...draftInput,
-                lineItems: customLineItems
-              };
-
-              console.log('  - [SHOPIFY MUTATION RETRY] Retrying draftOrderCreate with custom line items...');
-              console.log('    - Fallback Payload sent to Shopify:', JSON.stringify(retryInput, null, 2));
-
-              const retryData = await adminClient.request(
-                `mutation DraftOrderCreate($input: DraftOrderInput!) {
-                  draftOrderCreate(input: $input) {
-                    draftOrder {
-                      id
-                    }
-                    userErrors {
-                      field
-                      message
-                    }
-                  }
-                }`,
-                { input: retryInput }
-              );
-
-              console.log('  - [SHOPIFY RESPONSE] Fallback draftOrderCreate raw API response:', JSON.stringify(retryData, null, 2));
-
-              if (retryData?.draftOrderCreate?.draftOrder?.id) {
-                draftPayload = retryData.draftOrderCreate;
-                console.log('  - [SHOPIFY SUCCESS] Fallback draftOrderCreate succeeded with ID:', draftPayload.draftOrder.id);
-              } else {
-                console.error('  - [SHOPIFY ERROR] Fallback draftOrderCreate also failed:', JSON.stringify(retryData?.draftOrderCreate?.userErrors || [], null, 2));
-              }
-            }
-
-            if (draftPayload?.draftOrder?.id) {
-              const draftOrderId = draftPayload.draftOrder.id;
-              console.log('\n  - [SHOPIFY MUTATION 2/2] Succeeded draftOrderCreate. Proceeding to draftOrderComplete to transition draft to a real order...');
-              console.log('    - Draft Order ID to complete:', draftOrderId);
-
-              const completeData = await adminClient.request(
-                `mutation DraftOrderComplete($id: ID!) {
-                  draftOrderComplete(id: $id) {
-                    draftOrder {
-                      order {
-                        id
-                        name
-                      }
-                    }
-                    userErrors {
-                      field
-                      message
-                    }
-                  }
-                }`,
-                { id: draftOrderId }
-              );
-
-              console.log('  - [SHOPIFY RESPONSE] draftOrderComplete raw API response:', JSON.stringify(completeData, null, 2));
-
-              const completePayload = completeData?.draftOrderComplete;
-              if (completePayload?.draftOrder?.order?.id) {
-                shopifyOrderId = completePayload.draftOrder.order.id;
-                shopifyOrderNumber = completePayload.draftOrder.order.name;
-                console.log('  - [SHOPIFY UPDATE SUCCESS] Real Shopify order successfully updated on board! Shopify Order Name/Number:', shopifyOrderNumber);
-              } else {
-                console.error('  - [SHOPIFY ERROR] Failed to complete draft order:', JSON.stringify(completePayload?.userErrors || [], null, 2));
-              }
+            if (retryData?.draftOrderCreate?.draftOrder?.id) {
+              draftPayload = retryData.draftOrderCreate;
+              console.log('  - [SHOPIFY SUCCESS] Fallback draftOrderCreate succeeded with ID:', draftPayload.draftOrder.id);
             } else {
-              console.error('  - [SHOPIFY ERROR] All draft order creation attempts failed. Order could not be synced on Shopify. User errors:', JSON.stringify(draftPayload?.userErrors || [], null, 2));
-            }
-          } catch (err: any) {
-            console.error('  - [SHOPIFY EXCEPTION] Caught error during Shopify API communication:', err.message);
-            const isAccessDenied = err.message && (
-              err.message.includes('403') || 
-              err.message.includes('Access denied') || 
-              err.message.includes('access scope')
-            );
-            if (isAccessDenied) {
-              console.error('\n  ================================================================');
-              console.error('  [ACCESS DENIED DETECTED] This token is missing required scopes!');
-              console.error('  If using a Custom App Access Token (shpca_ or shpat_):');
-              console.error('  1. Go to Shopify Admin -> Settings -> Apps and sales channels -> Develop apps.');
-              console.error('  2. Select your app and go to the "Configuration" tab.');
-              console.error('  3. Under "Admin API integration", click "Edit" and enable:');
-              console.error('     - write_draft_orders, read_draft_orders');
-              console.error('     - write_orders, read_orders');
-              console.error('  4. Save and click "Reinstall app" to apply scopes.');
-              console.error('  ================================================================\n');
-            } else {
-              console.error(err.stack);
+              console.error('  - [SHOPIFY ERROR] Fallback draftOrderCreate also failed:', JSON.stringify(retryData?.draftOrderCreate?.userErrors || [], null, 2));
             }
           }
-          console.log('[STEP 2: SHOPIFY UPDATE - END]');
-        } else {
-          console.warn('\n[STEP 2: SHOPIFY UPDATE - SKIPPED] No admin credentials (shop url and access token) found in persistent session or cookies. Skipping live Shopify board update.');
-        }
 
-        const orderNumber = shopifyOrderNumber || `NMD-${Math.floor(1000 + Math.random() * 9000)}`;
-        const orderId = shopifyOrderId || `gid://shopify/Order/${Math.floor(100000 + Math.random() * 900000)}`;
+          if (draftPayload?.draftOrder?.id) {
+            const draftOrderId = draftPayload.draftOrder.id;
+            console.log('\n  - [SHOPIFY MUTATION 2/2] Succeeded draftOrderCreate. Proceeding to draftOrderComplete to transition draft to a real order...');
+            console.log('    - Draft Order ID to complete:', draftOrderId);
 
-        console.log(`\n[STEP 3: LOCAL UPDATE - START] Updating local order storage (cookie: 'mock_orders') for the customer`);
-        console.log(`  - Target Local Order ID: ${orderId}`);
-        console.log(`  - Target Local Order Number: ${orderNumber}`);
-
-        const newOrder = {
-          node: {
-            id: orderId,
-            orderNumber,
-            createdAt: new Date().toISOString(),
-            email: customerEmail || body.email || 'customer@example.com',
-            totalPrice: {
-              amount: String(body.totalPrice || 0),
-              currencyCode: body.currency || 'INR'
-            },
-            status: body.paymentMethod === 'COD' ? 'Pending COD' : 'In Transit',
-            lineItems: {
-              edges: (body.lineItems || []).map((item: any, idx: number) => ({
-                node: {
-                  id: item.variantId || `l_${idx}`,
-                  title: item.title,
-                  quantity: item.quantity,
-                  variant: {
-                    price: {
-                      amount: String(item.price || 0),
-                      currencyCode: 'INR'
-                    },
-                    image: {
-                      url: item.image || 'https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=300&q=80'
+            const completeData = await adminClient.request(
+              `mutation DraftOrderComplete($id: ID!) {
+                draftOrderComplete(id: $id) {
+                  draftOrder {
+                    order {
+                      id
+                      name
                     }
+                  }
+                  userErrors {
+                    field
+                    message
                   }
                 }
-              }))
-            }
-          }
-        };
+              }`,
+              { id: draftOrderId }
+            );
 
-        console.log('  - Reading existing local orders from cookie...');
-        const existingCookie = cookieStore.get('mock_orders')?.value;
-        let orders = [];
-        if (existingCookie) {
-          try {
-            orders = JSON.parse(existingCookie);
-            console.log(`    - Found ${orders.length} existing orders in local cookie`);
-          } catch (e: any) {
-            console.error('    - Failed to parse existing local orders cookie:', e.message);
+            console.log('  - [SHOPIFY RESPONSE] draftOrderComplete raw API response:', JSON.stringify(completeData, null, 2));
+
+            const completePayload = completeData?.draftOrderComplete;
+            if (completePayload?.draftOrder?.order?.id) {
+              shopifyOrderId = completePayload.draftOrder.order.id;
+              shopifyOrderNumber = completePayload.draftOrder.order.name;
+              console.log('  - [SHOPIFY UPDATE SUCCESS] Real Shopify order successfully updated on board! Shopify Order Name/Number:', shopifyOrderNumber);
+            } else {
+              console.error('  - [SHOPIFY ERROR] Failed to complete draft order:', JSON.stringify(completePayload?.userErrors || [], null, 2));
+            }
+          } else {
+            console.error('  - [SHOPIFY ERROR] All draft order creation attempts failed. Order could not be synced on Shopify. User errors:', JSON.stringify(draftPayload?.userErrors || [], null, 2));
+          }
+        } catch (err: any) {
+          console.error('  - [SHOPIFY EXCEPTION] Caught error during Shopify API communication:', err.message);
+          const isAccessDenied = err.message && (
+            err.message.includes('403') || 
+            err.message.includes('Access denied') || 
+            err.message.includes('access scope')
+          );
+          if (isAccessDenied) {
+            console.error('\n  ================================================================');
+            console.error('  [ACCESS DENIED DETECTED] This token is missing required scopes!');
+            console.error('  If using a Custom App Access Token (shpca_ or shpat_):');
+            console.error('  1. Go to Shopify Admin -> Settings -> Apps and sales channels -> Develop apps.');
+            console.error('  2. Select your app and go to the "Configuration" tab.');
+            console.error('  3. Under "Admin API integration", click "Edit" and enable:');
+            console.error('     - write_draft_orders, read_draft_orders');
+            console.error('     - write_orders, read_orders');
+            console.error('  4. Save and click "Reinstall app" to apply scopes.');
+            console.error('  ================================================================\n');
+          } else {
+            console.error(err.stack);
           }
         }
-        
-        orders.unshift(newOrder);
-        console.log(`  - Saving updated orders list (total ${orders.length} orders) to local cookie 'mock_orders'`);
-        cookieStore.set('mock_orders', JSON.stringify(orders), {
-          path: '/',
-          maxAge: 60 * 60 * 24 * 30
-        });
-
-        console.log('[STEP 3: LOCAL UPDATE - END] Cookie successfully updated.');
-        console.log('================================================================');
-        console.log('[ORDER UPDATE PROCESS] COMPLETED SUCCESSFULLY');
-        console.log('================================================================');
-
-        return NextResponse.json({
-          ...paymentResult,
-          orderId,
-          orderNumber
-        });
+        console.log('[STEP 2: SHOPIFY UPDATE - END]');
+      } else {
+        console.warn('\n[STEP 2: SHOPIFY UPDATE - SKIPPED] No admin credentials (shop url and access token) found in persistent session or cookies. Skipping live Shopify board update.');
       }
 
-      return NextResponse.json(paymentResult);
+      const orderNumber = shopifyOrderNumber || `NMD-${Math.floor(1000 + Math.random() * 9000)}`;
+      const orderId = shopifyOrderId || `gid://shopify/Order/${Math.floor(100000 + Math.random() * 900000)}`;
+
+      console.log(`\n[STEP 3: LOCAL UPDATE - START] Updating local order storage (cookie: 'mock_orders') for the customer`);
+      console.log(`  - Target Local Order ID: ${orderId}`);
+      console.log(`  - Target Local Order Number: ${orderNumber}`);
+
+      const newOrder = {
+        node: {
+          id: orderId,
+          orderNumber,
+          createdAt: new Date().toISOString(),
+          email: customerEmail || body.email || 'customer@example.com',
+          totalPrice: {
+            amount: String(body.totalPrice || 0),
+            currencyCode: body.currency || 'INR'
+          },
+          status: paymentMethod === 'cod' || paymentMethod === 'COD' ? 'Pending COD' : 'In Transit',
+          lineItems: {
+            edges: (body.lineItems || []).map((item: any, idx: number) => ({
+              node: {
+                id: item.variantId || `l_${idx}`,
+                title: item.title,
+                quantity: item.quantity,
+                variant: {
+                  price: {
+                    amount: String(item.price || 0),
+                    currencyCode: 'INR'
+                  },
+                  image: {
+                    url: item.image || 'https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=300&q=80'
+                  }
+                }
+              }
+            }))
+          }
+        }
+      };
+
+      console.log('  - Reading existing local orders from cookie...');
+      const existingCookie = cookieStore.get('mock_orders')?.value;
+      let orders = [];
+      if (existingCookie) {
+        try {
+          orders = JSON.parse(existingCookie);
+          console.log(`    - Found ${orders.length} existing orders in local cookie`);
+        } catch (e: any) {
+          console.error('    - Failed to parse existing local orders cookie:', e.message);
+        }
+      }
+      
+      orders.unshift(newOrder);
+      console.log(`  - Saving updated orders list (total ${orders.length} orders) to local cookie 'mock_orders'`);
+      cookieStore.set('mock_orders', JSON.stringify(orders), {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30
+      });
+
+      console.log('[STEP 3: LOCAL UPDATE - END] Cookie successfully updated.');
+      console.log('================================================================');
+      console.log('[ORDER UPDATE PROCESS] COMPLETED SUCCESSFULLY');
+      console.log('================================================================');
+
+      return NextResponse.json({
+        success: true,
+        orderId,
+        orderNumber,
+        shopifyOrderId: orderId
+      });
     }
+
+    return NextResponse.json({ success: false, error: 'Unauthorized or verification failed' }, { status: 400 });
   } catch (error) {
     console.error('Checkout error:', error);
     return NextResponse.json(
@@ -299,3 +386,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
