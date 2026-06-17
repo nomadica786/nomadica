@@ -7,6 +7,7 @@ import { api } from "@/components/api/api";
 import { useAuth } from "@/utils/hooks/useAuth";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { MOCK_PRODUCTS } from "@/utils/mockData";
+import Script from "next/script";
 
 function CheckoutContent() {
   const router = useRouter();
@@ -154,51 +155,151 @@ function CheckoutContent() {
     console.log("[CHECKOUT FLOW] STEP 4: Submitting to /api/checkout");
     console.log(`  Total: ${totalPrice} INR (Subtotal: ${subtotal} + Shipping: ${shipping})`);
 
-    try {
-      const result = await api.checkout.process({
-        email,
-        firstName,
-        lastName,
-        address1,
-        address2,
-        city,
-        province,
-        zip,
-        lineItems,
-        totalPrice,
-        currency: "INR",
-        paymentMethod,
-        cardNumber: paymentMethod === "card" ? cardNumber : undefined,
-        expiry: paymentMethod === "card" ? expiry : undefined,
-        cvv: paymentMethod === "card" ? cvv : undefined,
-        upiId: paymentMethod === "upi" ? upiId : undefined
-      });
+    // For Card / UPI, use Razorpay checkout
+    if (paymentMethod === "card" || paymentMethod === "upi") {
+      try {
+        console.log("[CHECKOUT FLOW] Step 4a: Creating Razorpay Order on Server...");
+        const createResult = await api.checkout.process({
+          action: "create",
+          totalPrice,
+          currency: "INR"
+        });
 
-      if (result.success) {
-        console.log("========================================");
-        console.log("[CHECKOUT FLOW] STEP 7: Order finalized!");
-        console.log("========================================");
-        console.log(`  ✅ Order Number: ${result.orderNumber}`);
-        console.log(`  ✅ Shopify Order ID: ${result.shopifyOrderId}`);
-        
-        setOrderInfo(result);
-        setCheckoutSuccess(true);
-        // Clear local cart
-        localStorage.removeItem("nomadica_cart_id");
-        // Dispatch event to clear badge in navbar
-        window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: false } }));
-        
-        // Redirect to profile orders tab after 3 seconds
-        setTimeout(() => {
-          router.replace("/account/profile?tab=orders");
-        }, 3000);
-      } else {
-        setErrorMessage(result.message || "Payment declined. Please check your details.");
+        if (!createResult.success || !createResult.orderId) {
+          throw new Error(createResult.error || "Failed to initiate payment. Please try again.");
+        }
+
+        const { orderId, amount, keyId } = createResult;
+        console.log(`[CHECKOUT FLOW] Step 4b: Razorpay Order Created: ${orderId}`);
+
+        const RazorpayConstructor = (window as any).Razorpay;
+        if (!RazorpayConstructor) {
+          throw new Error("Razorpay SDK failed to load. Please verify your internet connection.");
+        }
+
+        const options = {
+          key: keyId,
+          amount: amount,
+          currency: "INR",
+          name: "Nomadica",
+          description: "Order Checkout Payment",
+          image: typeof window !== 'undefined' ? `${window.location.origin}/Logo.png` : "",
+          order_id: orderId,
+          prefill: {
+            name: `${firstName} ${lastName}`,
+            email: email,
+          },
+          theme: {
+            color: "#1E1E1E",
+          },
+          handler: async function (response: any) {
+            try {
+              console.log("[CHECKOUT FLOW] Step 5: Payment Authorized. Verifying signature...");
+              setIsSubmitting(true);
+
+              const verifyResult = await api.checkout.process({
+                action: "verify",
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                email,
+                firstName,
+                lastName,
+                address1,
+                address2,
+                city,
+                province,
+                zip,
+                lineItems,
+                totalPrice,
+                currency: "INR",
+                paymentMethod
+              });
+
+              if (verifyResult.success) {
+                console.log("========================================");
+                console.log("[CHECKOUT FLOW] STEP 7: Order finalized!");
+                console.log("========================================");
+                console.log(`  ✅ Order Number: ${verifyResult.orderNumber}`);
+                console.log(`  ✅ Shopify Order ID: ${verifyResult.shopifyOrderId}`);
+
+                setOrderInfo(verifyResult);
+                setCheckoutSuccess(true);
+                localStorage.removeItem("nomadica_cart_id");
+                window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: false } }));
+
+                setTimeout(() => {
+                  router.replace("/account/profile?tab=orders");
+                }, 3000);
+              } else {
+                setErrorMessage(verifyResult.error || "Payment verification failed.");
+              }
+            } catch (verifyErr: any) {
+              console.error("Verification error:", verifyErr);
+              setErrorMessage(verifyErr.message || "An error occurred while finalizing your order.");
+            } finally {
+              setIsSubmitting(false);
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              setIsSubmitting(false);
+              setErrorMessage("Payment process cancelled.");
+            }
+          }
+        };
+
+        const rzp = new RazorpayConstructor(options);
+        rzp.open();
+      } catch (err: any) {
+        console.error("Razorpay initiation error:", err);
+        setErrorMessage(err.message || "Could not initiate payment. Please try again.");
+        setIsSubmitting(false);
       }
-    } catch (err: any) {
-      setErrorMessage(err.message || "An unexpected error occurred during checkout.");
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      // Cash on Delivery flow
+      try {
+        const result = await api.checkout.process({
+          email,
+          firstName,
+          lastName,
+          address1,
+          address2,
+          city,
+          province,
+          zip,
+          lineItems,
+          totalPrice,
+          currency: "INR",
+          paymentMethod: "cod"
+        });
+
+        if (result.success) {
+          console.log("========================================");
+          console.log("[CHECKOUT FLOW] STEP 7: Order finalized!");
+          console.log("========================================");
+          console.log(`  ✅ Order Number: ${result.orderNumber}`);
+          console.log(`  ✅ Shopify Order ID: ${result.shopifyOrderId}`);
+
+          setOrderInfo(result);
+          setCheckoutSuccess(true);
+          // Clear local cart
+          localStorage.removeItem("nomadica_cart_id");
+          // Dispatch event to clear badge in navbar
+          window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: false } }));
+
+          // Redirect to profile orders tab after 3 seconds
+          setTimeout(() => {
+            router.replace("/account/profile?tab=orders");
+          }, 3000);
+        } else {
+          setErrorMessage(result.message || "Failed to process order.");
+        }
+      } catch (err: any) {
+        setErrorMessage(err.message || "An unexpected error occurred during checkout.");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -395,15 +496,15 @@ function CheckoutContent() {
                     className="form-input"
                     required
                   />
-                </div>
               </div>
             </div>
+          </div>
 
             {/* Payment Gateway Form */}
             <div style={{ backgroundColor: "#fff", padding: "2rem", border: "1px solid rgba(30,30,30,0.08)", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <h3 style={{ fontFamily: "Playfair Display", fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>Payment Method</h3>
-                <span style={{ fontSize: "0.75rem", color: "#1E1E1E", border: "1px solid #1E1E1E", padding: "0.2rem 0.5rem", fontWeight: 600 }}>MOCK TEST GATEWAY</span>
+                <span style={{ fontSize: "0.75rem", color: "#1E1E1E", border: "1px solid #1E1E1E", padding: "0.2rem 0.5rem", fontWeight: 600 }}>RAZORPAY GATEWAY</span>
               </div>
 
               {/* Tabs */}
@@ -440,83 +541,36 @@ function CheckoutContent() {
 
               {/* Card Payment Form */}
               {paymentMethod === "card" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                  <div style={{ padding: "0.875rem 1rem", backgroundColor: "rgba(122,92,62,0.08)", borderLeft: "4px solid #1E1E1E", fontSize: "0.8125rem", color: "#1E1E1E", lineHeight: 1.5 }}>
-                    <p style={{ margin: "0 0 0.25rem", fontWeight: 600 }}>Test Card Info:</p>
-                    Use card <strong>4242 4242 4242 4242</strong> for a successful mock purchase.
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>Card Number</label>
-                    <input
-                      type="text"
-                      placeholder="4242 4242 4242 4242"
-                      value={cardNumber}
-                      onChange={(e) => setCardNumber(e.target.value)}
-                      className="form-input"
-                      required={paymentMethod === "card"}
-                    />
-                  </div>
-
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", padding: "1.25rem", backgroundColor: "rgba(30,30,30,0.02)", border: "1px dashed rgba(30,30,30,0.15)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <CreditCard size={24} style={{ color: "#1E1E1E", flexShrink: 0 }} />
                     <div>
-                      <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>Expiry Date</label>
-                      <input
-                        type="text"
-                        placeholder="MM / YY"
-                        value={expiry}
-                        onChange={(e) => setExpiry(e.target.value)}
-                        className="form-input"
-                        required={paymentMethod === "card"}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>CVV</label>
-                      <input
-                        type="text"
-                        placeholder="123"
-                        value={cvv}
-                        onChange={(e) => setCvv(e.target.value)}
-                        className="form-input"
-                        maxLength={4}
-                        required={paymentMethod === "card"}
-                      />
+                      <p style={{ margin: 0, fontFamily: "Montserrat", fontWeight: 600, fontSize: "0.875rem", color: "#1E1E1E" }}>Secure Card Payment via Razorpay</p>
+                      <p style={{ margin: "0.25rem 0 0", fontFamily: "Montserrat", fontSize: "0.8125rem", color: "rgba(30,30,30,0.6)" }}>
+                        Accepts Visa, Mastercard, RuPay, Maestro, Diners, and Amex cards.
+                      </p>
                     </div>
                   </div>
+                  <p style={{ margin: 0, fontFamily: "Montserrat", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", lineHeight: 1.4 }}>
+                    Your transaction will be processed in a secure checkout overlay. Card details are processed safely by Razorpay and are not stored by us.
+                  </p>
                 </div>
               )}
 
               {/* UPI Payment Form */}
               {paymentMethod === "upi" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", alignItems: "center", textAlign: "center" }}>
-                  <div style={{ width: "100%", textAlign: "left" }}>
-                    <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, marginBottom: "0.375rem" }}>UPI Virtual Payment Address (VPA)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. mobileNumber@upi, name@ybl"
-                      value={upiId}
-                      onChange={(e) => setUpiId(e.target.value)}
-                      className="form-input"
-                      required={paymentMethod === "upi"}
-                    />
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", padding: "1.25rem", backgroundColor: "rgba(30,30,30,0.02)", border: "1px dashed rgba(30,30,30,0.15)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <span style={{ fontSize: "1.5rem", lineHeight: 1, flexShrink: 0 }}>📱</span>
+                    <div>
+                      <p style={{ margin: 0, fontFamily: "Montserrat", fontWeight: 600, fontSize: "0.875rem", color: "#1E1E1E" }}>UPI / QR Code via Razorpay</p>
+                      <p style={{ margin: "0.25rem 0 0", fontFamily: "Montserrat", fontSize: "0.8125rem", color: "rgba(30,30,30,0.6)" }}>
+                        Pay instantly using GPay, PhonePe, Paytm, BHIM or any UPI app.
+                      </p>
+                    </div>
                   </div>
-
-                  <div style={{ height: "1px", backgroundColor: "rgba(30,30,30,0.08)", width: "100%", margin: "0.5rem 0" }} />
-                  
-                  <p style={{ fontFamily: "Montserrat", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)", margin: 0 }}>OR SCAN MOCK QR CODE</p>
-                  
-                  {/* Mock UPI QR Code Visualizer */}
-                  <div style={{ border: "1px solid rgba(30,30,30,0.1)", padding: "1rem", backgroundColor: "#fff", display: "inline-block", position: "relative" }}>
-                    <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=nomadica@upi%26pn=Nomadica%26am=${total}%26cu=INR`} 
-                      alt="UPI QR Code" 
-                      style={{ width: "150px", height: "150px" }}
-                    />
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", backgroundColor: "#1E1E1E", animation: "scan-bar 2s linear infinite" }} />
-                  </div>
-                  
-                  <p style={{ fontFamily: "Montserrat", fontSize: "0.75rem", color: "#1E1E1E", fontWeight: 600 }}>
-                    Scan QR using Google Pay, PhonePe, or Paytm to pay ₹{total.toLocaleString("en-IN")} (Mock simulation).
+                  <p style={{ margin: 0, fontFamily: "Montserrat", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", lineHeight: 1.4 }}>
+                    In the checkout overlay, select UPI to either pay using your UPI VPA ID (e.g. mobile@upi) or scan a secure dynamic QR code.
                   </p>
                 </div>
               )}
@@ -618,6 +672,10 @@ export default function CheckoutPage() {
   return (
     <Suspense fallback={<PageLoader />}>
       <CheckoutContent />
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+      />
     </Suspense>
   );
 }
