@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Star, Heart } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import { CardSkeleton } from "@/components/ui/SnowBallLoader";
 import { api } from "@/components/api/api";
@@ -62,172 +62,215 @@ const setCached = (key: string, data: any) => {
 };
 
 function HeroSection() {
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [loaded, setLoaded] = useState(false);
+  const bannerImages = [
+    "/Main Banner 1.jpg",
+    "/Main Banner 2.jpg",
+    "/Main Banner 4.jpg"
+  ];
+
   useEffect(() => {
-    const t = setTimeout(() => setLoaded(true), 100);
-    return () => clearTimeout(t);
+    setLoaded(true);
   }, []);
+
+  // Autoplay slideshow
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % bannerImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handlePrev = () => {
+    setCurrentSlide((prev) => (prev - 1 + bannerImages.length) % bannerImages.length);
+  };
+
+  const handleNext = () => {
+    setCurrentSlide((prev) => (prev + 1) % bannerImages.length);
+  };
 
   return (
     <section
       style={{
         position: "relative",
-        height: "100svh",
+        width: "100%",
+        aspectRatio: "2000/695",
+        minHeight: "450px",
         overflow: "hidden",
         marginTop: 0,
+        backgroundColor: "#000000",
       }}
     >
-      <Image
-        src={heroImage}
-        alt="Nomadica Hero"
-        fill
-        priority
-        sizes="100vw"
-        style={{
-          objectFit: "cover",
-          objectPosition: "center",
-          transform: loaded ? "scale(1)" : "scale(1.08)",
-          transition: "transform 1.8s cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-      />
+      {/* 1. Slides (Background Images) */}
+      {bannerImages.map((img, index) => (
+        <div
+          key={img}
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: currentSlide === index ? 1 : 0,
+            transform: loaded && currentSlide === index ? "scale(1)" : "scale(1.05)",
+            transition: "opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
+            zIndex: currentSlide === index ? 1 : 0,
+          }}
+        >
+          <Image
+            src={img}
+            alt={`Nomadica Banner ${index + 1}`}
+            fill
+            priority={index === 0}
+            sizes="100vw"
+            style={{
+              objectFit: "cover",
+              objectPosition: "center",
+            }}
+          />
+        </div>
+      ))}
+
+      {/* 2. Gradient Overlay */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          background:
-            "linear-gradient(to bottom, rgba(30,30,30,0.2) 0%, rgba(30,30,30,0.1) 50%, rgba(30,30,30,0.6) 100%)",
+          zIndex: 2,
         }}
       />
+
+      {/* 3. Logo Overlay inside Hero */}
+      <div
+        style={{
+          position: "absolute",
+          top: "1.5rem",
+          left: "1.5rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          color: "#FFFFFF",
+          zIndex: 10,
+        }}
+      >
+      </div>
+
+      {/* 4. Navigation Buttons (Left/Right Arrows) */}
+      <button
+        onClick={handlePrev}
+        style={{
+          position: "absolute",
+          left: "1rem",
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          backgroundColor: "#FFFFFF",
+          border: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          zIndex: 10,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          transition: "transform 0.2s ease, background-color 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1.08)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
+        }}
+        aria-label="Previous slide"
+      >
+        <ChevronLeft size={24} color="#1E1E1E" />
+      </button>
+
+      <button
+        onClick={handleNext}
+        style={{
+          position: "absolute",
+          right: "1rem",
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          backgroundColor: "#FFFFFF",
+          border: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          zIndex: 10,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          transition: "transform 0.2s ease, background-color 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1.08)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
+        }}
+        aria-label="Next slide"
+      >
+        <ChevronRight size={24} color="#1E1E1E" />
+      </button>
+
+      {/* 5. Center-Right Content Overlay */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-end",
-          padding: "clamp(1.5rem, 5vw, 5rem)",
-          paddingTop: "64px",
+          justifyContent: "center",
+          alignItems: "flex-end",
+          padding: "clamp(1rem, 4vw, 4rem)",
+          paddingRight: "clamp(1.5rem, 8vw, 5rem)",
+          zIndex: 10,
+          textAlign: "left",
         }}
       >
         <div
           style={{
+            maxWidth: "600px",
             opacity: loaded ? 1 : 0,
             transform: loaded ? "translateY(0)" : "translateY(30px)",
             transition: "opacity 0.9s ease 0.4s, transform 0.9s ease 0.4s",
           }}
         >
-          <span
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.75rem",
-              fontWeight: 500,
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              color: "#FFFFFF",
-              opacity: 0.8,
-              display: "block",
-              marginBottom: "1rem",
-            }}
-          >
-            Summer Collection 2025
-          </span>
-          <h1
-            style={{
-              fontFamily: "'Playfair Display', sans-serif",
-              fontSize: "clamp(3rem, 8vw, 7rem)",
-              fontWeight: 600,
-              color: "#FFFFFF",
-              lineHeight: 0.95,
-              letterSpacing: "-0.02em",
-              marginBottom: "1.5rem",
-              maxWidth: "700px",
-            }}
-          >
-            Wear Your
-            <br />
-            Journey.
-          </h1>
-
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            <Link href="/shop" style={{ textDecoration: "none" }}>
-              <button
-                style={{
-                  padding: "0.875rem 2rem",
-                  backgroundColor: "#FFFFFF",
-                  color: "#1E1E1E",
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  transition: "background 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#1E1E1E";
-                  (e.currentTarget as HTMLElement).style.color = "#FFFFFF";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#FFFFFF";
-                  (e.currentTarget as HTMLElement).style.color = "#1E1E1E";
-                }}
-              >
-                Shop Now <ArrowRight size={16} />
-              </button>
-            </Link>
-            <Link href="/brand/story" style={{ textDecoration: "none" }}>
-              <button
-                style={{
-                  padding: "0.875rem 2rem",
-                  backgroundColor: "transparent",
-                  color: "#FFFFFF",
-                  border: "1px solid rgba(255, 255, 255, 0.5)",
-                  cursor: "pointer",
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  transition: "border-color 0.2s ease",
-                }}
-              >
-                Our Story
-              </button>
-            </Link>
-          </div>
         </div>
+      </div>
 
-        <div
-          style={{
-            position: "absolute",
-            bottom: "2rem",
-            right: "2rem",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "0.5rem",
-            opacity: 0.6,
-            animation: "fade-in 1s ease 1.5s both",
-          }}
-        >
-          <span
+      {/* 6. Slide Indicator Dots */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "1.5rem",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "0.75rem",
+          zIndex: 10,
+        }}
+      >
+        {bannerImages.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentSlide(index)}
             style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.6875rem",
-              color: "#FFFFFF",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              writingMode: "vertical-rl",
+              width: "10px",
+              height: "10px",
+              borderRadius: "50%",
+              backgroundColor: currentSlide === index ? "#E65A00" : "rgba(255, 255, 255, 0.5)",
+              border: "none",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              padding: 0,
             }}
-          >
-            Scroll
-          </span>
-          <ChevronDown size={16} color="#FFFFFF" style={{ animation: "bounce-dot 1.4s infinite" }} />
-        </div>
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
       </div>
     </section>
   );
@@ -573,6 +616,360 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
   );
 }
 
+function LatestCollectionSection() {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
+
+  // Custom colors for the swatches
+  const swatchColors = [
+    "#FFFFFF",
+    "#000000",
+    "#D93838",
+    "#85D3F2",
+    "#1F3E6C",
+    "#22C55E",
+    "#6B7280",
+    "#C084FC"
+  ];
+
+  // Carousel product items matching the screenshot
+  const latestProducts = [
+    {
+      id: "lp1",
+      title: "Wanderer Spirit",
+      handle: "white-trekking-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Trekking_20Tees-front-1781514535205.jpg?v=1781514552",
+    },
+    {
+      id: "lp2",
+      title: "Tropical Escape",
+      handle: "travel-white-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20White_20Tees-front-1781505363689.jpg?v=1781505386",
+    },
+    {
+      id: "lp3",
+      title: "Sunset Chaser",
+      handle: "blue-oversized-tee",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlue_20Oversized_20Tee-front-1781498707028.jpg?v=1781498720",
+    },
+    {
+      id: "lp4",
+      title: "Paradise Found",
+      handle: "red-trekking-regular-fit-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FRed_20Trekking_20Regular_20Fit_20Tees-front-1781514621454.jpg?v=1781514637",
+    },
+    {
+      id: "lp5",
+      title: "Adventure Explorer",
+      handle: "travel-black-washed-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Washed_20Tees-front-1781505487295.jpg?v=1781505505",
+    },
+    {
+      id: "lp6",
+      title: "Wild Tiger",
+      handle: "white-tiger-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Tiger_20Tees-front-1781507184160.jpg?v=1781507205",
+    },
+    {
+      id: "lp7",
+      title: "Midnight Trek",
+      handle: "travel-black-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Tees-front-1781505419884.jpg?v=1781505435",
+    },
+    {
+      id: "lp8",
+      title: "Black Tiger",
+      handle: "black-tiger-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlack_20Tiger_20Tees-front-1781507225879.jpg?v=1781507244",
+    }
+  ];
+
+  const handleScrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: 320,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  return (
+    <section
+      style={{
+        backgroundColor: "#FAF9F7",
+        padding: "5rem 1.5rem",
+        borderBottom: "1px solid rgba(30,30,30,0.05)",
+        position: "relative"
+      }}
+    >
+      <div style={{ maxWidth: "1400px", margin: "0 auto", position: "relative" }}>
+        
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "3rem"
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Star size={24} color="#C1A886" fill="#C1A886" style={{ opacity: 0.8 }} />
+            <h2
+              style={{
+                fontFamily: "'Playfair Display', sans-serif",
+                fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+                fontWeight: 600,
+                color: "#1E1E1E",
+                letterSpacing: "-0.01em",
+                margin: 0
+              }}
+            >
+              Latest Collection
+            </h2>
+          </div>
+          <Link href="/shop" style={{ textDecoration: "none" }}>
+            <button
+              style={{
+                backgroundColor: "#C1A886",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "4px",
+                padding: "0.625rem 1.75rem",
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.8125rem",
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                transition: "background-color 0.2s ease"
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = "#A88E6D";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = "#C1A886";
+              }}
+            >
+              VIEW ALL
+            </button>
+          </Link>
+        </div>
+
+        {/* Carousel Wrapper */}
+        <div style={{ position: "relative" }}>
+          
+          {/* Scrollable Container */}
+          <div
+            ref={scrollContainerRef}
+            style={{
+              display: "flex",
+              gap: "1.5rem",
+              overflowX: "auto",
+              scrollBehavior: "smooth",
+              paddingBottom: "1.5rem"
+            }}
+            className="horizontal-scroll hide-scrollbar"
+          >
+            {latestProducts.map((product) => {
+              const isHovered = hoveredCardId === product.id;
+              return (
+                <div
+                  key={product.id}
+                  style={{
+                    flex: "0 0 calc(25% - 1.125rem)",
+                    minWidth: "280px",
+                    backgroundColor: "#FFFFFF",
+                    border: "1px solid rgba(30, 30, 30, 0.05)",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    boxShadow: isHovered ? "0 8px 25px rgba(0,0,0,0.06)" : "0 4px 15px rgba(0,0,0,0.02)",
+                    transform: isHovered ? "translateY(-4px)" : "translateY(0)",
+                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                    cursor: "pointer"
+                  }}
+                  onMouseEnter={() => setHoveredCardId(product.id)}
+                  onMouseLeave={() => setHoveredCardId(null)}
+                >
+                  {/* Image Container */}
+                  <Link href={`/products/${product.handle}`} style={{ textDecoration: "none", display: "block" }}>
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "100%",
+                        aspectRatio: "653.27 / 978", // Enforced portrait dimension
+                        overflow: "hidden",
+                        backgroundColor: "#F9F9F9"
+                      }}
+                    >
+                      <Image
+                        src={product.image}
+                        alt={product.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        style={{
+                          objectFit: "cover",
+                          transform: isHovered ? "scale(1.05)" : "scale(1)",
+                          transition: "transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)"
+                        }}
+                      />
+
+                      {/* Wishlist Heart Button */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log(`Add to wishlist: ${product.handle}`);
+                          const event = new CustomEvent("add-to-wishlist", { detail: { handle: product.handle } });
+                          window.dispatchEvent(event);
+                        }}
+                        style={{
+                          position: "absolute",
+                          top: "12px",
+                          right: "12px",
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "50%",
+                          backgroundColor: "#FFFFFF",
+                          border: "none",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                          zIndex: 5,
+                          transition: "transform 0.2s ease"
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                        }}
+                        aria-label="Add to wishlist"
+                      >
+                        <Heart size={18} color="#1E1E1E" />
+                      </button>
+                    </div>
+                  </Link>
+
+                  {/* Info Container */}
+                  <div style={{ padding: "1.25rem", textAlign: "center" }}>
+                    {/* Title */}
+                    <Link href={`/products/${product.handle}`} style={{ textDecoration: "none" }}>
+                      <h3
+                        style={{
+                          fontFamily: "'Playfair Display', serif",
+                          fontSize: "1.125rem",
+                          fontWeight: 600,
+                          color: isHovered ? "#C1A886" : "#1E1E1E",
+                          margin: "0 0 0.5rem 0",
+                          transition: "color 0.2s ease"
+                        }}
+                      >
+                        {product.title}
+                      </h3>
+                    </Link>
+
+                    {/* Price */}
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                      <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: "#1E1E1E", fontSize: "1rem" }}>
+                        ₹{product.price}
+                      </span>
+                      {product.originalPrice && (
+                        <span style={{ fontFamily: "'Montserrat', sans-serif", textDecoration: "line-through", color: "rgba(30,30,30,0.4)", fontSize: "0.875rem" }}>
+                          ₹{product.originalPrice}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Swatches */}
+                    <div style={{ display: "flex", justifyContent: "center", gap: "6px" }}>
+                      {swatchColors.map((color, index) => (
+                        <button
+                          key={index}
+                          style={{
+                            width: "14px",
+                            height: "14px",
+                            borderRadius: "50%",
+                            backgroundColor: color,
+                            border: "1px solid rgba(0,0,0,0.15)",
+                            padding: 0,
+                            cursor: "pointer",
+                            transition: "transform 0.15s ease"
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.transform = "scale(1.2)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                          }}
+                          aria-label={`Select color ${color}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Right Navigation Arrow Button */}
+          <button
+            onClick={handleScrollRight}
+            style={{
+              position: "absolute",
+              right: "-1.25rem",
+              top: "calc(50% - 36px)",
+              transform: "translateY(-50%)",
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              backgroundColor: "#FFFFFF",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              zIndex: 10,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              transition: "transform 0.2s ease"
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1.1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
+            }}
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={24} color="#1E1E1E" />
+          </button>
+
+        </div>
+
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const [collections, setCollections] = useState<any[]>(() => getCached("collections", []));
   const [newArrivals, setNewArrivals] = useState<any[]>(() => getCached("new_arrivals", []));
@@ -713,47 +1110,104 @@ export default function HomePage() {
       <HeroSection />
 
       {/* 2. Collections Section */}
-      <section style={{ backgroundColor: "#FFFFFF", padding: "6rem 1.5rem", borderBottom: "1px solid rgba(30,30,30,0.05)" }}>
+      <section
+        style={{
+          position: "relative",
+          backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url('/Map.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          padding: "6rem 1.5rem",
+          borderBottom: "1px solid rgba(30,30,30,0.05)",
+        }}
+      >
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "0.75rem" }}>
-              Explore Categories
-            </p>
-            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
-              Shop by Collection
+          <div style={{ textAlign: "left", marginBottom: "2rem" }}>
+            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 3vw, 3.5rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
+              Discover by Collections
             </h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {collections.length === 0 && loading
-              ? [1, 2, 3].map((i) => (
-                  <div key={i} style={{ aspectRatio: "16/10", backgroundColor: "#F0F0F0", animation: "shimmer 1.5s infinite" }} />
+              ? [1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} style={{ aspectRatio: "1/1", backgroundColor: "#F0F0F0", borderRadius: "8px", animation: "shimmer 1.5s infinite" }} />
                 ))
-              : collections.map((col: any) => (
-                  <Link key={col.id} href={`/collections/${encodeURIComponent(col.handle)}`} style={{ textDecoration: "none", display: "block" }}>
-                    <div style={{ position: "relative", aspectRatio: "16/10", overflow: "hidden" }} className="img-hover-zoom">
-                      <Image
-                        src={getShopifyImageUrl(col.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
-                        alt={col.title}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        style={{ objectFit: "cover" }}
-                      />
-                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30,30,30,0.6) 0%, transparent 60%)" }} />
-                      <div style={{ position: "absolute", bottom: "1.5rem", left: "1.5rem" }}>
-                        <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#FFFFFF", marginBottom: "0.3rem" }}>
-                          {col.title}
-                        </h3>
-                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(255,255,255,0.8)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                          Explore Collection <ArrowRight size={12} />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+              : (() => {
+                  const desiredOrder = [
+                    "destination-collection",
+                    "wildlife-and-safari",
+                    "adventure-and-trekking-collections",
+                    "travel-quotes",
+                    "beach-vibes"
+                  ];
+
+                  const collectionMeta: Record<string, { title: string; description: string }> = {
+                    "destination-collection": {
+                      title: "Destination Collection",
+                      description: "Iconic cities and landmarks from around the world",
+                    },
+                    "wildlife-and-safari": {
+                      title: "Wildlife & Safari Collection",
+                      description: "Majestic animals and nature-inspired designs",
+                    },
+                    "adventure-and-trekking-collections": {
+                      title: "Adventure & Trekking Collection",
+                      description: "Mountain peaks and outdoor expedition themes",
+                    },
+                    "travel-quotes": {
+                      title: "Travel Quotes Collection",
+                      description: "Inspiring words for the wandering soul",
+                    },
+                    "beach-vibes": {
+                      title: "Beach Vibes Collection",
+                      description: "Coastal living and ocean-inspired designs",
+                    },
+                  };
+
+                  const sortedCollections = [...collections].sort((a, b) => {
+                    const indexA = desiredOrder.indexOf(a.handle);
+                    const indexB = desiredOrder.indexOf(b.handle);
+                    const valA = indexA === -1 ? 999 : indexA;
+                    const valB = indexB === -1 ? 999 : indexB;
+                    return valA - valB;
+                  });
+
+                  return sortedCollections.map((col: any) => {
+                    const meta = collectionMeta[col.handle] || {
+                      title: col.title,
+                      description: col.description || "Explore our premium selection",
+                    };
+
+                    return (
+                      <Link key={col.id} href={`/collections/${encodeURIComponent(col.handle)}`} style={{ textDecoration: "none", display: "block" }}>
+                        <div style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden", borderRadius: "8px" }} className="img-hover-zoom">
+                          <Image
+                            src={getShopifyImageUrl(col.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
+                            alt={meta.title}
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                            style={{ objectFit: "cover" }}
+                          />
+                        </div>
+                        <div style={{ textAlign: "center", marginTop: "1rem", padding: "0 0.5rem" }}>
+                          <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.125rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>
+                            {meta.title}
+                          </h3>
+                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.6)", lineHeight: "1.4" }}>
+                            {meta.description}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  });
+                })()}
           </div>
         </div>
       </section>
+
+      {/* Latest Collection Section */}
+      <LatestCollectionSection />
 
       {/* 3. New Arrivals Section */}
       <ProductGridSection

@@ -11,9 +11,9 @@ import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 
 const navLinks = [
-  { label: "Home", href: "/" },
+  { label: "HOME", href: "/" },
   {
-    label: "Shop",
+    label: "SHOP",
     href: "/shop",
     children: [
       { label: "New Arrivals", href: "/shop/new-arrivals" },
@@ -22,10 +22,10 @@ const navLinks = [
       { label: "Limited Drops", href: "/shop/limited-drops" },
     ],
   },
-  { label: "Blogs", href: "/journal" },
-  { label: "Stories", href: "/brand/story" },
+  { label: "ARTICLES", href: "/journal" },
+  { label: "STORIES", href: "/brand/story" },
   {
-    label: "Brand",
+    label: "BRAND",
     href: "/brand",
     children: [
       { label: "About Us", href: "/brand/about" },
@@ -34,7 +34,7 @@ const navLinks = [
       { label: "Sustainability", href: "/brand/sustainability" },
     ],
   },
-  { label: "Support", href: "/support/faq" },
+  // { label: "SUPPORT", href: "/support/faq" },
 ];
 
 const dropdownItemStyle = {
@@ -204,11 +204,11 @@ export default function Navbar() {
         style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: "1.375rem",
-          fontWeight: 600,
+          fontWeight: 1000,
           lineHeight: 1,
         }}
       >
-        NOMADICA
+        Nomadica
       </span>
     </Link>
 
@@ -297,12 +297,23 @@ export default function Navbar() {
           </div>
 
           {/* Right icons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <Link href="/shop/search" style={{ color: "#1E1E1E", display: "flex" }}>
-              <Search size={20} />
-            </Link>
-            <Link href="/account/wishlist" style={{ color: "#1E1E1E" }} className="hidden sm:flex">
+          <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
+            <Link 
+              href="/account/wishlist" 
+              style={{ 
+                color: "#1E1E1E", 
+                display: "flex", 
+                flexDirection: "column", 
+                alignItems: "center", 
+                textDecoration: "none",
+                gap: "4px"
+              }} 
+              className="hidden sm:flex"
+            >
               <Heart size={20} />
+              <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+                wishlist
+              </span>
             </Link>
 
             {/* Profile Avatar / Login Icon */}
@@ -315,21 +326,19 @@ export default function Navbar() {
                 <Link
                   href="/account/profile"
                   style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "50%",
-                    backgroundColor: "#1E1E1E",
-                    color: "#FFFFFF",
+                    display: "flex",
+                    flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: "'Playfair Display', sans-serif",
-                    fontSize: "0.8125rem",
-                    fontWeight: 600,
                     textDecoration: "none",
+                    color: "#1E1E1E",
+                    gap: "4px"
                   }}
                   className="hidden sm:flex"
                 >
-                  {userInitials}
+                  <User size={20} />
+                  <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+                    {user?.firstName || "profile"}
+                  </span>
                 </Link>
                 {openDropdown === "user" && (
                   <div
@@ -390,8 +399,22 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <Link href="/account/login" style={{ color: "#1E1E1E" }} className="hidden sm:flex">
+              <Link 
+                href="/account/login" 
+                style={{ 
+                  color: "#1E1E1E",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textDecoration: "none",
+                  gap: "4px"
+                }} 
+                className="hidden sm:flex"
+              >
                 <User size={20} />
+                <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+                  log in
+                </span>
               </Link>
             )}
 
@@ -405,28 +428,36 @@ export default function Navbar() {
                 border: "none",
                 cursor: "pointer",
                 display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "4px"
               }}
             >
-              <ShoppingBag size={20} />
-              <span
-                style={{
-                  position: "absolute",
-                  top: "-6px",
-                  right: "-6px",
-                  width: "16px",
-                  height: "16px",
-                  borderRadius: "50%",
-                  backgroundColor: "#1E1E1E",
-                  color: "#fff",
-                  fontSize: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontWeight: 600,
-                }}
-              >
-                {totalItems}
+              <div style={{ position: "relative", display: "flex" }}>
+                <ShoppingBag size={20} />
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "-6px",
+                    right: "-6px",
+                    width: "16px",
+                    height: "16px",
+                    borderRadius: "50%",
+                    backgroundColor: "#1E1E1E",
+                    color: "#fff",
+                    fontSize: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontWeight: 600,
+                  }}
+                >
+                  {totalItems}
+                </span>
+              </div>
+              <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+                cart
               </span>
             </button>
 
