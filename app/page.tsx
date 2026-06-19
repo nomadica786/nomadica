@@ -14,33 +14,25 @@ const heroImage =
 
 const testimonials = [
   {
-    name: "Priya Sharma",
-    location: "Goa, India",
-    review: "I wore the Nomad Linen Shirt through 3 countries. Looks great, feels incredible.",
-    product: "Nomad Linen Shirt",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
+    name: "Priya S.",
+    review: "Absolutely love my tee! The quality is exceptional and the design is stunning. Gets compliments everywhere I go. The fabric is incredibly soft and breathable, perfect for everyday wear.",
+    verified: true
   },
   {
-    name: "Arjun Mehta",
-    location: "Ladakh, India",
-    review: "The Desert Trek Trousers handled everything from mountain trails to city streets flawlessly.",
-    product: "Desert Trek Trousers",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
+    name: "Arjun K.",
+    review: "Finally found travel-themed shirts that don't look cheesy! The fabric is soft, print quality is perfect. Ordered three more!",
+    verified: true
   },
   {
-    name: "Ananya Patel",
-    location: "Rajasthan, India",
-    review: "Finally, travel clothes that look editorial without sacrificing comfort. Nomadica is unmatched.",
-    product: "Horizon Canvas Jacket",
-    image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80",
+    name: "Kevin D.",
+    review: "Great quality and fast shipping. This is my new favorite tee. Love supporting a brand that celebrates travel!",
+    verified: true
   },
   {
-    name: "Rohit Kapoor",
-    location: "Mumbai, India",
-    review: "Every piece feels considered. The quality is exceptional for the price point.",
-    product: "Terra Wool Sweater",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
-  },
+    name: "Rohan P.",
+    review: "Bought this for a trip and it was the perfect conversation starter. Everyone wanted to know where I got it. The material holds up really well even after multiple washes.",
+    verified: false
+  }
 ];
 
 // Cache helper functions
@@ -655,258 +647,179 @@ function ProductCarouselSection({
 }
 
 function ImageBanner({
-  image,
-  title,
-  subtitle,
-  ctaText,
-  ctaLink,
+  image, href, height
 }: {
   image: string;
-  title: string;
-  subtitle: string;
-  ctaText: string;
-  ctaLink: string;
+  href: string;
+  height?: string;
 }) {
   return (
     <section
+      className="responsive-image-banner"
       style={{
         position: "relative",
-        height: "450px",
-        overflow: "hidden",
-        backgroundColor: "#1E1E1E",
+        width: "100%",
+        overflow: "hidden"
       }}
     >
-      <Image
-        src={image}
-        alt=""
-        fill
-        sizes="100vw"
-        style={{
-          objectFit: "cover",
-          opacity: 0.5,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          padding: "2rem",
-        }}
-      >
-        <h2
+      <style>{`
+        .responsive-image-banner {
+          height: ${height || "500px"};
+        }
+        @media (max-width: 768px) {
+          .responsive-image-banner {
+            height: ${height === "700px" ? "350px" : "250px"} !important;
+          }
+        }
+      `}</style>
+      <Link href={href}>
+        <Image
+          src={image}
+          alt=""
+          fill
+          sizes="100vw"
           style={{
-            fontFamily: "'Playfair Display', sans-serif",
-            fontSize: "clamp(2rem, 5vw, 3.5rem)",
-            fontWeight: 600,
-            color: "#FFFFFF",
-            lineHeight: 1.1,
-            letterSpacing: "-0.02em",
-            marginBottom: "1rem",
-            maxWidth: "800px",
+            objectFit: "cover"
           }}
-        >
-          {title}
-        </h2>
-        <p
-          style={{
-            fontFamily: "'Montserrat', sans-serif",
-            fontSize: "1rem",
-            color: "rgba(255, 255, 255, 0.75)",
-            maxWidth: "600px",
-            lineHeight: 1.6,
-            marginBottom: "2rem",
-          }}
-        >
-          {subtitle}
-        </p>
-        <Link href={ctaLink} style={{ textDecoration: "none" }}>
-          <button
-            style={{
-              padding: "0.875rem 2rem",
-              backgroundColor: "#FFFFFF",
-              color: "#1E1E1E",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "#1E1E1E";
-              (e.currentTarget as HTMLElement).style.color = "#FFFFFF";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "#FFFFFF";
-              (e.currentTarget as HTMLElement).style.color = "#1E1E1E";
-            }}
-          >
-            {ctaText} <ArrowRight size={14} style={{ marginLeft: "0.5rem", display: "inline" }} />
-          </button>
-        </Link>
-      </div>
+        />
+      </Link>
     </section>
   );
 }
 
 function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const t = setInterval(() => setActive((p) => (p + 1) % testimonials.length), 4000);
-    return () => clearInterval(t);
-  }, []);
-
   return (
     <section
+      className="testimonials-section"
       style={{
-        backgroundColor: bgTint ? "#F9F9F9" : "#FFFFFF",
-        padding: "6rem 1.5rem",
-        borderBottom: "1px solid rgba(30,30,30,0.05)",
+        position: "relative",
+        width: "100%",
+        height: "700px",
+        backgroundImage: "url('/testimonials-bg.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        display: "flex",
+        alignItems: "center",
+        padding: "4rem 1.5rem",
+        boxSizing: "border-box",
+        overflow: "hidden"
       }}
     >
-      <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-          <p
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.75rem",
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              color: "rgba(30,30,30,0.5)",
-              marginBottom: "0.75rem",
-            }}
-          >
-            Feedback
-          </p>
-          <h2
-            style={{
-              fontFamily: "'Playfair Display', sans-serif",
-              fontSize: "clamp(2rem, 5vw, 3.5rem)",
-              fontWeight: 600,
-              color: "#1E1E1E",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            Loved by Nomads
-          </h2>
-        </div>
+      <style>{`
+        .testimonials-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1.5rem;
+          width: 100%;
+          max-width: 800px;
+        }
+        @media (max-width: 991px) {
+          .testimonials-grid {
+            max-width: 100%;
+          }
+        }
+        @media (max-width: 768px) {
+          .testimonials-section {
+            height: auto !important;
+            min-height: auto !important;
+            padding: 3rem 1rem !important;
+          }
+          .testimonials-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
 
-        <div
+      <div style={{ maxWidth: "1400px", width: "100%", margin: "0 auto" }}>
+        {/* Title */}
+        <h2
           style={{
-            display: "flex",
-            gap: "1.5rem",
-            overflowX: "auto",
-            paddingBottom: "1rem",
-            scrollSnapType: "x mandatory",
-            WebkitOverflowScrolling: "touch",
+            fontFamily: "'Playfair Display', sans-serif",
+            fontSize: "clamp(2.25rem, 4vw, 2.75rem)",
+            fontWeight: 600,
+            color: "#1E1E1E",
+            letterSpacing: "-0.02em",
+            marginBottom: "2.5rem",
+            textAlign: "left"
           }}
-          className="horizontal-scroll"
         >
+          What Travelers Say
+        </h2>
+
+        {/* 2x2 Grid */}
+        <div className="testimonials-grid">
           {testimonials.map((t, i) => (
             <div
               key={i}
-              onClick={() => setActive(i)}
               style={{
-                flexShrink: 0,
-                width: "clamp(280px, 35vw, 400px)",
-                scrollSnapAlign: "start",
-                backgroundColor: active === i ? "#1E1E1E" : "#FFFFFF",
-                border: active === i ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.08)",
-                boxShadow: "0 12px 32px rgba(30,30,30,0.04)",
-                padding: "2.5rem 2rem",
-                cursor: "pointer",
-                transition: "all 0.4s ease",
-                transform: active === i ? "translateY(-8px)" : "translateY(0)",
+                backgroundColor: "#FFFFFF",
+                borderRadius: "12px",
+                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.06)",
+                padding: "1.75rem",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                border: "1px solid rgba(30,30,30,0.03)",
+                boxSizing: "border-box"
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
-                <Image
-                  src={t.image}
-                  alt={t.name}
-                  width={48}
-                  height={48}
-                  style={{
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    border: `2px solid ${active === i ? "#1E1E1E" : "transparent"}`,
-                  }}
-                />
-                <div>
-                  <p
-                    style={{
-                      fontFamily: "'Playfair Display', sans-serif",
-                      fontSize: "0.9375rem",
-                      fontWeight: 500,
-                      color: active === i ? "#FFFFFF" : "#1E1E1E",
-                    }}
+              {/* Stars */}
+              <div style={{ display: "flex", gap: "2px", marginBottom: "0.75rem" }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg
+                    key={star}
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="#388E3C"
+                    stroke="#388E3C"
+                    strokeWidth="1"
                   >
-                    {t.name}
-                  </p>
-                  <p
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "0.75rem",
-                      color: active === i ? "rgba(255, 255, 255, 0.5)" : "rgba(30,30,30,0.5)",
-                    }}
-                  >
-                    {t.location}
-                  </p>
-                </div>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                ))}
               </div>
 
+              {/* Review Text */}
               <p
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.9375rem",
-                  lineHeight: 1.7,
-                  color: active === i ? "rgba(255, 255, 255, 0.85)" : "rgba(30,30,30,0.7)",
-                  marginBottom: "1.25rem",
+                  fontSize: "0.875rem",
+                  lineHeight: "1.6",
+                  color: "rgba(30, 30, 30, 0.8)",
                   fontStyle: "italic",
+                  margin: "0 0 1rem 0",
                 }}
               >
                 &quot;{t.review}&quot;
               </p>
 
-              <span
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.6875rem",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  fontWeight: 600,
-                  color: active === i ? "#FFFFFF" : "#1E1E1E",
-                }}
-              >
-                {t.product}
-              </span>
+              {/* Author & Verification */}
+              <div style={{ display: "flex", flexDirection: "column", marginTop: "auto" }}>
+                <span
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "0.875rem",
+                    fontWeight: 700,
+                    color: "#1E1E1E"
+                  }}
+                >
+                  {t.name}
+                </span>
+                {t.verified && (
+                  <span
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.75rem",
+                      color: "rgba(30, 30, 30, 0.4)",
+                      marginTop: "2px"
+                    }}
+                  >
+                    Verified Purchase
+                  </span>
+                )}
+              </div>
             </div>
-          ))}
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "2rem" }}>
-          {testimonials.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActive(i)}
-              style={{
-                width: active === i ? "24px" : "8px",
-                height: "8px",
-                borderRadius: "4px",
-                backgroundColor: active === i ? "#1E1E1E" : "rgba(30,30,30,0.2)",
-                border: "none",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                padding: 0,
-              }}
-            />
           ))}
         </div>
       </div>
@@ -1478,15 +1391,6 @@ export default function HomePage() {
       {/* Latest Collection Section */}
       <LatestCollectionSection />
 
-      {/* 3. New Arrivals Section */}
-      <ProductCarouselSection
-        title="New Arrivals"
-        products={newArrivals}
-        loading={loading}
-        viewAllLink="/shop/new-arrivals"
-        viewAllText="VIEW ALL"
-      />
-
       {/* 4. Best Sellers Section */}
       <ProductCarouselSection
         title="Best Sellers"
@@ -1498,11 +1402,9 @@ export default function HomePage() {
 
       {/* 5. Banner Section 1 */}
       <ImageBanner
-        image="https://images.unsplash.com/photo-1486916856992-e4db22c8df33?w=1600&q=80"
-        title="Equipped for the Unplanned"
-        subtitle="Nomadica travel apparel balances functional utility with refined, modern aesthetics. Made for adventurers, creatives, and global citizens."
-        ctaText="Shop the Catalog"
-        ctaLink="/shop"
+        image="/youtube shorts banner 1.jpg"
+        href="/brand/story"
+        height="700px"
       />
 
       {/* 6. Collection 1 Section */}
@@ -1555,10 +1457,7 @@ export default function HomePage() {
       {/* 11. Banner Section 2 */}
       <ImageBanner
         image="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1600&q=80"
-        title="Made Consciously, Worn Endlessly"
-        subtitle="Timeless apparel designed with respect for the planet. We utilize organic, sustainable materials and enforce fair labor standard compliance across all partners."
-        ctaText="Our Philosophy"
-        ctaLink="/brand/sustainability"
+        href="/"
       />
 
       {/* 12. Collection 5 Section */}
