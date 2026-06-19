@@ -653,22 +653,24 @@ function ImageBanner({
   href: string;
   height?: string;
 }) {
+  const desktopHeight = height || "500px";
+  const mobileHeight = height === "700px" ? "350px" : "250px";
+
   return (
     <section
       className="responsive-image-banner"
       style={{
         position: "relative",
         width: "100%",
-        overflow: "hidden"
+        overflow: "hidden",
+        height: desktopHeight,
+        ["--mobile-height" as any]: mobileHeight
       }}
     >
       <style>{`
-        .responsive-image-banner {
-          height: ${height || "500px"};
-        }
         @media (max-width: 768px) {
           .responsive-image-banner {
-            height: ${height === "700px" ? "350px" : "250px"} !important;
+            height: var(--mobile-height) !important;
           }
         }
       `}</style>
@@ -713,6 +715,23 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
           width: 100%;
           max-width: 800px;
         }
+        .testimonial-card {
+          background-color: #FFFFFF;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+          padding: 1.75rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          border: 1px solid rgba(30,30,30,0.03);
+          box-sizing: border-box;
+          transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+          transform: translateY(0);
+        }
+        .testimonial-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+        }
         @media (max-width: 991px) {
           .testimonials-grid {
             max-width: 100%;
@@ -751,17 +770,7 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
           {testimonials.map((t, i) => (
             <div
               key={i}
-              style={{
-                backgroundColor: "#FFFFFF",
-                borderRadius: "12px",
-                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.06)",
-                padding: "1.75rem",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                border: "1px solid rgba(30,30,30,0.03)",
-                boxSizing: "border-box"
-              }}
+              className="testimonial-card"
             >
               {/* Stars */}
               <div style={{ display: "flex", gap: "2px", marginBottom: "0.75rem" }}>
