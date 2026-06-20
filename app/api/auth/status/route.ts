@@ -128,6 +128,6 @@ export async function GET() {
 
   return NextResponse.json(
     { isAuthenticated: false, user: null },
-    { status: 401 }
+    { status: 200 }
   );
 }

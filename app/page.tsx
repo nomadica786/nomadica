@@ -1,13 +1,14 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Star, Heart } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Star, Heart, LucideIcon, TrendingUp, MapPin, Luggage, Panda, LocateIcon, MapIcon, Shell } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import { CardSkeleton } from "@/components/ui/SnowBallLoader";
 import { api } from "@/components/api/api";
 import { groupProducts } from "@/utils/productGroup";
 import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
+import { color } from "framer-motion";
 
 const heroImage =
   "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80";
@@ -162,7 +163,7 @@ function HeroSection() {
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          zIndex: 10,
+          zIndex: 20,
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           transition: "transform 0.2s ease, background-color 0.2s ease",
         }}
@@ -193,7 +194,7 @@ function HeroSection() {
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          zIndex: 10,
+          zIndex: 20,
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           transition: "transform 0.2s ease, background-color 0.2s ease",
         }}
@@ -221,6 +222,7 @@ function HeroSection() {
           paddingRight: "clamp(1.5rem, 8vw, 5rem)",
           zIndex: 10,
           textAlign: "left",
+          pointerEvents: "none",
         }}
       >
         <div
@@ -229,6 +231,7 @@ function HeroSection() {
             opacity: loaded ? 1 : 0,
             transform: loaded ? "translateY(0)" : "translateY(30px)",
             transition: "opacity 0.9s ease 0.4s, transform 0.9s ease 0.4s",
+            pointerEvents: "auto",
           }}
         >
         </div>
@@ -243,7 +246,7 @@ function HeroSection() {
           transform: "translateX(-50%)",
           display: "flex",
           gap: "0.75rem",
-          zIndex: 10,
+          zIndex: 20,
         }}
       >
         {bannerImages.map((_, index) => (
@@ -274,12 +277,18 @@ function ProductCarouselSection({
   loading,
   viewAllLink,
   viewAllText,
+  icon: Icon,
+  backgroundColor,
+  backgroundImage
 }: {
   title: string;
   products: any[];
   loading: boolean;
   viewAllLink: string;
   viewAllText: string;
+  icon: LucideIcon;
+  backgroundColor?: string;
+  backgroundImage?: string;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
@@ -313,7 +322,18 @@ function ProductCarouselSection({
   return (
     <section
       style={{
-        backgroundColor: "#FAF9F7",
+            backgroundColor: backgroundImage
+            ? undefined
+            : backgroundColor || "#FAF9F7",
+
+          backgroundImage: backgroundImage
+            ? `url(${backgroundImage})`
+            : undefined,
+
+          backgroundSize: backgroundImage ? "cover" : undefined,
+          backgroundPosition: backgroundImage ? "center" : undefined,
+          backgroundRepeat: backgroundImage ? "no-repeat" : undefined,
+    
         padding: "5rem 1.5rem",
         borderBottom: "1px solid rgba(30,30,30,0.05)",
         position: "relative"
@@ -331,13 +351,13 @@ function ProductCarouselSection({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Star size={24} color="#C1A886" fill="#C1A886" style={{ opacity: 0.8 }} />
+            <Icon size={24} color="#c4a77d" style={{ opacity: 0.8 }} />
             <h2
               style={{
                 fontFamily: "'Playfair Display', sans-serif",
                 fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
                 fontWeight: 600,
-                color: "#1E1E1E",
+                color: "#111111",
                 letterSpacing: "-0.01em",
                 margin: 0
               }}
@@ -348,7 +368,7 @@ function ProductCarouselSection({
           <Link href={viewAllLink} style={{ textDecoration: "none" }}>
             <button
               style={{
-                backgroundColor: "#C1A886",
+                backgroundColor: "#c4a77d",
                 color: "#FFFFFF",
                 border: "none",
                 borderRadius: "4px",
@@ -362,10 +382,10 @@ function ProductCarouselSection({
                 transition: "background-color 0.2s ease"
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = "#A88E6D";
+                (e.currentTarget as HTMLElement).style.backgroundColor = "#b0936b";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = "#C1A886";
+                (e.currentTarget as HTMLElement).style.backgroundColor = "#c4a77d";
               }}
             >
               {viewAllText}
@@ -496,7 +516,6 @@ function ProductCarouselSection({
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              console.log(`Add to wishlist: ${pHandle}`);
                               const event = new CustomEvent("add-to-wishlist", { detail: { handle: pHandle } });
                               window.dispatchEvent(event);
                             }}
@@ -539,7 +558,7 @@ function ProductCarouselSection({
                               fontFamily: "'Playfair Display', serif",
                               fontSize: "1.125rem",
                               fontWeight: 600,
-                              color: isHovered ? "#C1A886" : "#1E1E1E",
+                              color: isHovered ? "var(--primary-gold)" : "var(--charcoal)",
                               margin: "0 0 0.5rem 0",
                               transition: "color 0.2s ease"
                             }}
@@ -550,7 +569,7 @@ function ProductCarouselSection({
 
                         {/* Price */}
                         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                          <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: "#1E1E1E", fontSize: "1rem" }}>
+                          <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: "var(--charcoal)", fontSize: "1rem" }}>
                             ₹{price.toLocaleString("en-IN")}
                           </span>
                           {originalPrice && (
@@ -584,7 +603,7 @@ function ProductCarouselSection({
                                       borderRadius: "50%",
                                       backgroundColor: v.colorHex,
                                       border: isSelected 
-                                        ? "2px solid #1E1E1E" 
+                                        ? "2px solid var(--charcoal)" 
                                         : (isWhite ? "1.5px solid rgba(30, 30, 30, 0.4)" : "1px solid rgba(0,0,0,0.15)"),
                                       boxShadow: isSelected ? "0 0 0 1.5px #FFFFFF inset" : "none",
                                       padding: 0,
@@ -674,7 +693,7 @@ function ImageBanner({
           }
         }
       `}</style>
-      <Link href={href}>
+      <Link href={href} style={{ position: "relative", display: "block", width: "100%", height: "100%" }}>
         <Image
           src={image}
           alt=""
@@ -1157,20 +1176,28 @@ function LatestCollectionSection() {
       loading={false}
       viewAllLink="/shop"
       viewAllText="VIEW ALL"
+      icon={Star}
     />
   );
 }
 
 export default function HomePage() {
-  const [collections, setCollections] = useState<any[]>(() => getCached("collections", []));
-  const [newArrivals, setNewArrivals] = useState<any[]>(() => getCached("new_arrivals", []));
-  const [bestSellers, setBestSellers] = useState<any[]>(() => getCached("best_sellers", []));
-  const [collectionProducts, setCollectionProducts] = useState<Record<string, any[]>>(() => getCached("collection_products", {}));
-  const [collectionConfigs, setCollectionConfigs] = useState<any[]>(() => getCached("collection_configs", []));
-  const [journalArticles, setJournalArticles] = useState<any[]>(() => getCached("journal", []));
+  const [collections, setCollections] = useState<any[]>([]);
+  const [newArrivals, setNewArrivals] = useState<any[]>([]);
+  const [bestSellers, setBestSellers] = useState<any[]>([]);
+  const [collectionProducts, setCollectionProducts] = useState<Record<string, any[]>>({});
+  const [collectionConfigs, setCollectionConfigs] = useState<any[]>([]);
+  const [journalArticles, setJournalArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setCollections(getCached("collections", []));
+    setNewArrivals(getCached("new_arrivals", []));
+    setBestSellers(getCached("best_sellers", []));
+    setCollectionProducts(getCached("collection_products", {}));
+    setCollectionConfigs(getCached("collection_configs", []));
+    setJournalArticles(getCached("journal", []));
+
     const loadHomeData = async () => {
       try {
         // 1. Fetch Collections list
@@ -1273,7 +1300,6 @@ export default function HomePage() {
         setCollectionProducts(colProductsMap);
         setCached("collection_products", colProductsMap);
 
-        // 4. Fetch Blog Articles
         let articles = getCached("journal", []);
         try {
           const res = await fetch('/api/journal?limit=3');
@@ -1294,6 +1320,16 @@ export default function HomePage() {
 
     loadHomeData();
   }, []);
+
+  const getCategoryLabel = (tags: string[]) => {
+    if (!tags || tags.length === 0) return "Travel Tips";
+    const tagList = tags.map(t => t.toLowerCase());
+    if (tagList.includes("guides") || tagList.includes("guide")) return "Destination Guides";
+    if (tagList.includes("adventure") || tagList.includes("hiking") || tagList.includes("stories")) return "Adventure Stories";
+    if (tagList.includes("perspectives") || tagList.includes("tips") || tagList.includes("ideas")) return "Travel Tips";
+    if (tagList.includes("destinations") || tagList.includes("japan") || tagList.includes("italy") || tagList.includes("switzerland") || tagList.includes("usa")) return "Destination Guides";
+    return "Travel Tips";
+  };
 
   return (
     <div>
@@ -1407,6 +1443,8 @@ export default function HomePage() {
         loading={loading}
         viewAllLink="/shop/best-sellers"
         viewAllText="VIEW ALL"
+        backgroundColor="#FFFFFF"
+        icon={TrendingUp}
       />
 
       {/* 5. Banner Section 1 */}
@@ -1424,6 +1462,7 @@ export default function HomePage() {
           loading={loading}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[0].handle)}`}
           viewAllText="VIEW ALL"
+          icon={Luggage}
         />
       )}
 
@@ -1435,6 +1474,8 @@ export default function HomePage() {
           loading={loading}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[1].handle)}`}
           viewAllText="VIEW ALL"
+          backgroundColor="#FFFFFF"
+          icon={Panda}
         />
       )}
 
@@ -1449,6 +1490,7 @@ export default function HomePage() {
           loading={loading}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[2].handle)}`}
           viewAllText="VIEW ALL"
+          icon={MapIcon}
         />
       )}
 
@@ -1460,13 +1502,16 @@ export default function HomePage() {
           loading={loading}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[3].handle)}`}
           viewAllText="VIEW ALL"
+          backgroundImage="/beach-bg.png"
+          icon={Shell}
         />
       )}
 
       {/* 11. Banner Section 2 */}
       <ImageBanner
-        image="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1600&q=80"
+        image="/Home-Banner2.png"
         href="/"
+        height="420px"
       />
 
       {/* 12. Collection 5 Section */}
@@ -1477,58 +1522,139 @@ export default function HomePage() {
           loading={loading}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[4].handle)}`}
           viewAllText="VIEW ALL"
+          backgroundColor="#FFFFFF"
+          icon={Star}
         />
       )}
 
       {/* 13. Blogs Section */}
-      <section style={{ backgroundColor: "#F9F9F9", padding: "6rem 1.5rem", borderBottom: "1px solid rgba(30,30,30,0.05)" }}>
+      <section style={{ backgroundColor: "var(--sand)", padding: "6rem 1.5rem", borderBottom: "1px solid rgba(30,30,30,0.05)" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "flex-end",
+              alignItems: "center",
               marginBottom: "3rem",
               flexWrap: "wrap",
               gap: "1rem",
             }}
           >
             <div>
-              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "0.5rem" }}>
-                Editorial
-              </p>
-              <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
-                The Nomad Journal
+              <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 3.5vw, 2.5rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.01em" }}>
+                Travel Articles & Inspiration
               </h2>
             </div>
             <Link href="/journal" style={{ textDecoration: "none" }}>
-              <button className="btn-outline">
-                Read the Journal <ArrowRight size={14} />
+              <button
+                style={{
+                  backgroundColor: "#c4a77d",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "0.65rem 1.25rem",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s ease, opacity 0.3s ease",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#b0936b"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#c4a77d"; }}
+              >
+                VIEW ALL
               </button>
             </Link>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {journalArticles.length === 0 && loading
               ? [1, 2, 3].map((i) => (
-                  <div key={i} style={{ aspectRatio: "16/10", backgroundColor: "#F0F0F0", animation: "shimmer 1.5s infinite" }} />
+                  <div key={i} style={{ aspectRatio: "16/10", backgroundColor: "#F0F0F0", borderRadius: "8px", animation: "shimmer 1.5s infinite" }} />
                 ))
               : journalArticles.map((art: any) => (
                   <Link key={art.id} href={`/journal/${art.handle}`} style={{ textDecoration: "none", display: "block" }}>
-                    <div style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(30,30,30,0.08)", boxShadow: "0 12px 32px rgba(30,30,30,0.04)" }}>
-                      <div style={{ aspectRatio: "16/10", overflow: "hidden", position: "relative" }}>
-                        <Image src={getShopifyImageUrl(art.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"} alt={art.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" style={{ objectFit: "cover" }} />
+                    <div className="journal-card">
+                      <div className="journal-card-image-wrap" style={{ aspectRatio: "16/10", position: "relative", width: "100%", overflow: "hidden" }}>
+                        <Image
+                          src={getShopifyImageUrl(art.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
+                          alt={art.title}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          style={{ objectFit: "cover" }}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "1.25rem",
+                            left: "1.25rem",
+                            backgroundColor: "rgba(196, 167, 125, 0.85)",
+                            color: "#FFFFFF",
+                            padding: "0.35rem 0.75rem",
+                            borderRadius: "3px",
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "0.7rem",
+                            fontWeight: 500,
+                            letterSpacing: "0.02em",
+                            zIndex: 10,
+                          }}
+                        >
+                          {getCategoryLabel(art.tags)}
+                        </div>
                       </div>
-                      <div style={{ padding: "1.5rem" }}>
-                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", color: "rgba(30,30,30,0.4)", textTransform: "uppercase", display: "block", marginBottom: "0.5rem" }}>
-                          {new Date(art.publishedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                        </span>
-                        <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.2rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.5rem", lineHeight: 1.3 }}>
+                      <div className="journal-card-body">
+                        <h3
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "1.125rem",
+                            fontWeight: 600,
+                            color: "#111111",
+                            marginBottom: "0.75rem",
+                            lineHeight: 1.4,
+                          }}
+                        >
                           {art.title}
                         </h3>
-                        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }} className="line-clamp-2">
+                        <p
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "0.875rem",
+                            color: "rgba(30,30,30,0.6)",
+                            lineHeight: 1.6,
+                            marginBottom: "1.25rem",
+                          }}
+                          className="line-clamp-2"
+                        >
                           {art.excerpt}
                         </p>
+                        <span
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "0.75rem",
+                            color: "rgba(30,30,30,0.45)",
+                            display: "block",
+                            marginBottom: "1.5rem",
+                            marginTop: "auto",
+                          }}
+                        >
+                          By {art.authorV2?.name || "Nomadica Editor"}
+                        </span>
+                        <div
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            color: "#c4a77d",
+                            letterSpacing: "0.05em",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.25rem",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          READ MORE <ArrowRight size={12} style={{ color: "#c4a77d" }} />
+                        </div>
                       </div>
                     </div>
                   </Link>
@@ -1536,6 +1662,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
 
       {/* 14. About Nomadica Section */}
       <section style={{ backgroundColor: "#FFFFFF", padding: "6rem 1.5rem" }}>

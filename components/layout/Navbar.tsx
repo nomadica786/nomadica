@@ -64,14 +64,11 @@ export default function Navbar() {
     const cartId = typeof window !== "undefined" ? localStorage.getItem("nomadica_cart_id") : null;
     if (!cartId) {
       setCart(null);
-      console.log("[NAVBAR] No cart ID in localStorage");
       return;
     }
-    console.log(`[NAVBAR] Fetching cart: ${cartId}`);
     setCartLoading(true);
     try {
       const res = await api.cart.get(cartId);
-      console.log(`[NAVBAR] ✅ Cart fetched:`, res.cart);
       setCart(res.cart);
     } catch (err) {
       console.error("[NAVBAR] Failed to fetch cart:", err);
@@ -115,10 +112,8 @@ export default function Navbar() {
     fetchCart();
 
     const handleCartUpdate = (e: any) => {
-      console.log("[NAVBAR] 🔔 cart-updated event received:", e.detail);
       fetchCart();
       if (e.detail?.openDrawer !== false) {
-        console.log("[NAVBAR] Opening cart drawer...");
         setCartOpen(true);
       }
     };
@@ -130,31 +125,7 @@ export default function Navbar() {
   const totalItems = cart?.lines?.edges?.reduce((acc: number, edge: any) => acc + edge.node.quantity, 0) || 0;
   const userInitials = user?.firstName ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ""}`.toUpperCase() : "T";
 
-  // Debug: Log cart structure with FULL detail
-  if (cart && cart.lines) {
-    const edges = cart.lines.edges || [];
-    console.log("[NAVBAR DEBUG] Cart edges array:", {
-      edgesCount: edges.length,
-      edgesArray: edges,
-      edgesMap: edges.map((e: any, i: number) => ({
-        index: i,
-        keys: Object.keys(e),
-        edgeNode: e.node,
-        nodeKeys: e.node ? Object.keys(e.node) : 'NO NODE',
-        quantity: e.node?.quantity,
-        title: e.node?.title || e.node?.merchandise?.title
-      }))
-    });
-    console.log("[NAVBAR DEBUG] Reduce calculation:", {
-      initialEdges: edges,
-      reduceResult: edges.reduce((acc: number, edge: any) => {
-        const qty = edge.node?.quantity || 0;
-        console.log(`  Adding edge: quantity=${qty}`);
-        return acc + qty;
-      }, 0),
-      totalItemsCalculated: totalItems
-    });
-  }
+
 
   return (
     <>
@@ -232,18 +203,17 @@ export default function Navbar() {
               >
                 <Link
                   href={link.href}
+                  className={`nav-link ${pathname.startsWith(link.href) ? "nav-link-active" : ""}`}
                   style={{
                     fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.875rem",
                     fontWeight: 500,
-                    color: pathname.startsWith(link.href) ? "#1E1E1E" : "#1E1E1E",
                     textDecoration: "none",
                     letterSpacing: "0.02em",
                     display: "flex",
                     alignItems: "center",
                     gap: "4px",
                     padding: "0.5rem 0",
-                    transition: "color 0.2s ease",
                   }}
                 >
                   {link.label}
@@ -513,7 +483,7 @@ export default function Navbar() {
                       fontFamily: "'Playfair Display', sans-serif",
                       fontSize: "1.375rem",
                       fontWeight: 500,
-                      color: "#1E1E1E",
+                      color: "var(--charcoal)",
                       textAlign: "left",
                     }}
                   >
@@ -537,7 +507,7 @@ export default function Navbar() {
                             padding: "0.625rem 1rem",
                             fontFamily: "'Montserrat', sans-serif",
                             fontSize: "0.9375rem",
-                            color: "#1E1E1E",
+                            color: "var(--charcoal)",
                             textDecoration: "none",
                           }}
                         >
@@ -556,7 +526,7 @@ export default function Navbar() {
                     fontFamily: "'Playfair Display', sans-serif",
                     fontSize: "1.375rem",
                     fontWeight: 500,
-                    color: "#1E1E1E",
+                    color: "var(--charcoal)",
                     textDecoration: "none",
                   }}
                 >
@@ -665,7 +635,6 @@ export default function Navbar() {
             </div>
           ) : !cart || cart.lines?.edges?.length === 0 ? (
             <>
-              {console.log("[NAVBAR RENDER] Cart empty state:", { cart: !!cart, itemCount: cart?.lines?.edges?.length || 0 })}
               <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", textAlign: "center" }}>
                 <ShoppingBag size={48} style={{ color: "rgba(30,30,30,0.2)", marginBottom: "1rem" }} />
                 <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9375rem", fontWeight: 500, color: "#1E1E1E", margin: "0 0 1.5rem" }}>
@@ -682,7 +651,6 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {console.log("[NAVBAR RENDER] Cart with items:", { itemCount: cart.lines?.edges?.length })}
               <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               {cart.lines.edges.map((edge: any) => {
                 const line = edge.node;

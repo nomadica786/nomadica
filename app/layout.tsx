@@ -45,8 +45,8 @@ export default function RootLayout({
   const websiteSchema = getWebsiteSchema();
 
   return (
-    <html lang="en">
-      <body className={`${montserrat.variable} ${playfairDisplay.variable}`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${montserrat.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
         <GoogleAnalytics />
         <JsonLd schema={organizationSchema} />
         <JsonLd schema={websiteSchema} />

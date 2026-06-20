@@ -149,13 +149,6 @@ export default function ProductCard({
                 }
                 setAddingToCart(true);
                 try {
-                  console.log("========================================");
-                  console.log("[CHECKOUT FLOW] STEP 1: Customer adding to cart");
-                  console.log("========================================");
-                  console.log(`  Product: ${currentName} (${currentPrice} INR)`);
-                  
-                  // Fetch product to get actual variant ID
-                  console.log(`  Fetching product ${currentId} to get variant ID...`);
                   const productRes = await api.products.get(currentId || "1");
                   const product = productRes?.product || productRes?.productByHandle;
                   
@@ -172,8 +165,6 @@ export default function ProductCard({
                     throw new Error('Product has no variants');
                   }
 
-                  console.log(`  ✅ Using variant ID: ${variantId}`);
-
                   let cartId = localStorage.getItem("nomadica_cart_id");
                   
                   if (!cartId) {
@@ -187,7 +178,6 @@ export default function ProductCard({
                     }]);
                     const newCart = res?.cartCreate?.cart || res?.cart;
                     if (newCart?.id) {
-                      console.log(`  ✅ Created new cart: ${newCart.id}`);
                       localStorage.setItem("nomadica_cart_id", newCart.id);
                     }
                   } else {
@@ -201,7 +191,6 @@ export default function ProductCard({
                         image: currentImage
                       }]
                     });
-                    console.log(`  ✅ Updated existing cart: ${cartId}`);
                   }
                   
                   window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: true } }));
@@ -215,7 +204,7 @@ export default function ProductCard({
                 width: "100%",
                 padding: "0.75rem",
                 backgroundColor: "#FFFFFF",
-                color: "#1E1E1E",
+                color: "var(--charcoal)",
                 border: "none",
                 cursor: "pointer",
                 fontFamily: "'Montserrat', sans-serif",
@@ -246,7 +235,7 @@ export default function ProductCard({
                 position: "absolute",
                 top: "0.75rem",
                 left: "0.75rem",
-                backgroundColor: currentBadge === "Sale" ? "#1E1E1E" : currentBadge === "New" ? "#4F6B5A" : "#1E1E1E",
+                backgroundColor: currentBadge === "Sale" ? "var(--charcoal)" : currentBadge === "New" ? "var(--forest-green)" : "var(--charcoal)",
                 color: "#FFFFFF",
                 padding: "0.25rem 0.625rem",
                 fontFamily: "'Montserrat', sans-serif",
@@ -296,10 +285,10 @@ export default function ProductCard({
               justifyContent: "center",
               opacity: hovered ? 1 : 0,
               transition: "opacity 0.3s ease",
-              color: wishlisted ? "#1E1E1E" : "#1E1E1E",
+              color: wishlisted ? "var(--charcoal)" : "var(--charcoal)",
             }}
           >
-            <Heart size={14} fill={wishlisted ? "#1E1E1E" : "none"} />
+            <Heart size={14} fill={wishlisted ? "var(--charcoal)" : "none"} />
           </button>
         </div>
       </Link>
@@ -311,7 +300,7 @@ export default function ProductCard({
             style={{
               fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.6875rem",
-              color: "#1E1E1E",
+              color: "var(--charcoal)",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               marginBottom: "0.25rem",
@@ -327,7 +316,7 @@ export default function ProductCard({
               fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.9375rem",
               fontWeight: 500,
-              color: "#1E1E1E",
+              color: "var(--charcoal)",
               marginBottom: "0.375rem",
               lineHeight: 1.4,
             }}
@@ -354,8 +343,8 @@ export default function ProductCard({
                   borderRadius: "50%",
                   backgroundColor: v.colorHex,
                   border: activeVariant?.id === v.id
-                    ? "1.5px solid #1E1E1E"
-                    : (isWhiteColor(v.colorHex) ? "1.5px solid #1E1E1E" : "1px solid rgba(30, 30, 30, 0.2)"),
+                    ? "1.5px solid var(--charcoal)"
+                    : (isWhiteColor(v.colorHex) ? "1.5px solid var(--charcoal)" : "1px solid rgba(30, 30, 30, 0.2)"),
                   boxShadow: activeVariant?.id === v.id ? "0 0 0 1.5px #FFFFFF inset" : "none",
                   cursor: "pointer",
                   padding: 0,
@@ -374,7 +363,7 @@ export default function ProductCard({
               fontFamily: "'Montserrat', sans-serif",
               fontSize: "0.9375rem",
               fontWeight: 600,
-              color: "#1E1E1E",
+              color: "var(--charcoal)",
             }}
           >
             ₹{currentPrice.toLocaleString("en-IN")}
