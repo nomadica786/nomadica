@@ -11,9 +11,9 @@ import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 
 const navLinks = [
-  { label: "Home", href: "/" },
+  { label: "HOME", href: "/" },
   {
-    label: "Shop",
+    label: "SHOP",
     href: "/shop",
     children: [
       { label: "New Arrivals", href: "/shop/new-arrivals" },
@@ -22,10 +22,10 @@ const navLinks = [
       { label: "Limited Drops", href: "/shop/limited-drops" },
     ],
   },
-  { label: "Blogs", href: "/journal" },
-  { label: "Stories", href: "/brand/story" },
+  { label: "ARTICLES", href: "/journal" },
+  { label: "STORIES", href: "/brand/story" },
   {
-    label: "Brand",
+    label: "BRAND",
     href: "/brand",
     children: [
       { label: "About Us", href: "/brand/about" },
@@ -34,7 +34,7 @@ const navLinks = [
       { label: "Sustainability", href: "/brand/sustainability" },
     ],
   },
-  { label: "Support", href: "/support/faq" },
+  // { label: "SUPPORT", href: "/support/faq" },
 ];
 
 const dropdownItemStyle = {
@@ -64,14 +64,11 @@ export default function Navbar() {
     const cartId = typeof window !== "undefined" ? localStorage.getItem("nomadica_cart_id") : null;
     if (!cartId) {
       setCart(null);
-      console.log("[NAVBAR] No cart ID in localStorage");
       return;
     }
-    console.log(`[NAVBAR] Fetching cart: ${cartId}`);
     setCartLoading(true);
     try {
       const res = await api.cart.get(cartId);
-      console.log(`[NAVBAR] ✅ Cart fetched:`, res.cart);
       setCart(res.cart);
     } catch (err) {
       console.error("[NAVBAR] Failed to fetch cart:", err);
@@ -115,10 +112,8 @@ export default function Navbar() {
     fetchCart();
 
     const handleCartUpdate = (e: any) => {
-      console.log("[NAVBAR] 🔔 cart-updated event received:", e.detail);
       fetchCart();
       if (e.detail?.openDrawer !== false) {
-        console.log("[NAVBAR] Opening cart drawer...");
         setCartOpen(true);
       }
     };
@@ -130,31 +125,7 @@ export default function Navbar() {
   const totalItems = cart?.lines?.edges?.reduce((acc: number, edge: any) => acc + edge.node.quantity, 0) || 0;
   const userInitials = user?.firstName ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ""}`.toUpperCase() : "T";
 
-  // Debug: Log cart structure with FULL detail
-  if (cart && cart.lines) {
-    const edges = cart.lines.edges || [];
-    console.log("[NAVBAR DEBUG] Cart edges array:", {
-      edgesCount: edges.length,
-      edgesArray: edges,
-      edgesMap: edges.map((e: any, i: number) => ({
-        index: i,
-        keys: Object.keys(e),
-        edgeNode: e.node,
-        nodeKeys: e.node ? Object.keys(e.node) : 'NO NODE',
-        quantity: e.node?.quantity,
-        title: e.node?.title || e.node?.merchandise?.title
-      }))
-    });
-    console.log("[NAVBAR DEBUG] Reduce calculation:", {
-      initialEdges: edges,
-      reduceResult: edges.reduce((acc: number, edge: any) => {
-        const qty = edge.node?.quantity || 0;
-        console.log(`  Adding edge: quantity=${qty}`);
-        return acc + qty;
-      }, 0),
-      totalItemsCalculated: totalItems
-    });
-  }
+
 
   return (
     <>
@@ -204,11 +175,11 @@ export default function Navbar() {
         style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: "1.375rem",
-          fontWeight: 600,
+          fontWeight: 1000,
           lineHeight: 1,
         }}
       >
-        NOMADICA
+        Nomadica
       </span>
     </Link>
 
@@ -232,18 +203,17 @@ export default function Navbar() {
               >
                 <Link
                   href={link.href}
+                  className={`nav-link ${pathname.startsWith(link.href) ? "nav-link-active" : ""}`}
                   style={{
                     fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.875rem",
                     fontWeight: 500,
-                    color: pathname.startsWith(link.href) ? "#1E1E1E" : "#1E1E1E",
                     textDecoration: "none",
                     letterSpacing: "0.02em",
                     display: "flex",
                     alignItems: "center",
                     gap: "4px",
                     padding: "0.5rem 0",
-                    transition: "color 0.2s ease",
                   }}
                 >
                   {link.label}
@@ -297,12 +267,23 @@ export default function Navbar() {
           </div>
 
           {/* Right icons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <Link href="/shop/search" style={{ color: "#1E1E1E", display: "flex" }}>
-              <Search size={20} />
-            </Link>
-            <Link href="/account/wishlist" style={{ color: "#1E1E1E" }} className="hidden sm:flex">
+          <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
+            <Link 
+              href="/account/wishlist" 
+              style={{ 
+                color: "#1E1E1E", 
+                display: "flex", 
+                flexDirection: "column", 
+                alignItems: "center", 
+                textDecoration: "none",
+                gap: "4px"
+              }} 
+              className="hidden sm:flex"
+            >
               <Heart size={20} />
+              <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+                wishlist
+              </span>
             </Link>
 
             {/* Profile Avatar / Login Icon */}
@@ -315,21 +296,19 @@ export default function Navbar() {
                 <Link
                   href="/account/profile"
                   style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "50%",
-                    backgroundColor: "#1E1E1E",
-                    color: "#FFFFFF",
+                    display: "flex",
+                    flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: "'Playfair Display', sans-serif",
-                    fontSize: "0.8125rem",
-                    fontWeight: 600,
                     textDecoration: "none",
+                    color: "#1E1E1E",
+                    gap: "4px"
                   }}
                   className="hidden sm:flex"
                 >
-                  {userInitials}
+                  <User size={20} />
+                  <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+                    {user?.firstName || "profile"}
+                  </span>
                 </Link>
                 {openDropdown === "user" && (
                   <div
@@ -390,8 +369,22 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <Link href="/account/login" style={{ color: "#1E1E1E" }} className="hidden sm:flex">
+              <Link 
+                href="/account/login" 
+                style={{ 
+                  color: "#1E1E1E",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textDecoration: "none",
+                  gap: "4px"
+                }} 
+                className="hidden sm:flex"
+              >
                 <User size={20} />
+                <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+                  log in
+                </span>
               </Link>
             )}
 
@@ -405,28 +398,36 @@ export default function Navbar() {
                 border: "none",
                 cursor: "pointer",
                 display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "4px"
               }}
             >
-              <ShoppingBag size={20} />
-              <span
-                style={{
-                  position: "absolute",
-                  top: "-6px",
-                  right: "-6px",
-                  width: "16px",
-                  height: "16px",
-                  borderRadius: "50%",
-                  backgroundColor: "#1E1E1E",
-                  color: "#fff",
-                  fontSize: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontWeight: 600,
-                }}
-              >
-                {totalItems}
+              <div style={{ position: "relative", display: "flex" }}>
+                <ShoppingBag size={20} />
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "-6px",
+                    right: "-6px",
+                    width: "16px",
+                    height: "16px",
+                    borderRadius: "50%",
+                    backgroundColor: "#1E1E1E",
+                    color: "#fff",
+                    fontSize: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontWeight: 600,
+                  }}
+                >
+                  {totalItems}
+                </span>
+              </div>
+              <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+                cart
               </span>
             </button>
 
@@ -482,7 +483,7 @@ export default function Navbar() {
                       fontFamily: "'Playfair Display', sans-serif",
                       fontSize: "1.375rem",
                       fontWeight: 500,
-                      color: "#1E1E1E",
+                      color: "var(--charcoal)",
                       textAlign: "left",
                     }}
                   >
@@ -506,7 +507,7 @@ export default function Navbar() {
                             padding: "0.625rem 1rem",
                             fontFamily: "'Montserrat', sans-serif",
                             fontSize: "0.9375rem",
-                            color: "#1E1E1E",
+                            color: "var(--charcoal)",
                             textDecoration: "none",
                           }}
                         >
@@ -525,7 +526,7 @@ export default function Navbar() {
                     fontFamily: "'Playfair Display', sans-serif",
                     fontSize: "1.375rem",
                     fontWeight: 500,
-                    color: "#1E1E1E",
+                    color: "var(--charcoal)",
                     textDecoration: "none",
                   }}
                 >
@@ -634,7 +635,6 @@ export default function Navbar() {
             </div>
           ) : !cart || cart.lines?.edges?.length === 0 ? (
             <>
-              {console.log("[NAVBAR RENDER] Cart empty state:", { cart: !!cart, itemCount: cart?.lines?.edges?.length || 0 })}
               <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", textAlign: "center" }}>
                 <ShoppingBag size={48} style={{ color: "rgba(30,30,30,0.2)", marginBottom: "1rem" }} />
                 <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9375rem", fontWeight: 500, color: "#1E1E1E", margin: "0 0 1.5rem" }}>
@@ -651,7 +651,6 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {console.log("[NAVBAR RENDER] Cart with items:", { itemCount: cart.lines?.edges?.length })}
               <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               {cart.lines.edges.map((edge: any) => {
                 const line = edge.node;

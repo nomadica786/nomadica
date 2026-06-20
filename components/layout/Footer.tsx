@@ -66,7 +66,7 @@ export default function Footer() {
   return (
     <footer
       style={{
-        backgroundColor: "#1E1E1E",
+        backgroundColor: "var(--charcoal)",
         color: "#FFFFFF",
         paddingTop: "5rem",
         paddingBottom: "2rem",
@@ -129,7 +129,7 @@ export default function Footer() {
               <button
                 style={{
                   padding: "0.75rem 1rem",
-                  backgroundColor: "#1E1E1E",
+                  backgroundColor: "var(--charcoal)",
                   border: "none",
                   cursor: "pointer",
                   display: "flex",
@@ -150,10 +150,16 @@ export default function Footer() {
                   href="#"
                   style={{
                     color: "rgba(255, 255, 255,0.4)",
-                    transition: "color 0.2s ease",
+                    transition: "color 0.2s ease, transform 0.2s ease",
                   }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#1E1E1E")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255,0.4)")}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = "var(--primary-gold)";
+                    (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255,0.4)";
+                    (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                  }}
                 >
                   <Icon size={18} />
                 </a>

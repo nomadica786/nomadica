@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const after = searchParams.get('after') || undefined;
     const limit = parseInt(searchParams.get('limit') || '12', 10);
 
-    const data = await getBlogArticles(limit, after);
+    const data = await getBlogArticles(limit, after, { cache: 'no-store' });
     return NextResponse.json(data);
   } catch (error) {
     console.error('Failed to fetch journal articles API:', error);

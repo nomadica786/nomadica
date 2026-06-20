@@ -33,7 +33,7 @@ export function useAuth() {
         if (response.ok) {
           const data = await response.json();
           setStatus({
-            isAuthenticated: true,
+            isAuthenticated: !!data.isAuthenticated,
             user: data.user,
             loading: false,
             error: null,

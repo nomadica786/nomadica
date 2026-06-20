@@ -139,7 +139,7 @@ export function getStorefrontClient() {
   return new ShopifyStorefrontClient(shopUrl, storefrontToken);
 }
 
-export async function getBlogArticles(first = 10, after?: string) {
+export async function getBlogArticles(first = 10, after?: string, cacheOptions?: { cache?: RequestCache; next?: { revalidate?: number | false } }) {
   try {
     const client = getStorefrontClient();
     const query = `
@@ -175,7 +175,7 @@ export async function getBlogArticles(first = 10, after?: string) {
         }
       }
     `;
-    const data = await client.request(query, { first, after });
+    const data = await client.request(query, { first, after }, 'storefront', cacheOptions);
     const articles = data?.blog?.articles?.edges?.map((edge: any) => edge.node) || [];
     const pageInfo = data?.blog?.articles?.pageInfo || { hasNextPage: false, endCursor: null };
 
@@ -230,7 +230,7 @@ export async function getArticleByHandle(handle: string) {
         }
       }
     `;
-    const data = await client.request(query, { handle });
+    const data = await client.request(query, { handle }, 'storefront', { cache: 'no-store' });
     const article = data?.blog?.articleByHandle;
 
     if (article) {
