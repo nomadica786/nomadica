@@ -2,6 +2,7 @@
 
 export interface ColorVariant {
   id: string;
+  name?: string; // Actual product title for the variant
   colorName: string;
   colorHex: string;
   image: string;
@@ -96,7 +97,15 @@ export function parseProduct(product: any) {
 export function groupProducts(products: any[]): GroupedProduct[] {
   // 1. Prepare word arrays for suffix matching
   const items = products.map((product) => {
-    const name = (product.name || product.title || "").trim();
+    let name = (product.name || product.title || "").trim();
+    
+    // Normalization to ensure "White Trekking Tees" and "Red Trekking Regular Fit Tee" group together
+    if (name.toLowerCase().includes("trekking")) {
+      const parts = name.split(/\s+/);
+      const color = parts[0];
+      name = `${color} Trekking Tees`;
+    }
+    
     const words = name.split(/\s+/);
     return {
       product,
@@ -176,6 +185,7 @@ export function groupProducts(products: any[]): GroupedProduct[] {
 
     const variant: ColorVariant = {
       id: item.product.id,
+      name: item.product.name,
       colorName,
       colorHex,
       image: item.product.image || item.product.images?.[0] || "",

@@ -1,46 +1,39 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Star, Heart, LucideIcon, TrendingUp, MapPin, Luggage, Panda, LocateIcon, MapIcon, Shell } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import { CardSkeleton } from "@/components/ui/SnowBallLoader";
 import { api } from "@/components/api/api";
 import { groupProducts } from "@/utils/productGroup";
 import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
+import { color } from "framer-motion";
 
 const heroImage =
   "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80";
 
 const testimonials = [
   {
-    name: "Priya Sharma",
-    location: "Goa, India",
-    review: "I wore the Nomad Linen Shirt through 3 countries. Looks great, feels incredible.",
-    product: "Nomad Linen Shirt",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
+    name: "Priya S.",
+    review: "Absolutely love my tee! The quality is exceptional and the design is stunning. Gets compliments everywhere I go. The fabric is incredibly soft and breathable, perfect for everyday wear.",
+    verified: true
   },
   {
-    name: "Arjun Mehta",
-    location: "Ladakh, India",
-    review: "The Desert Trek Trousers handled everything from mountain trails to city streets flawlessly.",
-    product: "Desert Trek Trousers",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
+    name: "Arjun K.",
+    review: "Finally found travel-themed shirts that don't look cheesy! The fabric is soft, print quality is perfect. Ordered three more!",
+    verified: true
   },
   {
-    name: "Ananya Patel",
-    location: "Rajasthan, India",
-    review: "Finally, travel clothes that look editorial without sacrificing comfort. Nomadica is unmatched.",
-    product: "Horizon Canvas Jacket",
-    image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80",
+    name: "Kevin D.",
+    review: "Great quality and fast shipping. This is my new favorite tee. Love supporting a brand that celebrates travel!",
+    verified: true
   },
   {
-    name: "Rohit Kapoor",
-    location: "Mumbai, India",
-    review: "Every piece feels considered. The quality is exceptional for the price point.",
-    product: "Terra Wool Sweater",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
-  },
+    name: "Rohan P.",
+    review: "Bought this for a trip and it was the perfect conversation starter. Everyone wanted to know where I got it. The material holds up really well even after multiple washes.",
+    verified: false
+  }
 ];
 
 // Cache helper functions
@@ -62,510 +55,799 @@ const setCached = (key: string, data: any) => {
 };
 
 function HeroSection() {
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [loaded, setLoaded] = useState(false);
+  const bannerImages = [
+    "/Main Banner 1.jpg",
+    "/Main Banner 2.jpg",
+    "/Main Banner 4.jpg"
+  ];
+
   useEffect(() => {
-    const t = setTimeout(() => setLoaded(true), 100);
-    return () => clearTimeout(t);
+    setLoaded(true);
   }, []);
+
+  // Autoplay slideshow
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % bannerImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handlePrev = () => {
+    setCurrentSlide((prev) => (prev - 1 + bannerImages.length) % bannerImages.length);
+  };
+
+  const handleNext = () => {
+    setCurrentSlide((prev) => (prev + 1) % bannerImages.length);
+  };
 
   return (
     <section
       style={{
         position: "relative",
-        height: "100svh",
+        width: "100%",
+        aspectRatio: "2000/695",
+        minHeight: "450px",
         overflow: "hidden",
         marginTop: 0,
+        backgroundColor: "#000000",
       }}
     >
-      <Image
-        src={heroImage}
-        alt="Nomadica Hero"
-        fill
-        priority
-        sizes="100vw"
-        style={{
-          objectFit: "cover",
-          objectPosition: "center",
-          transform: loaded ? "scale(1)" : "scale(1.08)",
-          transition: "transform 1.8s cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-      />
+      {/* 1. Slides (Background Images) */}
+      {bannerImages.map((img, index) => (
+        <div
+          key={img}
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: currentSlide === index ? 1 : 0,
+            transform: loaded && currentSlide === index ? "scale(1)" : "scale(1.05)",
+            transition: "opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
+            zIndex: currentSlide === index ? 1 : 0,
+          }}
+        >
+          <Image
+            src={img}
+            alt={`Nomadica Banner ${index + 1}`}
+            fill
+            priority={index === 0}
+            sizes="100vw"
+            style={{
+              objectFit: "cover",
+              objectPosition: "center",
+            }}
+          />
+        </div>
+      ))}
+
+      {/* 2. Gradient Overlay */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          background:
-            "linear-gradient(to bottom, rgba(30,30,30,0.2) 0%, rgba(30,30,30,0.1) 50%, rgba(30,30,30,0.6) 100%)",
+          zIndex: 2,
         }}
       />
+
+      {/* 3. Logo Overlay inside Hero */}
+      <div
+        style={{
+          position: "absolute",
+          top: "1.5rem",
+          left: "1.5rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          color: "#FFFFFF",
+          zIndex: 10,
+        }}
+      >
+      </div>
+
+      {/* 4. Navigation Buttons (Left/Right Arrows) */}
+      <button
+        onClick={handlePrev}
+        style={{
+          position: "absolute",
+          left: "1rem",
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          backgroundColor: "#FFFFFF",
+          border: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          zIndex: 20,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          transition: "transform 0.2s ease, background-color 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1.08)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
+        }}
+        aria-label="Previous slide"
+      >
+        <ChevronLeft size={24} color="#1E1E1E" />
+      </button>
+
+      <button
+        onClick={handleNext}
+        style={{
+          position: "absolute",
+          right: "1rem",
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          backgroundColor: "#FFFFFF",
+          border: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          zIndex: 20,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          transition: "transform 0.2s ease, background-color 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1.08)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
+        }}
+        aria-label="Next slide"
+      >
+        <ChevronRight size={24} color="#1E1E1E" />
+      </button>
+
+      {/* 5. Center-Right Content Overlay */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-end",
-          padding: "clamp(1.5rem, 5vw, 5rem)",
-          paddingTop: "64px",
+          justifyContent: "center",
+          alignItems: "flex-end",
+          padding: "clamp(1rem, 4vw, 4rem)",
+          paddingRight: "clamp(1.5rem, 8vw, 5rem)",
+          zIndex: 10,
+          textAlign: "left",
+          pointerEvents: "none",
         }}
       >
         <div
           style={{
+            maxWidth: "600px",
             opacity: loaded ? 1 : 0,
             transform: loaded ? "translateY(0)" : "translateY(30px)",
             transition: "opacity 0.9s ease 0.4s, transform 0.9s ease 0.4s",
+            pointerEvents: "auto",
           }}
         >
-          <span
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.75rem",
-              fontWeight: 500,
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              color: "#FFFFFF",
-              opacity: 0.8,
-              display: "block",
-              marginBottom: "1rem",
-            }}
-          >
-            Summer Collection 2025
-          </span>
-          <h1
-            style={{
-              fontFamily: "'Playfair Display', sans-serif",
-              fontSize: "clamp(3rem, 8vw, 7rem)",
-              fontWeight: 600,
-              color: "#FFFFFF",
-              lineHeight: 0.95,
-              letterSpacing: "-0.02em",
-              marginBottom: "1.5rem",
-              maxWidth: "700px",
-            }}
-          >
-            Wear Your
-            <br />
-            Journey.
-          </h1>
-
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            <Link href="/shop" style={{ textDecoration: "none" }}>
-              <button
-                style={{
-                  padding: "0.875rem 2rem",
-                  backgroundColor: "#FFFFFF",
-                  color: "#1E1E1E",
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  transition: "background 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#1E1E1E";
-                  (e.currentTarget as HTMLElement).style.color = "#FFFFFF";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#FFFFFF";
-                  (e.currentTarget as HTMLElement).style.color = "#1E1E1E";
-                }}
-              >
-                Shop Now <ArrowRight size={16} />
-              </button>
-            </Link>
-            <Link href="/brand/story" style={{ textDecoration: "none" }}>
-              <button
-                style={{
-                  padding: "0.875rem 2rem",
-                  backgroundColor: "transparent",
-                  color: "#FFFFFF",
-                  border: "1px solid rgba(255, 255, 255, 0.5)",
-                  cursor: "pointer",
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  transition: "border-color 0.2s ease",
-                }}
-              >
-                Our Story
-              </button>
-            </Link>
-          </div>
         </div>
+      </div>
 
-        <div
-          style={{
-            position: "absolute",
-            bottom: "2rem",
-            right: "2rem",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "0.5rem",
-            opacity: 0.6,
-            animation: "fade-in 1s ease 1.5s both",
-          }}
-        >
-          <span
+      {/* 6. Slide Indicator Dots */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "1.5rem",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "0.75rem",
+          zIndex: 20,
+        }}
+      >
+        {bannerImages.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentSlide(index)}
             style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.6875rem",
-              color: "#FFFFFF",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              writingMode: "vertical-rl",
+              width: "10px",
+              height: "10px",
+              borderRadius: "50%",
+              backgroundColor: currentSlide === index ? "#E65A00" : "rgba(255, 255, 255, 0.5)",
+              border: "none",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              padding: 0,
             }}
-          >
-            Scroll
-          </span>
-          <ChevronDown size={16} color="#FFFFFF" style={{ animation: "bounce-dot 1.4s infinite" }} />
-        </div>
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
       </div>
     </section>
   );
 }
 
-function ProductGridSection({
+function ProductCarouselSection({
   title,
-  subtitle,
   products,
   loading,
-  bgTint,
   viewAllLink,
   viewAllText,
+  icon: Icon,
+  backgroundColor,
+  backgroundImage
 }: {
   title: string;
-  subtitle: string;
   products: any[];
   loading: boolean;
-  bgTint: boolean;
   viewAllLink: string;
   viewAllText: string;
+  icon: LucideIcon;
+  backgroundColor?: string;
+  backgroundImage?: string;
 }) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
+  const [activeVariants, setActiveVariants] = useState<Record<string, any>>({});
+
+  const handleScrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: -scrollContainerRef.current.clientWidth,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  const handleScrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: scrollContainerRef.current.clientWidth,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  const displayProducts = products.length > 0 ? products : [
+    { id: "p1", name: "Wanderer Spirit", handle: "white-trekking-tees", price: 599, originalPrice: 999, image: "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80" },
+    { id: "p2", name: "Tropical Escape", handle: "travel-white-tees", price: 599, originalPrice: 999, image: "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80" },
+    { id: "p3", name: "Sunset Chaser", handle: "blue-oversized-tee", price: 599, originalPrice: 999, image: "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80" },
+    { id: "p4", name: "Paradise Found", handle: "red-trekking-regular-fit-tees", price: 599, originalPrice: 999, image: "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80" },
+  ];
+
   return (
-    <section style={{ backgroundColor: bgTint ? "#F9F9F9" : "#FFFFFF", padding: "6rem 1.5rem", borderBottom: "1px solid rgba(30,30,30,0.05)" }}>
-      <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+    <section
+      style={{
+            backgroundColor: backgroundImage
+            ? undefined
+            : backgroundColor || "#FAF9F7",
+
+          backgroundImage: backgroundImage
+            ? `url(${backgroundImage})`
+            : undefined,
+
+          backgroundSize: backgroundImage ? "cover" : undefined,
+          backgroundPosition: backgroundImage ? "center" : undefined,
+          backgroundRepeat: backgroundImage ? "no-repeat" : undefined,
+    
+        padding: "5rem 1.5rem",
+        borderBottom: "1px solid rgba(30,30,30,0.05)",
+        position: "relative"
+      }}
+    >
+      <div style={{ maxWidth: "1400px", margin: "0 auto", position: "relative" }}>
+        
+        {/* Header */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "flex-end",
-            marginBottom: "3rem",
-            flexWrap: "wrap",
-            gap: "1rem",
+            alignItems: "center",
+            marginBottom: "3rem"
           }}
         >
-          <div>
-            <p
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "0.75rem",
-                letterSpacing: "0.25em",
-                textTransform: "uppercase",
-                color: "rgba(30,30,30,0.5)",
-                marginBottom: "0.5rem",
-              }}
-            >
-              {subtitle}
-            </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Icon size={24} color="#c4a77d" style={{ opacity: 0.8 }} />
             <h2
               style={{
                 fontFamily: "'Playfair Display', sans-serif",
-                fontSize: "clamp(2rem, 4vw, 3rem)",
+                fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
                 fontWeight: 600,
-                color: "#1E1E1E",
-                letterSpacing: "-0.02em",
+                color: "#111111",
+                letterSpacing: "-0.01em",
+                margin: 0
               }}
             >
               {title}
             </h2>
           </div>
           <Link href={viewAllLink} style={{ textDecoration: "none" }}>
-            <button className="btn-outline">
-              {viewAllText} <ArrowRight size={14} />
+            <button
+              style={{
+                backgroundColor: "#c4a77d",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "4px",
+                padding: "0.625rem 1.75rem",
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.8125rem",
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                transition: "background-color 0.2s ease"
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = "#b0936b";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = "#c4a77d";
+              }}
+            >
+              {viewAllText}
             </button>
           </Link>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-            gap: "1.5rem",
-          }}
-        >
-          {loading && products.length === 0
-            ? [1, 2, 3, 4, 5].map((i) => <CardSkeleton key={i} />)
-            : products.map((product) => (
-                <ProductCard key={product.id} {...product} />
-              ))}
+        {/* Carousel Wrapper */}
+        <div style={{ position: "relative" }}>
+          
+          {/* Left Navigation Arrow Button */}
+          <button
+            onClick={handleScrollLeft}
+            style={{
+              position: "absolute",
+              left: "-1.25rem",
+              top: "calc(50% - 36px)",
+              transform: "translateY(-50%)",
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              backgroundColor: "#FFFFFF",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              zIndex: 10,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              transition: "transform 0.2s ease"
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1.1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
+            }}
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={24} color="#1E1E1E" />
+          </button>
+
+          {/* Scrollable Container */}
+          <div
+            ref={scrollContainerRef}
+            style={{
+              display: "flex",
+              gap: "1.5rem",
+              overflowX: "auto",
+              scrollBehavior: "smooth",
+              paddingBottom: "1.5rem"
+            }}
+            className="horizontal-scroll hide-scrollbar"
+          >
+            {loading && products.length === 0
+              ? [1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      flex: "0 0 calc(25% - 1.125rem)",
+                      minWidth: "280px",
+                      aspectRatio: "653.27 / 978",
+                      backgroundColor: "#F0F0F0",
+                      borderRadius: "8px",
+                      animation: "shimmer 1.5s infinite"
+                    }}
+                  />
+                ))
+              : displayProducts.map((product) => {
+                  const isHovered = hoveredCardId === product.id;
+                  const activeVar = activeVariants[product.id] || product.colorVariants?.[0] || null;
+                  
+                  const price = (activeVar && activeVar.price) 
+                    ? (typeof activeVar.price === "number" ? activeVar.price : parseFloat(activeVar.price || "0")) 
+                    : (typeof product.price === "number" ? product.price : parseFloat(product.price || "0"));
+                  
+                  const originalPrice = (activeVar && activeVar.originalPrice) 
+                    ? activeVar.originalPrice 
+                    : product.originalPrice;
+                  
+                  const pTitle = activeVar ? (activeVar.name || product.name || product.title || "Product") : (product.name || product.title || "Product");
+                  const pImage = activeVar ? activeVar.image : (product.image || product.images?.[0]?.node?.url);
+                  const pHandle = activeVar ? (activeVar.handle || product.handle) : product.handle;
+
+                  return (
+                    <div
+                      key={product.id}
+                      style={{
+                        flex: "0 0 calc(25% - 1.125rem)",
+                        minWidth: "280px",
+                        backgroundColor: "#FFFFFF",
+                        border: "1px solid rgba(30, 30, 30, 0.05)",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        boxShadow: isHovered ? "0 8px 25px rgba(0,0,0,0.06)" : "0 4px 15px rgba(0,0,0,0.02)",
+                        transform: isHovered ? "translateY(-4px)" : "translateY(0)",
+                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                        cursor: "pointer"
+                      }}
+                      onMouseEnter={() => setHoveredCardId(product.id)}
+                      onMouseLeave={() => setHoveredCardId(null)}
+                    >
+                      {/* Image Container */}
+                      <Link href={`/products/${pHandle}`} style={{ textDecoration: "none", display: "block" }}>
+                        <div
+                          style={{
+                            position: "relative",
+                            width: "100%",
+                            aspectRatio: "653.27 / 978",
+                            overflow: "hidden",
+                            backgroundColor: "#F9F9F9"
+                          }}
+                        >
+                          <Image
+                            src={getShopifyImageUrl(pImage, 600)}
+                            alt={pTitle}
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                            style={{
+                              objectFit: "cover",
+                              transform: isHovered ? "scale(1.05)" : "scale(1)",
+                              transition: "transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)"
+                            }}
+                          />
+
+                          {/* Wishlist Heart Button */}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              const event = new CustomEvent("add-to-wishlist", { detail: { handle: pHandle } });
+                              window.dispatchEvent(event);
+                            }}
+                            style={{
+                              position: "absolute",
+                              top: "12px",
+                              right: "12px",
+                              width: "36px",
+                              height: "36px",
+                              borderRadius: "50%",
+                              backgroundColor: "#FFFFFF",
+                              border: "none",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                              zIndex: 5,
+                              transition: "transform 0.2s ease"
+                            }}
+                            onMouseEnter={(e) => {
+                              (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                            }}
+                            aria-label="Add to wishlist"
+                          >
+                            <Heart size={18} color="#1E1E1E" />
+                          </button>
+                        </div>
+                      </Link>
+
+                      {/* Info Container */}
+                      <div style={{ padding: "1.25rem", textAlign: "center" }}>
+                        {/* Title */}
+                        <Link href={`/products/${pHandle}`} style={{ textDecoration: "none" }}>
+                          <h3
+                            style={{
+                              fontFamily: "'Playfair Display', serif",
+                              fontSize: "1.125rem",
+                              fontWeight: 600,
+                              color: isHovered ? "var(--primary-gold)" : "var(--charcoal)",
+                              margin: "0 0 0.5rem 0",
+                              transition: "color 0.2s ease"
+                            }}
+                          >
+                            {pTitle}
+                          </h3>
+                        </Link>
+
+                        {/* Price */}
+                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                          <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: "var(--charcoal)", fontSize: "1rem" }}>
+                            ₹{price.toLocaleString("en-IN")}
+                          </span>
+                          {originalPrice && (
+                            <span style={{ fontFamily: "'Montserrat', sans-serif", textDecoration: "line-through", color: "rgba(30,30,30,0.4)", fontSize: "0.875rem" }}>
+                              ₹{originalPrice.toLocaleString("en-IN")}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Swatches */}
+                        {product.colorVariants && product.colorVariants.length > 1 && (
+                          <div style={{ display: "flex", justifyContent: "center", gap: "6px", flexWrap: "wrap", minHeight: "22px" }}>
+                            {product.colorVariants.map((v: any) => {
+                              const isSelected = activeVar ? activeVar.id === v.id : false;
+                              const isWhite = v.colorHex?.toLowerCase() === "#ffffff" || v.colorHex?.toLowerCase() === "white";
+                              
+                              return (
+                                <div key={v.id} className="dest-swatch-wrap" style={{ width: "22px", height: "22px" }}>
+                                  <button
+                                    onMouseEnter={() => {
+                                      setActiveVariants(prev => ({ ...prev, [product.id]: v }));
+                                    }}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setActiveVariants(prev => ({ ...prev, [product.id]: v }));
+                                    }}
+                                    style={{
+                                      width: "14px",
+                                      height: "14px",
+                                      borderRadius: "50%",
+                                      backgroundColor: v.colorHex,
+                                      border: isSelected 
+                                        ? "2px solid var(--charcoal)" 
+                                        : (isWhite ? "1.5px solid rgba(30, 30, 30, 0.4)" : "1px solid rgba(0,0,0,0.15)"),
+                                      boxShadow: isSelected ? "0 0 0 1.5px #FFFFFF inset" : "none",
+                                      padding: 0,
+                                      cursor: "pointer",
+                                      transition: "all 0.15s ease",
+                                      transform: isSelected ? "scale(1.25)" : "scale(1)",
+                                    }}
+                                    aria-label={`Select color ${v.colorName}`}
+                                    title={v.colorName}
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  );
+                })}
+          </div>
+
+          {/* Right Navigation Arrow Button */}
+          <button
+            onClick={handleScrollRight}
+            style={{
+              position: "absolute",
+              right: "-1.25rem",
+              top: "calc(50% - 36px)",
+              transform: "translateY(-50%)",
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              backgroundColor: "#FFFFFF",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              zIndex: 10,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              transition: "transform 0.2s ease"
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1.1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
+            }}
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={24} color="#1E1E1E" />
+          </button>
+
         </div>
+
       </div>
     </section>
   );
 }
 
 function ImageBanner({
-  image,
-  title,
-  subtitle,
-  ctaText,
-  ctaLink,
+  image, href, height
 }: {
   image: string;
-  title: string;
-  subtitle: string;
-  ctaText: string;
-  ctaLink: string;
+  href: string;
+  height?: string;
 }) {
+  const desktopHeight = height || "500px";
+  const mobileHeight = height === "700px" ? "350px" : "250px";
+
   return (
     <section
+      className="responsive-image-banner"
       style={{
         position: "relative",
-        height: "450px",
+        width: "100%",
         overflow: "hidden",
-        backgroundColor: "#1E1E1E",
+        height: desktopHeight,
+        ["--mobile-height" as any]: mobileHeight
       }}
     >
-      <Image
-        src={image}
-        alt=""
-        fill
-        sizes="100vw"
-        style={{
-          objectFit: "cover",
-          opacity: 0.5,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          padding: "2rem",
-        }}
-      >
-        <h2
+      <style>{`
+        @media (max-width: 768px) {
+          .responsive-image-banner {
+            height: var(--mobile-height) !important;
+          }
+        }
+      `}</style>
+      <Link href={href} style={{ position: "relative", display: "block", width: "100%", height: "100%" }}>
+        <Image
+          src={image}
+          alt=""
+          fill
+          sizes="100vw"
           style={{
-            fontFamily: "'Playfair Display', sans-serif",
-            fontSize: "clamp(2rem, 5vw, 3.5rem)",
-            fontWeight: 600,
-            color: "#FFFFFF",
-            lineHeight: 1.1,
-            letterSpacing: "-0.02em",
-            marginBottom: "1rem",
-            maxWidth: "800px",
+            objectFit: "cover"
           }}
-        >
-          {title}
-        </h2>
-        <p
-          style={{
-            fontFamily: "'Montserrat', sans-serif",
-            fontSize: "1rem",
-            color: "rgba(255, 255, 255, 0.75)",
-            maxWidth: "600px",
-            lineHeight: 1.6,
-            marginBottom: "2rem",
-          }}
-        >
-          {subtitle}
-        </p>
-        <Link href={ctaLink} style={{ textDecoration: "none" }}>
-          <button
-            style={{
-              padding: "0.875rem 2rem",
-              backgroundColor: "#FFFFFF",
-              color: "#1E1E1E",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "#1E1E1E";
-              (e.currentTarget as HTMLElement).style.color = "#FFFFFF";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "#FFFFFF";
-              (e.currentTarget as HTMLElement).style.color = "#1E1E1E";
-            }}
-          >
-            {ctaText} <ArrowRight size={14} style={{ marginLeft: "0.5rem", display: "inline" }} />
-          </button>
-        </Link>
-      </div>
+        />
+      </Link>
     </section>
   );
 }
 
 function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const t = setInterval(() => setActive((p) => (p + 1) % testimonials.length), 4000);
-    return () => clearInterval(t);
-  }, []);
-
   return (
     <section
+      className="testimonials-section"
       style={{
-        backgroundColor: bgTint ? "#F9F9F9" : "#FFFFFF",
-        padding: "6rem 1.5rem",
-        borderBottom: "1px solid rgba(30,30,30,0.05)",
+        position: "relative",
+        width: "100%",
+        height: "700px",
+        backgroundImage: "url('/testimonials-bg.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        display: "flex",
+        alignItems: "center",
+        padding: "4rem 1.5rem",
+        boxSizing: "border-box",
+        overflow: "hidden"
       }}
     >
-      <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-          <p
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.75rem",
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              color: "rgba(30,30,30,0.5)",
-              marginBottom: "0.75rem",
-            }}
-          >
-            Feedback
-          </p>
-          <h2
-            style={{
-              fontFamily: "'Playfair Display', sans-serif",
-              fontSize: "clamp(2rem, 5vw, 3.5rem)",
-              fontWeight: 600,
-              color: "#1E1E1E",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            Loved by Nomads
-          </h2>
-        </div>
+      <style>{`
+        .testimonials-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1.5rem;
+          width: 100%;
+          max-width: 800px;
+        }
+        .testimonial-card {
+          background-color: #FFFFFF;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+          padding: 1.75rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          border: 1px solid rgba(30,30,30,0.03);
+          box-sizing: border-box;
+          transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+          transform: translateY(0);
+        }
+        .testimonial-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+        }
+        @media (max-width: 991px) {
+          .testimonials-grid {
+            max-width: 100%;
+          }
+        }
+        @media (max-width: 768px) {
+          .testimonials-section {
+            height: auto !important;
+            min-height: auto !important;
+            padding: 3rem 1rem !important;
+          }
+          .testimonials-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
 
-        <div
+      <div style={{ maxWidth: "1400px", width: "100%", margin: "0 auto" }}>
+        {/* Title */}
+        <h2
           style={{
-            display: "flex",
-            gap: "1.5rem",
-            overflowX: "auto",
-            paddingBottom: "1rem",
-            scrollSnapType: "x mandatory",
-            WebkitOverflowScrolling: "touch",
+            fontFamily: "'Playfair Display', sans-serif",
+            fontSize: "clamp(2.25rem, 4vw, 2.75rem)",
+            fontWeight: 600,
+            color: "#1E1E1E",
+            letterSpacing: "-0.02em",
+            marginBottom: "2.5rem",
+            textAlign: "left"
           }}
-          className="horizontal-scroll"
         >
+          What Travelers Say
+        </h2>
+
+        {/* 2x2 Grid */}
+        <div className="testimonials-grid">
           {testimonials.map((t, i) => (
             <div
               key={i}
-              onClick={() => setActive(i)}
-              style={{
-                flexShrink: 0,
-                width: "clamp(280px, 35vw, 400px)",
-                scrollSnapAlign: "start",
-                backgroundColor: active === i ? "#1E1E1E" : "#FFFFFF",
-                border: active === i ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.08)",
-                boxShadow: "0 12px 32px rgba(30,30,30,0.04)",
-                padding: "2.5rem 2rem",
-                cursor: "pointer",
-                transition: "all 0.4s ease",
-                transform: active === i ? "translateY(-8px)" : "translateY(0)",
-              }}
+              className="testimonial-card"
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
-                <Image
-                  src={t.image}
-                  alt={t.name}
-                  width={48}
-                  height={48}
-                  style={{
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    border: `2px solid ${active === i ? "#1E1E1E" : "transparent"}`,
-                  }}
-                />
-                <div>
-                  <p
-                    style={{
-                      fontFamily: "'Playfair Display', sans-serif",
-                      fontSize: "0.9375rem",
-                      fontWeight: 500,
-                      color: active === i ? "#FFFFFF" : "#1E1E1E",
-                    }}
+              {/* Stars */}
+              <div style={{ display: "flex", gap: "2px", marginBottom: "0.75rem" }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg
+                    key={star}
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="#388E3C"
+                    stroke="#388E3C"
+                    strokeWidth="1"
                   >
-                    {t.name}
-                  </p>
-                  <p
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "0.75rem",
-                      color: active === i ? "rgba(255, 255, 255, 0.5)" : "rgba(30,30,30,0.5)",
-                    }}
-                  >
-                    {t.location}
-                  </p>
-                </div>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                ))}
               </div>
 
+              {/* Review Text */}
               <p
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.9375rem",
-                  lineHeight: 1.7,
-                  color: active === i ? "rgba(255, 255, 255, 0.85)" : "rgba(30,30,30,0.7)",
-                  marginBottom: "1.25rem",
+                  fontSize: "0.875rem",
+                  lineHeight: "1.6",
+                  color: "rgba(30, 30, 30, 0.8)",
                   fontStyle: "italic",
+                  margin: "0 0 1rem 0",
                 }}
               >
                 &quot;{t.review}&quot;
               </p>
 
-              <span
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.6875rem",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  fontWeight: 600,
-                  color: active === i ? "#FFFFFF" : "#1E1E1E",
-                }}
-              >
-                {t.product}
-              </span>
+              {/* Author & Verification */}
+              <div style={{ display: "flex", flexDirection: "column", marginTop: "auto" }}>
+                <span
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "0.875rem",
+                    fontWeight: 700,
+                    color: "#1E1E1E"
+                  }}
+                >
+                  {t.name}
+                </span>
+                {t.verified && (
+                  <span
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.75rem",
+                      color: "rgba(30, 30, 30, 0.4)",
+                      marginTop: "2px"
+                    }}
+                  >
+                    Verified Purchase
+                  </span>
+                )}
+              </div>
             </div>
-          ))}
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "2rem" }}>
-          {testimonials.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActive(i)}
-              style={{
-                width: active === i ? "24px" : "8px",
-                height: "8px",
-                borderRadius: "4px",
-                backgroundColor: active === i ? "#1E1E1E" : "rgba(30,30,30,0.2)",
-                border: "none",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                padding: 0,
-              }}
-            />
           ))}
         </div>
       </div>
@@ -573,16 +855,349 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
   );
 }
 
+function LatestCollectionSection() {
+  const latestProducts = [
+    {
+      id: "lp1",
+      name: "White Trekking Tees",
+      handle: "white-trekking-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Trekking_20Tees-front-1781514535205.jpg?v=1781514552",
+      colorVariants: [
+        {
+          id: "lp1-white",
+          name: "White Trekking Tees",
+          colorName: "White",
+          colorHex: "#FFFFFF",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Trekking_20Tees-front-1781514535205.jpg?v=1781514552",
+          handle: "white-trekking-tees",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp1-red",
+          name: "Red Trekking Regular Fit Tee",
+          colorName: "Red",
+          colorHex: "#D93838",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FRed_20Trekking_20Regular_20Fit_20Tees-front-1781514621454.jpg?v=1781514637",
+          handle: "red-trekking-regular-fit-tees",
+          price: 599,
+          originalPrice: 999
+        }
+      ]
+    },
+    {
+      id: "lp2",
+      name: "White Travel Tees",
+      handle: "travel-white-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20White_20Tees-front-1781505363689.jpg?v=1781505386",
+      colorVariants: [
+        {
+          id: "lp2-white",
+          name: "White Travel Tees",
+          colorName: "White",
+          colorHex: "#FFFFFF",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20White_20Tees-front-1781505363689.jpg?v=1781505386",
+          handle: "travel-white-tees",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp2-black",
+          name: "Black Travel Tees",
+          colorName: "Black",
+          colorHex: "#000000",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Tees-front-1781505419884.jpg?v=1781505435",
+          handle: "travel-black-tees",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp2-washed",
+          name: "Black Washed Travel Tees",
+          colorName: "Denim Wash",
+          colorHex: "#5C768D",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Washed_20Tees-front-1781505487295.jpg?v=1781505505",
+          handle: "travel-black-washed-tees",
+          price: 599,
+          originalPrice: 999
+        }
+      ]
+    },
+    {
+      id: "lp3",
+      name: "Blue Oversized Tee",
+      handle: "blue-oversized-tee",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlue_20Oversized_20Tee-front-1781498707028.jpg?v=1781498720",
+      colorVariants: [
+        {
+          id: "lp3-blue",
+          name: "Blue Oversized Tee",
+          colorName: "Blue",
+          colorHex: "#1F3E6C",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlue_20Oversized_20Tee-front-1781498707028.jpg?v=1781498720",
+          handle: "blue-oversized-tee",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp3-black",
+          name: "Black Oversized Tee",
+          colorName: "Black",
+          colorHex: "#000000",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlack_20Oversized_20Tee-front-1781498528785.jpg?v=1781498544",
+          handle: "black-oversized-tee",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp3-white",
+          name: "White Oversized Tee",
+          colorName: "White",
+          colorHex: "#FFFFFF",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Oversized_20Tee-front-1781498578357.jpg?v=1781498593",
+          handle: "white-oversized-tee",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp3-red",
+          name: "Red Oversized Tee",
+          colorName: "Red",
+          colorHex: "#D93838",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FRed_20Oversized_20Tee-front-1781498631984.jpg?v=1781498647",
+          handle: "red-oversized-tee",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp3-brown",
+          name: "Brown Oversized Tee",
+          colorName: "Brown",
+          colorHex: "#8B5A2B",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBrown_20Oversized_20Tee-front-1781498673293.jpg?v=1781498685",
+          handle: "brown-oversized-tee",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp3-green",
+          name: "Green Oversized Tee",
+          colorName: "Green",
+          colorHex: "#388E3C",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FGreen_20Oversized_20Tee-front-1781498751142.jpg?v=1781498768",
+          handle: "green-oversized-tee",
+          price: 599,
+          originalPrice: 999
+        }
+      ]
+    },
+    {
+      id: "lp4",
+      name: "Red Trekking Regular Fit Tee",
+      handle: "red-trekking-regular-fit-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FRed_20Trekking_20Regular_20Fit_20Tees-front-1781514621454.jpg?v=1781514637",
+      colorVariants: [
+        {
+          id: "lp4-red",
+          name: "Red Trekking Regular Fit Tee",
+          colorName: "Red",
+          colorHex: "#D93838",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FRed_20Trekking_20Regular_20Fit_20Tees-front-1781514621454.jpg?v=1781514637",
+          handle: "red-trekking-regular-fit-tees",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp4-white",
+          name: "White Trekking Tees",
+          colorName: "White",
+          colorHex: "#FFFFFF",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Trekking_20Tees-front-1781514535205.jpg?v=1781514552",
+          handle: "white-trekking-tees",
+          price: 599,
+          originalPrice: 999
+        }
+      ]
+    },
+    {
+      id: "lp5",
+      name: "Black Washed Travel Tees",
+      handle: "travel-black-washed-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Washed_20Tees-front-1781505487295.jpg?v=1781505505",
+      colorVariants: [
+        {
+          id: "lp5-washed",
+          name: "Black Washed Travel Tees",
+          colorName: "Denim Wash",
+          colorHex: "#5C768D",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Washed_20Tees-front-1781505487295.jpg?v=1781505505",
+          handle: "travel-black-washed-tees",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp5-white",
+          name: "White Travel Tees",
+          colorName: "White",
+          colorHex: "#FFFFFF",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20White_20Tees-front-1781505363689.jpg?v=1781505386",
+          handle: "travel-white-tees",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp5-black",
+          name: "Black Travel Tees",
+          colorName: "Black",
+          colorHex: "#000000",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Tees-front-1781505419884.jpg?v=1781505435",
+          handle: "travel-black-tees",
+          price: 599,
+          originalPrice: 999
+        }
+      ]
+    },
+    {
+      id: "lp6",
+      name: "White Tiger Tees",
+      handle: "white-tiger-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Tiger_20Tees-front-1781507184160.jpg?v=1781507205",
+      colorVariants: [
+        {
+          id: "lp6-white",
+          name: "White Tiger Tees",
+          colorName: "White",
+          colorHex: "#FFFFFF",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Tiger_20Tees-front-1781507184160.jpg?v=1781507205",
+          handle: "white-tiger-tees",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp6-black",
+          name: "Black Tiger Tees",
+          colorName: "Black",
+          colorHex: "#000000",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlack_20Tiger_20Tees-front-1781507225879.jpg?v=1781507244",
+          handle: "black-tiger-tees",
+          price: 599,
+          originalPrice: 999
+        }
+      ]
+    },
+    {
+      id: "lp7",
+      name: "Black Travel Tees",
+      handle: "travel-black-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Tees-front-1781505419884.jpg?v=1781505435",
+      colorVariants: [
+        {
+          id: "lp7-black",
+          name: "Black Travel Tees",
+          colorName: "Black",
+          colorHex: "#000000",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Tees-front-1781505419884.jpg?v=1781505435",
+          handle: "travel-black-tees",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp7-white",
+          name: "White Travel Tees",
+          colorName: "White",
+          colorHex: "#FFFFFF",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20White_20Tees-front-1781505363689.jpg?v=1781505386",
+          handle: "travel-white-tees",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp7-washed",
+          name: "Black Washed Travel Tees",
+          colorName: "Denim Wash",
+          colorHex: "#5C768D",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Washed_20Tees-front-1781505487295.jpg?v=1781505505",
+          handle: "travel-black-washed-tees",
+          price: 599,
+          originalPrice: 999
+        }
+      ]
+    },
+    {
+      id: "lp8",
+      name: "Black Tiger Tees",
+      handle: "black-tiger-tees",
+      price: 599,
+      originalPrice: 999,
+      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlack_20Tiger_20Tees-front-1781507225879.jpg?v=1781507244",
+      colorVariants: [
+        {
+          id: "lp8-black",
+          name: "Black Tiger Tees",
+          colorName: "Black",
+          colorHex: "#000000",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlack_20Tiger_20Tees-front-1781507225879.jpg?v=1781507244",
+          handle: "black-tiger-tees",
+          price: 599,
+          originalPrice: 999
+        },
+        {
+          id: "lp8-white",
+          name: "White Tiger Tees",
+          colorName: "White",
+          colorHex: "#FFFFFF",
+          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Tiger_20Tees-front-1781507184160.jpg?v=1781507205",
+          handle: "white-tiger-tees",
+          price: 599,
+          originalPrice: 999
+        }
+      ]
+    }
+  ];
+
+  return (
+    <ProductCarouselSection
+      title="Latest Collection"
+      products={latestProducts}
+      loading={false}
+      viewAllLink="/shop"
+      viewAllText="VIEW ALL"
+      icon={Star}
+    />
+  );
+}
+
 export default function HomePage() {
-  const [collections, setCollections] = useState<any[]>(() => getCached("collections", []));
-  const [newArrivals, setNewArrivals] = useState<any[]>(() => getCached("new_arrivals", []));
-  const [bestSellers, setBestSellers] = useState<any[]>(() => getCached("best_sellers", []));
-  const [collectionProducts, setCollectionProducts] = useState<Record<string, any[]>>(() => getCached("collection_products", {}));
-  const [collectionConfigs, setCollectionConfigs] = useState<any[]>(() => getCached("collection_configs", []));
-  const [journalArticles, setJournalArticles] = useState<any[]>(() => getCached("journal", []));
+  const [collections, setCollections] = useState<any[]>([]);
+  const [newArrivals, setNewArrivals] = useState<any[]>([]);
+  const [bestSellers, setBestSellers] = useState<any[]>([]);
+  const [collectionProducts, setCollectionProducts] = useState<Record<string, any[]>>({});
+  const [collectionConfigs, setCollectionConfigs] = useState<any[]>([]);
+  const [journalArticles, setJournalArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setCollections(getCached("collections", []));
+    setNewArrivals(getCached("new_arrivals", []));
+    setBestSellers(getCached("best_sellers", []));
+    setCollectionProducts(getCached("collection_products", {}));
+    setCollectionConfigs(getCached("collection_configs", []));
+    setJournalArticles(getCached("journal", []));
+
     const loadHomeData = async () => {
       try {
         // 1. Fetch Collections list
@@ -685,7 +1300,6 @@ export default function HomePage() {
         setCollectionProducts(colProductsMap);
         setCached("collection_products", colProductsMap);
 
-        // 4. Fetch Blog Articles
         let articles = getCached("journal", []);
         try {
           const res = await fetch('/api/journal?limit=3');
@@ -707,108 +1321,161 @@ export default function HomePage() {
     loadHomeData();
   }, []);
 
+  const getCategoryLabel = (tags: string[]) => {
+    if (!tags || tags.length === 0) return "Travel Tips";
+    const tagList = tags.map(t => t.toLowerCase());
+    if (tagList.includes("guides") || tagList.includes("guide")) return "Destination Guides";
+    if (tagList.includes("adventure") || tagList.includes("hiking") || tagList.includes("stories")) return "Adventure Stories";
+    if (tagList.includes("perspectives") || tagList.includes("tips") || tagList.includes("ideas")) return "Travel Tips";
+    if (tagList.includes("destinations") || tagList.includes("japan") || tagList.includes("italy") || tagList.includes("switzerland") || tagList.includes("usa")) return "Destination Guides";
+    return "Travel Tips";
+  };
+
   return (
     <div>
       {/* 1. Hero Section */}
       <HeroSection />
 
       {/* 2. Collections Section */}
-      <section style={{ backgroundColor: "#FFFFFF", padding: "6rem 1.5rem", borderBottom: "1px solid rgba(30,30,30,0.05)" }}>
+      <section
+        style={{
+          position: "relative",
+          backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url('/Map.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          padding: "6rem 1.5rem",
+          borderBottom: "1px solid rgba(30,30,30,0.05)",
+        }}
+      >
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "0.75rem" }}>
-              Explore Categories
-            </p>
-            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
-              Shop by Collection
+          <div style={{ textAlign: "left", marginBottom: "2rem" }}>
+            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 3vw, 3.5rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
+              Discover by Collections
             </h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {collections.length === 0 && loading
-              ? [1, 2, 3].map((i) => (
-                  <div key={i} style={{ aspectRatio: "16/10", backgroundColor: "#F0F0F0", animation: "shimmer 1.5s infinite" }} />
+              ? [1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} style={{ aspectRatio: "1/1", backgroundColor: "#F0F0F0", borderRadius: "8px", animation: "shimmer 1.5s infinite" }} />
                 ))
-              : collections.map((col: any) => (
-                  <Link key={col.id} href={`/collections/${encodeURIComponent(col.handle)}`} style={{ textDecoration: "none", display: "block" }}>
-                    <div style={{ position: "relative", aspectRatio: "16/10", overflow: "hidden" }} className="img-hover-zoom">
-                      <Image
-                        src={getShopifyImageUrl(col.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
-                        alt={col.title}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        style={{ objectFit: "cover" }}
-                      />
-                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30,30,30,0.6) 0%, transparent 60%)" }} />
-                      <div style={{ position: "absolute", bottom: "1.5rem", left: "1.5rem" }}>
-                        <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#FFFFFF", marginBottom: "0.3rem" }}>
-                          {col.title}
-                        </h3>
-                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(255,255,255,0.8)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                          Explore Collection <ArrowRight size={12} />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+              : (() => {
+                  const desiredOrder = [
+                    "destination-collection",
+                    "wildlife-and-safari",
+                    "adventure-and-trekking-collections",
+                    "travel-quotes",
+                    "beach-vibes"
+                  ];
+
+                  const collectionMeta: Record<string, { title: string; description: string }> = {
+                    "destination-collection": {
+                      title: "Destination Collection",
+                      description: "Iconic cities and landmarks from around the world",
+                    },
+                    "wildlife-and-safari": {
+                      title: "Wildlife & Safari Collection",
+                      description: "Majestic animals and nature-inspired designs",
+                    },
+                    "adventure-and-trekking-collections": {
+                      title: "Adventure & Trekking Collection",
+                      description: "Mountain peaks and outdoor expedition themes",
+                    },
+                    "travel-quotes": {
+                      title: "Travel Quotes Collection",
+                      description: "Inspiring words for the wandering soul",
+                    },
+                    "beach-vibes": {
+                      title: "Beach Vibes Collection",
+                      description: "Coastal living and ocean-inspired designs",
+                    },
+                  };
+
+                  const sortedCollections = [...collections].sort((a, b) => {
+                    const indexA = desiredOrder.indexOf(a.handle);
+                    const indexB = desiredOrder.indexOf(b.handle);
+                    const valA = indexA === -1 ? 999 : indexA;
+                    const valB = indexB === -1 ? 999 : indexB;
+                    return valA - valB;
+                  });
+
+                  return sortedCollections.map((col: any) => {
+                    const meta = collectionMeta[col.handle] || {
+                      title: col.title,
+                      description: col.description || "Explore our premium selection",
+                    };
+
+                    return (
+                      <Link key={col.id} href={`/collections/${encodeURIComponent(col.handle)}`} style={{ textDecoration: "none", display: "block" }}>
+                        <div style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden", borderRadius: "8px" }} className="img-hover-zoom">
+                          <Image
+                            src={getShopifyImageUrl(col.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
+                            alt={meta.title}
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                            style={{ objectFit: "cover" }}
+                          />
+                        </div>
+                        <div style={{ textAlign: "center", marginTop: "1rem", padding: "0 0.5rem" }}>
+                          <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.125rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>
+                            {meta.title}
+                          </h3>
+                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.6)", lineHeight: "1.4" }}>
+                            {meta.description}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  });
+                })()}
           </div>
         </div>
       </section>
 
-      {/* 3. New Arrivals Section */}
-      <ProductGridSection
-        title="New Arrivals"
-        subtitle="Just Landed"
-        products={newArrivals}
-        loading={loading}
-        bgTint={true}
-        viewAllLink="/shop/new-arrivals"
-        viewAllText="View New Arrivals"
-      />
+      {/* Latest Collection Section */}
+      <LatestCollectionSection />
 
       {/* 4. Best Sellers Section */}
-      <ProductGridSection
+      <ProductCarouselSection
         title="Best Sellers"
-        subtitle="Community Favorites"
         products={bestSellers}
         loading={loading}
-        bgTint={false}
         viewAllLink="/shop/best-sellers"
-        viewAllText="View Best Sellers"
+        viewAllText="VIEW ALL"
+        backgroundColor="#FFFFFF"
+        icon={TrendingUp}
       />
 
       {/* 5. Banner Section 1 */}
       <ImageBanner
-        image="https://images.unsplash.com/photo-1486916856992-e4db22c8df33?w=1600&q=80"
-        title="Equipped for the Unplanned"
-        subtitle="Nomadica travel apparel balances functional utility with refined, modern aesthetics. Made for adventurers, creatives, and global citizens."
-        ctaText="Shop the Catalog"
-        ctaLink="/shop"
+        image="/youtube shorts banner 1.jpg"
+        href="/brand/story"
+        height="700px"
       />
 
       {/* 6. Collection 1 Section */}
       {collectionConfigs[0] && (
-        <ProductGridSection
+        <ProductCarouselSection
           title={collectionConfigs[0].title}
-          subtitle="Featured Series"
           products={collectionProducts[collectionConfigs[0].handle] || []}
           loading={loading}
-          bgTint={true}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[0].handle)}`}
-          viewAllText={`Explore ${collectionConfigs[0].title}`}
+          viewAllText="VIEW ALL"
+          icon={Luggage}
         />
       )}
 
       {/* 7. Collection 2 Section */}
       {collectionConfigs[1] && (
-        <ProductGridSection
+        <ProductCarouselSection
           title={collectionConfigs[1].title}
-          subtitle="Wardrobe Essentials"
           products={collectionProducts[collectionConfigs[1].handle] || []}
           loading={loading}
-          bgTint={false}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[1].handle)}`}
-          viewAllText={`Explore ${collectionConfigs[1].title}`}
+          viewAllText="VIEW ALL"
+          backgroundColor="#FFFFFF"
+          icon={Panda}
         />
       )}
 
@@ -817,101 +1484,177 @@ export default function HomePage() {
 
       {/* 9. Collection 3 Section */}
       {collectionConfigs[2] && (
-        <ProductGridSection
+        <ProductCarouselSection
           title={collectionConfigs[2].title}
-          subtitle="Engineered For Travel"
           products={collectionProducts[collectionConfigs[2].handle] || []}
           loading={loading}
-          bgTint={false}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[2].handle)}`}
-          viewAllText={`Explore ${collectionConfigs[2].title}`}
+          viewAllText="VIEW ALL"
+          icon={MapIcon}
         />
       )}
 
       {/* 10. Collection 4 Section */}
       {collectionConfigs[3] && (
-        <ProductGridSection
+        <ProductCarouselSection
           title={collectionConfigs[3].title}
-          subtitle="Layer Up"
           products={collectionProducts[collectionConfigs[3].handle] || []}
           loading={loading}
-          bgTint={true}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[3].handle)}`}
-          viewAllText={`Explore ${collectionConfigs[3].title}`}
+          viewAllText="VIEW ALL"
+          backgroundImage="/beach-bg.png"
+          icon={Shell}
         />
       )}
 
       {/* 11. Banner Section 2 */}
       <ImageBanner
-        image="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1600&q=80"
-        title="Made Consciously, Worn Endlessly"
-        subtitle="Timeless apparel designed with respect for the planet. We utilize organic, sustainable materials and enforce fair labor standard compliance across all partners."
-        ctaText="Our Philosophy"
-        ctaLink="/brand/sustainability"
+        image="/Home-Banner2.png"
+        href="/"
+        height="420px"
       />
 
       {/* 12. Collection 5 Section */}
       {collectionConfigs[4] && (
-        <ProductGridSection
+        <ProductCarouselSection
           title={collectionConfigs[4].title}
-          subtitle="Natural Warmth"
           products={collectionProducts[collectionConfigs[4].handle] || []}
           loading={loading}
-          bgTint={false}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[4].handle)}`}
-          viewAllText={`Explore ${collectionConfigs[4].title}`}
+          viewAllText="VIEW ALL"
+          backgroundColor="#FFFFFF"
+          icon={Star}
         />
       )}
 
       {/* 13. Blogs Section */}
-      <section style={{ backgroundColor: "#F9F9F9", padding: "6rem 1.5rem", borderBottom: "1px solid rgba(30,30,30,0.05)" }}>
+      <section style={{ backgroundColor: "var(--sand)", padding: "6rem 1.5rem", borderBottom: "1px solid rgba(30,30,30,0.05)" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "flex-end",
+              alignItems: "center",
               marginBottom: "3rem",
               flexWrap: "wrap",
               gap: "1rem",
             }}
           >
             <div>
-              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "0.5rem" }}>
-                Editorial
-              </p>
-              <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
-                The Nomad Journal
+              <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 3.5vw, 2.5rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.01em" }}>
+                Travel Articles & Inspiration
               </h2>
             </div>
             <Link href="/journal" style={{ textDecoration: "none" }}>
-              <button className="btn-outline">
-                Read the Journal <ArrowRight size={14} />
+              <button
+                style={{
+                  backgroundColor: "#c4a77d",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "0.65rem 1.25rem",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s ease, opacity 0.3s ease",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#b0936b"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#c4a77d"; }}
+              >
+                VIEW ALL
               </button>
             </Link>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {journalArticles.length === 0 && loading
               ? [1, 2, 3].map((i) => (
-                  <div key={i} style={{ aspectRatio: "16/10", backgroundColor: "#F0F0F0", animation: "shimmer 1.5s infinite" }} />
+                  <div key={i} style={{ aspectRatio: "16/10", backgroundColor: "#F0F0F0", borderRadius: "8px", animation: "shimmer 1.5s infinite" }} />
                 ))
               : journalArticles.map((art: any) => (
                   <Link key={art.id} href={`/journal/${art.handle}`} style={{ textDecoration: "none", display: "block" }}>
-                    <div style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(30,30,30,0.08)", boxShadow: "0 12px 32px rgba(30,30,30,0.04)" }}>
-                      <div style={{ aspectRatio: "16/10", overflow: "hidden", position: "relative" }}>
-                        <Image src={getShopifyImageUrl(art.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"} alt={art.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" style={{ objectFit: "cover" }} />
+                    <div className="journal-card">
+                      <div className="journal-card-image-wrap" style={{ aspectRatio: "16/10", position: "relative", width: "100%", overflow: "hidden" }}>
+                        <Image
+                          src={getShopifyImageUrl(art.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
+                          alt={art.title}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          style={{ objectFit: "cover" }}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "1.25rem",
+                            left: "1.25rem",
+                            backgroundColor: "rgba(196, 167, 125, 0.85)",
+                            color: "#FFFFFF",
+                            padding: "0.35rem 0.75rem",
+                            borderRadius: "3px",
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "0.7rem",
+                            fontWeight: 500,
+                            letterSpacing: "0.02em",
+                            zIndex: 10,
+                          }}
+                        >
+                          {getCategoryLabel(art.tags)}
+                        </div>
                       </div>
-                      <div style={{ padding: "1.5rem" }}>
-                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", color: "rgba(30,30,30,0.4)", textTransform: "uppercase", display: "block", marginBottom: "0.5rem" }}>
-                          {new Date(art.publishedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                        </span>
-                        <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.2rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.5rem", lineHeight: 1.3 }}>
+                      <div className="journal-card-body">
+                        <h3
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "1.125rem",
+                            fontWeight: 600,
+                            color: "#111111",
+                            marginBottom: "0.75rem",
+                            lineHeight: 1.4,
+                          }}
+                        >
                           {art.title}
                         </h3>
-                        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }} className="line-clamp-2">
+                        <p
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "0.875rem",
+                            color: "rgba(30,30,30,0.6)",
+                            lineHeight: 1.6,
+                            marginBottom: "1.25rem",
+                          }}
+                          className="line-clamp-2"
+                        >
                           {art.excerpt}
                         </p>
+                        <span
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "0.75rem",
+                            color: "rgba(30,30,30,0.45)",
+                            display: "block",
+                            marginBottom: "1.5rem",
+                            marginTop: "auto",
+                          }}
+                        >
+                          By {art.authorV2?.name || "Nomadica Editor"}
+                        </span>
+                        <div
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            color: "#c4a77d",
+                            letterSpacing: "0.05em",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.25rem",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          READ MORE <ArrowRight size={12} style={{ color: "#c4a77d" }} />
+                        </div>
                       </div>
                     </div>
                   </Link>
@@ -919,6 +1662,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
 
       {/* 14. About Nomadica Section */}
       <section style={{ backgroundColor: "#FFFFFF", padding: "6rem 1.5rem" }}>

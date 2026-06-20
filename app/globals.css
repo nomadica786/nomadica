@@ -1,12 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  --sand: #FFFFFF;
-  --charcoal: #1E1E1E;
-  --leather: #1E1E1E;
-  --sage: #4F6B5A;
+  /* Design Tokens to Recreate */
+  --primary-gold: #c4a77d;
+  --primary-hover: #b0936b;
+  --forest-green: #1a5d3a;
+  --charcoal: #111111;
+  --soft-gray: #f5f5f5;
+
+  /* Theme mappings */
+  --sand: #FAF9F7;
+  --leather: var(--primary-gold);
+  --sage: var(--forest-green);
   --white: #FFFFFF;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-s: 8px;
+  --spacing-m: 16px;
+  --spacing-l: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --spacing-xxxl: 64px;
+
+  /* Font defaults */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Montserrat', sans-serif;
 }
+
+@theme {
+  --color-primary-gold: var(--primary-gold);
+  --color-primary-hover: var(--primary-hover);
+  --color-forest-green: var(--forest-green);
+  --color-charcoal: var(--charcoal);
+  --color-soft-gray: var(--soft-gray);
+  --color-sand: var(--sand);
+  --color-leather: var(--leather);
+  --color-sage: var(--sage);
+}
+
 
 * {
   box-sizing: border-box;
@@ -282,48 +314,57 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Btn styles */
 .btn-primary {
-  background: var(--charcoal);
+  background-color: var(--primary-gold);
   color: var(--white);
-  padding: 0.875rem 2rem;
-  font-family: var(--font-body), sans-serif;
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   border: none;
+  padding: 12px 28px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
 }
 .btn-primary:hover {
-  background: var(--leather);
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 .btn-primary:active {
-  transform: scale(0.98);
+  transform: translateY(-1px) scale(0.98);
 }
 
 .btn-outline {
-  background: transparent;
+  background-color: transparent;
   color: var(--charcoal);
-  padding: 0.875rem 2rem;
-  font-family: var(--font-body), sans-serif;
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   border: 1px solid var(--charcoal);
+  padding: 12px 32px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
 }
 .btn-outline:hover {
-  background: var(--charcoal);
+  background-color: var(--charcoal);
   color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 
 /* Tag/badge */
 .badge {
@@ -491,4 +532,183 @@ h1, h2, h3, h4, h5, h6 {
   color: rgba(30, 30, 30, 0.5);
   margin-top: 0.75rem;
   font-style: italic;
+}
+
+/* Hide scrollbar utility */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
+/* Swatch wrap styling */
+.dest-swatch-wrap {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  position: relative;
+}
+
+/* ==========================================================================
+   CSS MIGRATION - ORIGINAL DESIGN SYSTEM OVERRIDES & COMPONENTS
+   ========================================================================== */
+
+/* Global Typographies */
+body {
+  font-family: var(--font-body), sans-serif !important;
+  color: var(--charcoal) !important;
+  background-color: var(--sand) !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), serif !important;
+}
+
+/* Navigation Links Parity */
+.nav-link {
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-decoration: none;
+  color: var(--charcoal);
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: var(--primary-gold) !important;
+}
+
+.nav-link::after {
+  background-color: var(--primary-gold) !important;
+}
+
+.nav-link-active {
+  color: var(--primary-gold) !important;
+}
+
+.nav-link-active::after {
+  background-color: var(--primary-gold) !important;
+}
+
+/* Product Card Styling Parity */
+.product-card {
+  background-color: var(--white) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.product-card:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+.product-image-wrapper {
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+/* Destination Card Styles */
+.dest-card {
+  background: var(--white) !important;
+  border-radius: 10px !important;
+  border: 1px solid #EAEAEA !important;
+  transition: transform 0.35s ease, box-shadow 0.35s ease !important;
+}
+
+.dest-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Features Banner Section */
+.features-banner-section {
+  background-color: var(--soft-gray) !important;
+  padding: 20px 0 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.features-banner-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 40px !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+}
+
+/* Standardized responsive breakpoints and rules */
+@media (max-width: 1400px) {
+  /* Wide desktop adjustments */
+}
+
+@media (max-width: 1280px) {
+  /* Large desktop adjustments */
+}
+
+@media (max-width: 1024px) {
+  /* Desktop adjustments */
+}
+
+@media (max-width: 768px) {
+  /* Tablet adjustments */
+  .features-banner-grid {
+    gap: 20px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Large Mobile adjustments */
+}
+
+@media (max-width: 480px) {
+  /* Mobile adjustments */
+  .features-banner-grid {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+}
+
+/* Journal/Editorial Card Enhancements */
+.journal-card {
+  background-color: #FFFFFF;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.journal-card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+}
+
+.journal-card-image-wrap {
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  position: relative;
+}
+
+.journal-card-image-wrap img {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.journal-card:hover .journal-card-image-wrap img {
+  transform: scale(1.05);
+}
+
+.journal-card-body {
+  padding: 2.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
