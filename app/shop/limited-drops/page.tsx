@@ -66,21 +66,50 @@ export default function LimitedDropsPage() {
   const { sorted: displayProducts, newestIds } = sortNewArrivalsFirst(baseList, 3);
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
-      {/* Drop countdown */}
-      <div style={{ backgroundColor: "#1E1E1E", padding: "4rem 1.5rem", textAlign: "center" }}>
-        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "1rem" }}>Exclusive</p>
-        <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)", fontWeight: 600, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: "2.5rem" }}>
-          Limited Drops
-        </h1>
-        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(255, 255, 255,0.5)", marginBottom: "2rem", letterSpacing: "0.05em" }}>
-          Next drop ends in:
-        </p>
-        <Countdown targetDate={target} />
+    <div style={{ paddingTop: "0px", backgroundColor: "#FAF9F7", minHeight: "100vh" }}>
+      {/* Drop countdown header */}
+      <div
+        style={{
+          minHeight: "45vh",
+          borderBottom: "1px solid rgba(30,30,30,0.1)",
+          padding: "3rem 1.5rem 2.5rem",
+          backgroundImage: "url('/shop-header.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center"
+        }}
+      >
+        <div style={{ maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+            Exclusive
+          </p>
+          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2.5rem, 3vw, 4rem)", color: "#1E1E1E", letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>
+            Limited Drops
+          </h1>
+          
+          {/* Glass countdown card */}
+          <div style={{
+            backgroundColor: "rgba(30, 30, 30, 0.9)",
+            padding: "1.5rem 2.5rem",
+            borderRadius: "20px",
+            boxShadow: "0 12px 32px rgba(0, 0, 0, 0.15)",
+            display: "inline-block"
+          }}>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", color: "rgba(255, 255, 255, 0.6)", marginBottom: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+              Next drop ends in
+            </p>
+            <Countdown targetDate={target} />
+          </div>
+        </div>
       </div>
 
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
           {displayProducts.map((p: any) => (
             <ProductCard
               key={p.id}

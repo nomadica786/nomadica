@@ -14,7 +14,6 @@ export const metadata = constructMetadata({
 });
 
 export default async function BrandJournalPage() {
-  // Fetch initial batch of articles
   const { articles, pageInfo } = await getBlogArticles(12);
 
   return (

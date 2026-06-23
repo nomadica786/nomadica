@@ -2,7 +2,6 @@
 import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
-import Image from "next/image";
 import { groupProducts } from "@/utils/productGroup";
 
 export default function NewArrivalsPage() {
@@ -42,51 +41,32 @@ export default function NewArrivalsPage() {
   const newestIds = new Set(displayProducts.slice(0, 3).map(p => p.id));
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
-      {/* Hero banner */}
+    <div style={{ paddingTop: "0px", backgroundColor: "#FAF9F7", minHeight: "100vh" }}>
+      {/* Header */}
       <div
         style={{
-          position: "relative",
-          height: "340px",
-          overflow: "hidden",
-          backgroundColor: "#1E1E1E",
+          height: "35vh",
+          borderBottom: "1px solid rgba(30,30,30,0.1)",
+          padding: "3rem 1.5rem 2rem",
+          backgroundImage: "url('/shop-header.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         }}
       >
-        <Image
-          src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600&q=80"
-          alt="New Arrivals"
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectFit: "cover", opacity: 0.45 }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            padding: "1.5rem",
-          }}
-        >
-          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.75rem", fontWeight: 500 }}>
-            Just Landed
-          </p>
-          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(3rem, 7vw, 5.5rem)", fontWeight: 600, color: "#FFFFFF", letterSpacing: "-0.02em", lineHeight: 1 }}>
+        <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", textAlign: "center", fontSize: "clamp(2.5rem, 3vw, 4rem)", color: "#1E1E1E", letterSpacing: "-0.02em", paddingTop: "4%" }}>
             New Arrivals
           </h1>
-          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1rem", color: "rgba(255, 255, 255,0.65)", marginTop: "1rem", maxWidth: "400px", lineHeight: 1.7 }}>
-            The latest additions to the Nomadica collection, designed for every destination.
+          <p style={{ fontFamily: "'Montserrat', sans-serif", textAlign: "center", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+            Just Landed
           </p>
         </div>
       </div>
 
       {/* Grid */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
           {displayProducts.map((p: any) => (
             <ProductCard
               key={p.id}

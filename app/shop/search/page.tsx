@@ -84,15 +84,29 @@ export default function SearchPage() {
   };
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
+    <div style={{ paddingTop: "0px", backgroundColor: "#FAF9F7", minHeight: "100vh" }}>
       {/* Search hero */}
-      <div style={{ backgroundColor: "#1E1E1E", padding: "4rem 1.5rem 3rem" }}>
-        <div style={{ maxWidth: "700px", margin: "0 auto" }}>
-          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 600, color: "#FFFFFF", textAlign: "center", marginBottom: "2rem", letterSpacing: "-0.02em" }}>
+      <div
+        style={{
+          minHeight: "38vh",
+          borderBottom: "1px solid rgba(30,30,30,0.1)",
+          padding: "3.5rem 1.5rem 2.5rem",
+          backgroundImage: "url('/shop-header.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center"
+        }}
+      >
+        <div style={{ width: "100%", maxWidth: "700px", margin: "0 auto" }}>
+          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 600, color: "#1E1E1E", textAlign: "center", marginBottom: "1.5rem", letterSpacing: "-0.02em" }}>
             What are you looking for?
           </h1>
           <div style={{ position: "relative" }}>
-            <Search size={20} style={{ position: "absolute", left: "1.25rem", top: "50%", transform: "translateY(-50%)", color: "rgba(255, 255, 255,0.4)" }} />
+            <Search size={20} style={{ position: "absolute", left: "1.25rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30, 30, 30, 0.5)" }} />
             <input
               autoFocus
               type="text"
@@ -102,18 +116,20 @@ export default function SearchPage() {
               style={{
                 width: "100%",
                 padding: "1.125rem 1.25rem 1.125rem 3.5rem",
-                backgroundColor: "rgba(255, 255, 255,0.07)",
-                border: "1px solid rgba(255, 255, 255,0.15)",
-                color: "#FFFFFF",
+                backgroundColor: "#FFFFFF",
+                border: "1px solid rgba(30, 30, 30, 0.15)",
+                borderRadius: "30px",
+                color: "#1E1E1E",
                 fontFamily: "'Montserrat', sans-serif",
                 fontSize: "1rem",
                 outline: "none",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)"
               }}
             />
             {query && (
               <button
                 onClick={clearSearch}
-                style={{ position: "absolute", right: "1.25rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(255, 255, 255,0.5)", padding: "4px" }}
+                style={{ position: "absolute", right: "1.25rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(30, 30, 30, 0.5)", padding: "4px" }}
               >
                 <X size={18} />
               </button>
@@ -128,17 +144,18 @@ export default function SearchPage() {
                   key={s}
                   onClick={() => handleSearch(s)}
                   style={{
-                    padding: "0.5rem 1rem",
-                    border: "1px solid rgba(255, 255, 255,0.2)",
+                    padding: "0.5rem 1.25rem",
+                    border: "1px solid rgba(30, 30, 30, 0.15)",
+                    borderRadius: "20px",
                     backgroundColor: "transparent",
-                    color: "rgba(255, 255, 255,0.7)",
+                    color: "#1E1E1E",
                     fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.8125rem",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255,0.1)";
+                    (e.currentTarget as HTMLElement).style.background = "rgba(30, 30, 30, 0.05)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -162,7 +179,7 @@ export default function SearchPage() {
               {results.length} result{results.length !== 1 ? "s" : ""} for &quot;{query}&quot;
             </p>
             {results.length > 0 ? (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.5rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
                 {results.map((p) => <ProductCard key={p.id} {...p} />)}
               </div>
             ) : (

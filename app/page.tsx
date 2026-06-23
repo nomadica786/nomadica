@@ -334,7 +334,7 @@ function ProductCarouselSection({
           backgroundPosition: backgroundImage ? "center" : undefined,
           backgroundRepeat: backgroundImage ? "no-repeat" : undefined,
     
-        padding: "5rem 1.5rem",
+        padding: "2rem 1.5rem",
         borderBottom: "1px solid rgba(30,30,30,0.05)",
         position: "relative"
       }}
@@ -347,7 +347,7 @@ function ProductCarouselSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "3rem"
+            marginBottom: "2rem"
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -355,8 +355,8 @@ function ProductCarouselSection({
             <h2
               style={{
                 fontFamily: "'Playfair Display', sans-serif",
-                fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-                fontWeight: 600,
+                fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
+                fontWeight: 750,
                 color: "#111111",
                 letterSpacing: "-0.01em",
                 margin: 0
@@ -478,7 +478,7 @@ function ProductCarouselSection({
                         minWidth: "280px",
                         backgroundColor: "#FFFFFF",
                         border: "1px solid rgba(30, 30, 30, 0.05)",
-                        borderRadius: "8px",
+                        borderRadius: "15px",
                         overflow: "hidden",
                         boxShadow: isHovered ? "0 8px 25px rgba(0,0,0,0.06)" : "0 4px 15px rgba(0,0,0,0.02)",
                         transform: isHovered ? "translateY(-4px)" : "translateY(0)",
@@ -494,7 +494,7 @@ function ProductCarouselSection({
                           style={{
                             position: "relative",
                             width: "100%",
-                            aspectRatio: "653.27 / 978",
+                            aspectRatio: "750 / 978",
                             overflow: "hidden",
                             backgroundColor: "#F9F9F9"
                           }}
@@ -550,7 +550,7 @@ function ProductCarouselSection({
                       </Link>
 
                       {/* Info Container */}
-                      <div style={{ padding: "1.25rem", textAlign: "center" }}>
+                      <div style={{ padding: "0.7rem", textAlign: "center" }}>
                         {/* Title */}
                         <Link href={`/products/${pHandle}`} style={{ textDecoration: "none" }}>
                           <h3
@@ -855,331 +855,7 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
   );
 }
 
-function LatestCollectionSection() {
-  const latestProducts = [
-    {
-      id: "lp1",
-      name: "White Trekking Tees",
-      handle: "white-trekking-tees",
-      price: 599,
-      originalPrice: 999,
-      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Trekking_20Tees-front-1781514535205.jpg?v=1781514552",
-      colorVariants: [
-        {
-          id: "lp1-white",
-          name: "White Trekking Tees",
-          colorName: "White",
-          colorHex: "#FFFFFF",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Trekking_20Tees-front-1781514535205.jpg?v=1781514552",
-          handle: "white-trekking-tees",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp1-red",
-          name: "Red Trekking Regular Fit Tee",
-          colorName: "Red",
-          colorHex: "#D93838",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FRed_20Trekking_20Regular_20Fit_20Tees-front-1781514621454.jpg?v=1781514637",
-          handle: "red-trekking-regular-fit-tees",
-          price: 599,
-          originalPrice: 999
-        }
-      ]
-    },
-    {
-      id: "lp2",
-      name: "White Travel Tees",
-      handle: "travel-white-tees",
-      price: 599,
-      originalPrice: 999,
-      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20White_20Tees-front-1781505363689.jpg?v=1781505386",
-      colorVariants: [
-        {
-          id: "lp2-white",
-          name: "White Travel Tees",
-          colorName: "White",
-          colorHex: "#FFFFFF",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20White_20Tees-front-1781505363689.jpg?v=1781505386",
-          handle: "travel-white-tees",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp2-black",
-          name: "Black Travel Tees",
-          colorName: "Black",
-          colorHex: "#000000",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Tees-front-1781505419884.jpg?v=1781505435",
-          handle: "travel-black-tees",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp2-washed",
-          name: "Black Washed Travel Tees",
-          colorName: "Denim Wash",
-          colorHex: "#5C768D",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Washed_20Tees-front-1781505487295.jpg?v=1781505505",
-          handle: "travel-black-washed-tees",
-          price: 599,
-          originalPrice: 999
-        }
-      ]
-    },
-    {
-      id: "lp3",
-      name: "Blue Oversized Tee",
-      handle: "blue-oversized-tee",
-      price: 599,
-      originalPrice: 999,
-      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlue_20Oversized_20Tee-front-1781498707028.jpg?v=1781498720",
-      colorVariants: [
-        {
-          id: "lp3-blue",
-          name: "Blue Oversized Tee",
-          colorName: "Blue",
-          colorHex: "#1F3E6C",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlue_20Oversized_20Tee-front-1781498707028.jpg?v=1781498720",
-          handle: "blue-oversized-tee",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp3-black",
-          name: "Black Oversized Tee",
-          colorName: "Black",
-          colorHex: "#000000",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlack_20Oversized_20Tee-front-1781498528785.jpg?v=1781498544",
-          handle: "black-oversized-tee",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp3-white",
-          name: "White Oversized Tee",
-          colorName: "White",
-          colorHex: "#FFFFFF",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Oversized_20Tee-front-1781498578357.jpg?v=1781498593",
-          handle: "white-oversized-tee",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp3-red",
-          name: "Red Oversized Tee",
-          colorName: "Red",
-          colorHex: "#D93838",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FRed_20Oversized_20Tee-front-1781498631984.jpg?v=1781498647",
-          handle: "red-oversized-tee",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp3-brown",
-          name: "Brown Oversized Tee",
-          colorName: "Brown",
-          colorHex: "#8B5A2B",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBrown_20Oversized_20Tee-front-1781498673293.jpg?v=1781498685",
-          handle: "brown-oversized-tee",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp3-green",
-          name: "Green Oversized Tee",
-          colorName: "Green",
-          colorHex: "#388E3C",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FGreen_20Oversized_20Tee-front-1781498751142.jpg?v=1781498768",
-          handle: "green-oversized-tee",
-          price: 599,
-          originalPrice: 999
-        }
-      ]
-    },
-    {
-      id: "lp4",
-      name: "Red Trekking Regular Fit Tee",
-      handle: "red-trekking-regular-fit-tees",
-      price: 599,
-      originalPrice: 999,
-      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FRed_20Trekking_20Regular_20Fit_20Tees-front-1781514621454.jpg?v=1781514637",
-      colorVariants: [
-        {
-          id: "lp4-red",
-          name: "Red Trekking Regular Fit Tee",
-          colorName: "Red",
-          colorHex: "#D93838",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FRed_20Trekking_20Regular_20Fit_20Tees-front-1781514621454.jpg?v=1781514637",
-          handle: "red-trekking-regular-fit-tees",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp4-white",
-          name: "White Trekking Tees",
-          colorName: "White",
-          colorHex: "#FFFFFF",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Trekking_20Tees-front-1781514535205.jpg?v=1781514552",
-          handle: "white-trekking-tees",
-          price: 599,
-          originalPrice: 999
-        }
-      ]
-    },
-    {
-      id: "lp5",
-      name: "Black Washed Travel Tees",
-      handle: "travel-black-washed-tees",
-      price: 599,
-      originalPrice: 999,
-      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Washed_20Tees-front-1781505487295.jpg?v=1781505505",
-      colorVariants: [
-        {
-          id: "lp5-washed",
-          name: "Black Washed Travel Tees",
-          colorName: "Denim Wash",
-          colorHex: "#5C768D",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Washed_20Tees-front-1781505487295.jpg?v=1781505505",
-          handle: "travel-black-washed-tees",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp5-white",
-          name: "White Travel Tees",
-          colorName: "White",
-          colorHex: "#FFFFFF",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20White_20Tees-front-1781505363689.jpg?v=1781505386",
-          handle: "travel-white-tees",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp5-black",
-          name: "Black Travel Tees",
-          colorName: "Black",
-          colorHex: "#000000",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Tees-front-1781505419884.jpg?v=1781505435",
-          handle: "travel-black-tees",
-          price: 599,
-          originalPrice: 999
-        }
-      ]
-    },
-    {
-      id: "lp6",
-      name: "White Tiger Tees",
-      handle: "white-tiger-tees",
-      price: 599,
-      originalPrice: 999,
-      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Tiger_20Tees-front-1781507184160.jpg?v=1781507205",
-      colorVariants: [
-        {
-          id: "lp6-white",
-          name: "White Tiger Tees",
-          colorName: "White",
-          colorHex: "#FFFFFF",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Tiger_20Tees-front-1781507184160.jpg?v=1781507205",
-          handle: "white-tiger-tees",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp6-black",
-          name: "Black Tiger Tees",
-          colorName: "Black",
-          colorHex: "#000000",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlack_20Tiger_20Tees-front-1781507225879.jpg?v=1781507244",
-          handle: "black-tiger-tees",
-          price: 599,
-          originalPrice: 999
-        }
-      ]
-    },
-    {
-      id: "lp7",
-      name: "Black Travel Tees",
-      handle: "travel-black-tees",
-      price: 599,
-      originalPrice: 999,
-      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Tees-front-1781505419884.jpg?v=1781505435",
-      colorVariants: [
-        {
-          id: "lp7-black",
-          name: "Black Travel Tees",
-          colorName: "Black",
-          colorHex: "#000000",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Tees-front-1781505419884.jpg?v=1781505435",
-          handle: "travel-black-tees",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp7-white",
-          name: "White Travel Tees",
-          colorName: "White",
-          colorHex: "#FFFFFF",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20White_20Tees-front-1781505363689.jpg?v=1781505386",
-          handle: "travel-white-tees",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp7-washed",
-          name: "Black Washed Travel Tees",
-          colorName: "Denim Wash",
-          colorHex: "#5C768D",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FTravel_20Black_20Washed_20Tees-front-1781505487295.jpg?v=1781505505",
-          handle: "travel-black-washed-tees",
-          price: 599,
-          originalPrice: 999
-        }
-      ]
-    },
-    {
-      id: "lp8",
-      name: "Black Tiger Tees",
-      handle: "black-tiger-tees",
-      price: 599,
-      originalPrice: 999,
-      image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlack_20Tiger_20Tees-front-1781507225879.jpg?v=1781507244",
-      colorVariants: [
-        {
-          id: "lp8-black",
-          name: "Black Tiger Tees",
-          colorName: "Black",
-          colorHex: "#000000",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FBlack_20Tiger_20Tees-front-1781507225879.jpg?v=1781507244",
-          handle: "black-tiger-tees",
-          price: 599,
-          originalPrice: 999
-        },
-        {
-          id: "lp8-white",
-          name: "White Tiger Tees",
-          colorName: "White",
-          colorHex: "#FFFFFF",
-          image: "https://cdn.shopify.com/s/files/1/0823/7095/3471/files/mockups_2FWhite_20Tiger_20Tees-front-1781507184160.jpg?v=1781507205",
-          handle: "white-tiger-tees",
-          price: 599,
-          originalPrice: 999
-        }
-      ]
-    }
-  ];
 
-  return (
-    <ProductCarouselSection
-      title="Latest Collection"
-      products={latestProducts}
-      loading={false}
-      viewAllLink="/shop"
-      viewAllText="VIEW ALL"
-      icon={Star}
-    />
-  );
-}
 
 export default function HomePage() {
   const [collections, setCollections] = useState<any[]>([]);
@@ -1237,16 +913,16 @@ export default function HomePage() {
 
         const groupedAll = groupProducts(allProds);
 
-        // New Arrivals: newest 5
+        // New Arrivals: newest 8
         const arrivals = [...groupedAll].sort((a: any, b: any) => {
           return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-        }).slice(0, 5);
+        }).slice(0, 8);
         setNewArrivals(arrivals);
         setCached("new_arrivals", arrivals);
 
-        // Best Sellers: filtered or first 5
+        // Best Sellers: filtered or first 8
         const bSellersFiltered = groupedAll.filter((p: any) => p.badge?.toLowerCase() === 'best seller');
-        const bSellers = bSellersFiltered.length > 0 ? bSellersFiltered.slice(0, 5) : groupedAll.slice(0, 5);
+        const bSellers = bSellersFiltered.length > 0 ? bSellersFiltered.slice(0, 8) : groupedAll.slice(0, 8);
         setBestSellers(bSellers);
         setCached("best_sellers", bSellers);
 
@@ -1344,13 +1020,13 @@ export default function HomePage() {
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          padding: "6rem 1.5rem",
+          padding: "2.5rem 1.5rem",
           borderBottom: "1px solid rgba(30,30,30,0.05)",
         }}
       >
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <div style={{ textAlign: "left", marginBottom: "2rem" }}>
-            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 3vw, 3.5rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 2.5vw, 3.5rem)", fontWeight: 700, color: "#1E1E1E", letterSpacing: "-0.04em" }}>
               Discover by Collections
             </h2>
           </div>
@@ -1433,8 +1109,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Latest Collection Section */}
-      <LatestCollectionSection />
+      {/* 3. Latest Collection Section */}
+      <ProductCarouselSection
+        title="Latest Collection"
+        products={newArrivals}
+        loading={loading}
+        viewAllLink="/shop/new-arrivals"
+        viewAllText="VIEW ALL"
+        icon={Star}
+      />
 
       {/* 4. Best Sellers Section */}
       <ProductCarouselSection

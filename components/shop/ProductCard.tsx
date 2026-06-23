@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart } from "lucide-react";
 import { api } from "@/components/api/api";
 import { useAuth } from "@/utils/hooks/useAuth";
 import Image from "next/image";
@@ -98,7 +98,18 @@ export default function ProductCard({
 
   return (
     <div
-      style={{ position: "relative", width: "100%" }}
+      style={{
+        width: "100%",
+        backgroundColor: "#FFFFFF",
+        border: "1px solid rgba(30, 30, 30, 0.05)",
+        borderRadius: "15px",
+        overflow: "hidden",
+        boxShadow: hovered ? "0 8px 25px rgba(0,0,0,0.06)" : "0 4px 15px rgba(0,0,0,0.02)",
+        transform: hovered ? "translateY(-4px)" : "translateY(0)",
+        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+        cursor: "pointer",
+        position: "relative"
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -107,134 +118,31 @@ export default function ProductCard({
         <div
           style={{
             position: "relative",
-            aspectRatio: "3/4",
+            width: "100%",
+            aspectRatio: "750 / 978",
             overflow: "hidden",
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "#F9F9F9"
           }}
         >
           <Image
             src={sizedImage}
             alt={currentName}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 250px"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             style={{
               objectFit: "cover",
-              transition: "transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
-              transform: hovered ? "scale(1.06)" : "scale(1)",
+              transform: hovered ? "scale(1.05)" : "scale(1)",
+              transition: "transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)"
             }}
           />
-
-          {/* Overlay */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(to top, rgba(30,30,30,0.5) 0%, transparent 50%)",
-              opacity: hovered ? 1 : 0,
-              transition: "opacity 0.4s ease",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
-              padding: "1.25rem",
-            }}
-          >
-            <button
-              disabled={addingToCart}
-              onClick={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!isAuthenticated) {
-                  router.push("/account/login");
-                  return;
-                }
-                setAddingToCart(true);
-                try {
-                  const productRes = await api.products.get(currentId || "1");
-                  const product = productRes?.product || productRes?.productByHandle;
-                  
-                  if (!product) {
-                    throw new Error('Product not found');
-                  }
-
-                  // Get first available variant (in real implementation, user would select variant)
-                  const variant = product.variants?.edges?.[0]?.node;
-                  const variantId = variant?.id;
-
-                  if (!variantId) {
-                    console.error('[ProductCard] No variant ID found in product response:', product);
-                    throw new Error('Product has no variants');
-                  }
-
-                  let cartId = localStorage.getItem("nomadica_cart_id");
-                  
-                  if (!cartId) {
-                    const res = await api.cart.create([{
-                      merchandiseId: variantId,
-                      quantity: 1,
-                      title: "Default Size",
-                      price: currentPrice,
-                      productTitle: currentName,
-                      image: currentImage
-                    }]);
-                    const newCart = res?.cartCreate?.cart || res?.cart;
-                    if (newCart?.id) {
-                      localStorage.setItem("nomadica_cart_id", newCart.id);
-                    }
-                  } else {
-                    const res = await api.cart.update(cartId, {
-                      lines: [{
-                        merchandiseId: variantId,
-                        quantity: 1,
-                        title: "Default Size",
-                        price: currentPrice,
-                        productTitle: currentName,
-                        image: currentImage
-                      }]
-                    });
-                  }
-                  
-                  window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: true } }));
-                } catch (err) {
-                  console.error("Card Add to Bag failed:", err);
-                } finally {
-                  setAddingToCart(false);
-                }
-              }}
-              style={{
-                width: "100%",
-                padding: "0.75rem",
-                backgroundColor: "#FFFFFF",
-                color: "var(--charcoal)",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "0.8125rem",
-                fontWeight: 500,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.5rem",
-                transition: "background 0.2s ease",
-                transform: hovered ? "translateY(0)" : "translateY(20px)",
-                transition2: "transform 0.4s ease, background 0.2s ease",
-                opacity: addingToCart ? 0.7 : 1,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              } as any}
-            >
-              <ShoppingBag size={14} />
-              {addingToCart ? "Adding..." : "Add to Bag"}
-            </button>
-          </div>
 
           {/* Badge */}
           {currentBadge && (
             <div
               style={{
                 position: "absolute",
-                top: "0.75rem",
-                left: "0.75rem",
+                top: "12px",
+                left: "12px",
                 backgroundColor: currentBadge === "Sale" ? "var(--charcoal)" : currentBadge === "New" ? "var(--forest-green)" : "var(--charcoal)",
                 color: "#FFFFFF",
                 padding: "0.25rem 0.625rem",
@@ -243,13 +151,14 @@ export default function ProductCard({
                 fontWeight: 600,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
+                zIndex: 5
               }}
             >
               {currentBadge}
             </div>
           )}
 
-          {/* Wishlist */}
+          {/* Wishlist Heart Button */}
           <button
             onClick={async (e) => {
               e.preventDefault();
@@ -272,115 +181,101 @@ export default function ProductCard({
             }}
             style={{
               position: "absolute",
-              top: "0.75rem",
-              right: "0.75rem",
-              width: "32px",
-              height: "32px",
+              top: "12px",
+              right: "12px",
+              width: "36px",
+              height: "36px",
               borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255,0.9)",
+              backgroundColor: "#FFFFFF",
               border: "none",
-              cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              opacity: hovered ? 1 : 0,
-              transition: "opacity 0.3s ease",
-              color: wishlisted ? "var(--charcoal)" : "var(--charcoal)",
+              cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              zIndex: 5,
+              transition: "transform 0.2s ease"
             }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+            }}
+            aria-label="Wishlist"
           >
-            <Heart size={14} fill={wishlisted ? "var(--charcoal)" : "none"} />
+            <Heart size={18} fill={wishlisted ? "var(--charcoal)" : "none"} color="var(--charcoal)" />
           </button>
         </div>
       </Link>
 
-      {/* Info */}
-      <div style={{ paddingTop: "0.875rem" }}>
-        {category && (
-          <p
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.6875rem",
-              color: "var(--charcoal)",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              marginBottom: "0.25rem",
-              fontWeight: 500,
-            }}
-          >
-            {category}
-          </p>
-        )}
+      {/* Info Container */}
+      <div style={{ padding: "0.7rem", textAlign: "center" }}>
+        {/* Title */}
         <Link href={productHref} style={{ textDecoration: "none" }}>
           <h3
             style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.9375rem",
-              fontWeight: 500,
-              color: "var(--charcoal)",
-              marginBottom: "0.375rem",
-              lineHeight: 1.4,
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "1.125rem",
+              fontWeight: 600,
+              color: hovered ? "var(--primary-gold)" : "var(--charcoal)",
+              margin: "0 0 0.5rem 0",
+              transition: "color 0.2s ease"
             }}
           >
             {currentName}
           </h3>
         </Link>
 
-        {/* Color Swatches */}
-        {colorVariants && colorVariants.length > 1 && (
-          <div style={{ display: "flex", gap: "0.375rem", marginTop: "0.25rem", marginBottom: "0.55rem", flexWrap: "wrap" }}>
-            {colorVariants.map((v) => (
-              <button
-                key={v.id}
-                onMouseEnter={() => setActiveVariant(v)}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setActiveVariant(v);
-                }}
-                style={{
-                  width: "14px",
-                  height: "14px",
-                  borderRadius: "50%",
-                  backgroundColor: v.colorHex,
-                  border: activeVariant?.id === v.id
-                    ? "1.5px solid var(--charcoal)"
-                    : (isWhiteColor(v.colorHex) ? "1.5px solid var(--charcoal)" : "1px solid rgba(30, 30, 30, 0.2)"),
-                  boxShadow: activeVariant?.id === v.id ? "0 0 0 1.5px #FFFFFF inset" : "none",
-                  cursor: "pointer",
-                  padding: 0,
-                  transition: "transform 0.15s ease",
-                  transform: activeVariant?.id === v.id ? "scale(1.15)" : "scale(1)",
-                }}
-                title={v.colorName}
-              />
-            ))}
-          </div>
-        )}
-
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.9375rem",
-              fontWeight: 600,
-              color: "var(--charcoal)",
-            }}
-          >
+        {/* Price */}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+          <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: "var(--charcoal)", fontSize: "1rem" }}>
             ₹{currentPrice.toLocaleString("en-IN")}
           </span>
           {currentOriginalPrice && (
-            <span
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "0.875rem",
-                color: "rgba(30,30,30,0.4)",
-                textDecoration: "line-through",
-              }}
-            >
+            <span style={{ fontFamily: "'Montserrat', sans-serif", textDecoration: "line-through", color: "rgba(30,30,30,0.4)", fontSize: "0.875rem" }}>
               ₹{currentOriginalPrice.toLocaleString("en-IN")}
             </span>
           )}
         </div>
+
+        {/* Color Swatches */}
+        {colorVariants && colorVariants.length > 1 && (
+          <div style={{ display: "flex", justifyContent: "center", gap: "6px", flexWrap: "wrap", minHeight: "22px", marginBottom: "0.5rem" }}>
+            {colorVariants.map((v) => {
+              const isSelected = activeVariant ? activeVariant.id === v.id : false;
+              const isWhite = v.colorHex?.toLowerCase() === "#ffffff" || v.colorHex?.toLowerCase() === "white";
+              return (
+                <div key={v.id} className="dest-swatch-wrap" style={{ width: "22px", height: "22px" }}>
+                  <button
+                    onMouseEnter={() => setActiveVariant(v)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setActiveVariant(v);
+                    }}
+                    style={{
+                      width: "14px",
+                      height: "14px",
+                      borderRadius: "50%",
+                      backgroundColor: v.colorHex,
+                      border: isSelected
+                        ? "2px solid var(--charcoal)"
+                        : (isWhite ? "1.5px solid rgba(30, 30, 30, 0.4)" : "1px solid rgba(0,0,0,0.15)"),
+                      boxShadow: isSelected ? "0 0 0 1.5px #FFFFFF inset" : "none",
+                      padding: 0,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      transform: isSelected ? "scale(1.25)" : "scale(1)",
+                    }}
+                    title={v.colorName}
+                    aria-label={`Select color ${v.colorName}`}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
