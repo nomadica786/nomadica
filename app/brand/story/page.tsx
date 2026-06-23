@@ -14,17 +14,7 @@ interface TravelShort {
   channelTitle: string;
 }
 
-// Aspect ratio list to create a premium Pinterest-style vertical masonry grid variation
-const ASPECT_RATIOS = [
-  "aspect-[9/16]", // Very tall (Standard Shorts)
-  "aspect-[2/3]",  // Classic portrait
-  "aspect-[3/4]",  // Slightly wider portrait
-  "aspect-[9/16]",
-  "aspect-[3/5]",  // Slim portrait
-  "aspect-[2/3]"
-];
-
-// Memoized Single Video Card to prevent rendering degradation with thousands of items
+// // Memoized Single Video Card to prevent rendering degradation with thousands of items
 const VideoCard = memo(({ 
   video, 
   index, 
@@ -35,16 +25,15 @@ const VideoCard = memo(({
   onClick: (videoId: string) => void;
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const aspect = ASPECT_RATIOS[index % ASPECT_RATIOS.length];
 
   return (
     <div
       onClick={() => onClick(video.videoId)}
-      className="group relative mb-6 break-inside-avoid overflow-hidden rounded-2xl border border-black/5 bg-[#FFFFFF] cursor-pointer shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:border-black/10"
+      className="group relative overflow-hidden rounded-2xl border border-black/5 bg-[#FFFFFF] cursor-pointer shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:border-black/10 w-full"
       style={{ backfaceVisibility: "hidden" }}
     >
       {/* Aspect Ratio Container */}
-      <div className={`relative w-full ${aspect} overflow-hidden bg-[#FFFFFF]`}>
+      <div className="relative w-full aspect-[9/16] overflow-hidden bg-[#FFFFFF]">
         {/* Placeholder Skeleton */}
         {!imageLoaded && (
           <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-[#FFFFFF] via-[#E5E2DA] to-[#FFFFFF]" />
@@ -182,35 +171,23 @@ export default function BrandStoryPage() {
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] text-[#1E1E1E]">
-      <Navbar />
-
-      {/* Hero Section */}
-      <section className="relative flex flex-col justify-center items-center px-6 text-center bg-[#FFFFFF] border-b border-black/5" style={{ minHeight: "55vh" }}>
-        {/* Background Grain/Visual Pattern Overlay */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
-        
-        <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-black/15 bg-[#FFFFFF] shadow-sm">
-            <Compass size={13} className="text-[#1E1E1E]" style={{ animation: 'spin 8s linear infinite' }} />
-            <span className="font-sans text-[10px] font-bold tracking-[0.2em] text-[#1E1E1E] uppercase leading-none">
-              BRAND STORY
-            </span>
-          </div>
-
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-normal leading-[1.1] tracking-tight text-[#1E1E1E] mt-2">
-            Stories From <br className="sm:hidden" />
-            <span className="italic font-normal text-[#1E1E1E]">Around The World</span>
-          </h1>
-
-          <p className="font-sans text-sm sm:text-base text-black/60 leading-relaxed max-w-xl mt-4">
-            Every tile represents a authentic, real travel moment captured by creators worldwide. Explore and immerse yourself in endless global exploration.
-          </p>
-        </div>
-      </section>
+      {/* Hero Banner Section */}
+      <section 
+        style={{ 
+          backgroundImage: "url('/Shorts Banner.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          width: "100%",
+          minHeight: "60vh",
+          position: "relative",
+          marginBottom: "3rem"
+        }}
+      />
 
       {/* Travel Shorts Wall */}
-      <main className="max-w-[1600px] mx-auto px-6 py-16 sm:px-8">
-        <div className="columns-1 sm:columns-2 lg:columns-4 xl:columns-6 gap-6 space-y-6">
+      <main className="w-full mx-auto" style={{ paddingLeft: "8%", paddingRight: "8%", paddingBottom: "4rem" }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {videos.map((video, idx) => (
             <VideoCard
               key={video.id}
