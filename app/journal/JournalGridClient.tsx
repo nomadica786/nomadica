@@ -163,7 +163,6 @@ export default function JournalGridClient({
 
   return (
     <div className="w-full flex flex-col items-center justify-center">
-      {/* Hero Banner Section */}
       <section 
         style={{ 
           backgroundImage: "url('/journal-banner.jpg')",
@@ -171,7 +170,7 @@ export default function JournalGridClient({
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           width: "100%",
-          minHeight: "440px",
+          minHeight: "200px",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -250,7 +249,7 @@ export default function JournalGridClient({
       </section>
 
       {/* Main Content Area */}
-      <main className="w-full max-w-[1400px] mx-auto px-8 pt-20 pb-32 sm:px-12 flex flex-col items-center justify-center mt-4">
+      <main className="w-full max-w-[1400px] mx-auto px-8 pt-20 pb-32 sm:px-12 flex flex-col items-center justify-center" style={{ marginTop: "4rem" }}>
         {/* Grid containing cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full justify-items-center justify-center">
           {filteredArticles.map((article, idx) => (

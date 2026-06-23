@@ -143,22 +143,26 @@ export default function CollectionClient({
   const pageLabel = isAll ? "Explore" : "Collection";
 
   return (
-    <div style={{ paddingTop: "64px", minHeight: "100vh", backgroundColor: "#FFFFFF" }}>
+    <div style={{ paddingTop: "0px", minHeight: "100vh", backgroundColor: "#FAF9F7" }}>
       {/* Header */}
       <div
         style={{
+          height: "35vh",
           borderBottom: "1px solid rgba(30,30,30,0.1)",
           padding: "3rem 1.5rem 2rem",
-          backgroundColor: "#FFFFFF",
+          backgroundImage: "url('/shop-header.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         }}
       >
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
-            {pageLabel}
-          </p>
-          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em" }}>
+          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", textAlign: "center", fontSize: "clamp(2.5rem, 3vw, 4rem)", color: "#1E1E1E", letterSpacing: "-0.02em", paddingTop: "4%" }}>
             {pageTitle}
           </h1>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", textAlign: "center", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+            {pageLabel}
+          </p>
         </div>
       </div>
 
@@ -246,7 +250,7 @@ export default function CollectionClient({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
             gap: "1.5rem",
           }}
         >
