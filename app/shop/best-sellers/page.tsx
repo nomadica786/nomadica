@@ -2,7 +2,6 @@
 import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
-import Image from "next/image";
 import { groupProducts, sortNewArrivalsFirst } from "@/utils/productGroup";
 
 export default function BestSellersPage() {
@@ -37,16 +36,32 @@ export default function BestSellersPage() {
   const { sorted: displayProducts, newestIds } = sortNewArrivalsFirst(baseList, 3);
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
-      <div style={{ position: "relative", height: "300px", overflow: "hidden", backgroundColor: "#1E1E1E" }}>
-        <Image src="https://images.unsplash.com/photo-1489493887464-892be6d1daae?w=1600&q=80" alt="" fill priority sizes="100vw" style={{ objectFit: "cover", opacity: 0.3 }} />
-        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(255, 255, 255,0.7)", marginBottom: "0.75rem" }}>Community Picks</p>
-          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(3rem, 7vw, 5rem)", fontWeight: 600, color: "#FFFFFF", letterSpacing: "-0.02em" }}>Best Sellers</h1>
+    <div style={{ paddingTop: "0px", backgroundColor: "#FAF9F7", minHeight: "100vh" }}>
+      {/* Header */}
+      <div
+        style={{
+          height: "35vh",
+          borderBottom: "1px solid rgba(30,30,30,0.1)",
+          padding: "3rem 1.5rem 2rem",
+          backgroundImage: "url('/shop-header.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", textAlign: "center", fontSize: "clamp(2.5rem, 3vw, 4rem)", color: "#1E1E1E", letterSpacing: "-0.02em", paddingTop: "4%" }}>
+            Best Sellers
+          </h1>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", textAlign: "center", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+            Community Picks
+          </p>
         </div>
       </div>
+
+      {/* Grid */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
           {displayProducts.map((p: any) => (
             <ProductCard
               key={p.id}

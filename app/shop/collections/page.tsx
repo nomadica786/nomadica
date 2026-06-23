@@ -27,7 +27,7 @@ export default function CollectionsPage() {
         {collections.length === 0 ? (
           <p style={{ fontFamily: 'Montserrat', color: 'rgba(30,30,30,0.5)' }}>No collections found.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
             {collections.map((collection: any) => (
               <Link
                 key={collection.id}

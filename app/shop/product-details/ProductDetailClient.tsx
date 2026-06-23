@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Heart, ShoppingBag, ShoppingCart, Star, ChevronDown, Truck, RotateCcw, Shield } from "lucide-react";
+import { Heart, ShoppingCart, Star, ChevronDown } from "lucide-react";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { parseProduct, groupProducts } from "@/utils/productGroup";
