@@ -55,6 +55,15 @@ export default function Navbar() {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const pathname = usePathname();
 
+  const checkActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    if (href === "/brand") {
+      return pathname === "/brand" || pathname.startsWith("/brand/about") || pathname.startsWith("/brand/sustainability");
+    }
+    if (href === "/brand/story") return pathname === "/brand/story";
+    return pathname.startsWith(href);
+  };
+
   // Cart Drawer State
   const [cartOpen, setCartOpen] = useState(false);
   const [cart, setCart] = useState<any>(null);
@@ -203,7 +212,7 @@ export default function Navbar() {
               >
                 <Link
                   href={link.href}
-                  className={`nav-link ${pathname.startsWith(link.href) ? "nav-link-active" : ""}`}
+                  className={`nav-link ${checkActive(link.href) ? "nav-link-active" : ""}`}
                   style={{
                     fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.875rem",
