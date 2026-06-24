@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Star, Heart, LucideIcon, TrendingUp, MapPin, Luggage, Panda, LocateIcon, MapIcon, Shell } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Heart, LucideIcon, TrendingUp, MapPin, LocateIcon } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import { CardSkeleton } from "@/components/ui/SnowBallLoader";
 import { api } from "@/components/api/api";
@@ -270,7 +270,6 @@ function ProductCarouselSection({
   loading,
   viewAllLink,
   viewAllText,
-  icon: Icon,
   backgroundColor,
   backgroundImage
 }: {
@@ -279,7 +278,6 @@ function ProductCarouselSection({
   loading: boolean;
   viewAllLink: string;
   viewAllText: string;
-  icon: LucideIcon;
   backgroundColor?: string;
   backgroundImage?: string;
 }) {
@@ -345,7 +343,6 @@ function ProductCarouselSection({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Icon size={24} color="#c4a77d" style={{ opacity: 0.8 }} />
             <h2
               style={{
                 fontFamily: "'Playfair Display', sans-serif",
@@ -1122,7 +1119,6 @@ export default function HomePage() {
         loading={loading}
         viewAllLink="/shop/new-arrivals"
         viewAllText="VIEW ALL"
-        icon={Star}
       />
 
       {/* 4. Best Sellers Section */}
@@ -1133,7 +1129,6 @@ export default function HomePage() {
         viewAllLink="/shop/best-sellers"
         viewAllText="VIEW ALL"
         backgroundColor="#FFFFFF"
-        icon={TrendingUp}
       />
 
       {/* 5. Banner Section 1 */}
@@ -1150,7 +1145,6 @@ export default function HomePage() {
           loading={loading}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[0].handle)}`}
           viewAllText="VIEW ALL"
-          icon={Luggage}
         />
       )}
 
@@ -1163,7 +1157,6 @@ export default function HomePage() {
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[1].handle)}`}
           viewAllText="VIEW ALL"
           backgroundColor="#FFFFFF"
-          icon={Panda}
         />
       )}
 
@@ -1178,7 +1171,6 @@ export default function HomePage() {
           loading={loading}
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[2].handle)}`}
           viewAllText="VIEW ALL"
-          icon={MapIcon}
         />
       )}
 
@@ -1191,7 +1183,6 @@ export default function HomePage() {
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[3].handle)}`}
           viewAllText="VIEW ALL"
           backgroundImage="/beach-bg.png"
-          icon={Shell}
         />
       )}
 
@@ -1210,7 +1201,6 @@ export default function HomePage() {
           viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[4].handle)}`}
           viewAllText="VIEW ALL"
           backgroundColor="#FFFFFF"
-          icon={Star}
         />
       )}
 
