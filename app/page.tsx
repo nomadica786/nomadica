@@ -39,6 +39,7 @@ const testimonials = [
 // Cache helper functions
 const getCached = (key: string, fallback: any) => {
   if (typeof window === "undefined") return fallback;
+  if (process.env.NODE_ENV === "development") return fallback;
   try {
     const item = localStorage.getItem(`nomadica_home_cache_${key}`);
     return item ? JSON.parse(item) : fallback;
@@ -85,11 +86,11 @@ function HeroSection() {
 
   return (
     <section
+      className="min-h-[140px] sm:min-h-[250px] md:min-h-[400px] lg:min-h-[450px]"
       style={{
         position: "relative",
         width: "100%",
         aspectRatio: "2000/695",
-        minHeight: "450px",
         overflow: "hidden",
         marginTop: 0,
         backgroundColor: "#000000",
@@ -149,19 +150,15 @@ function HeroSection() {
       {/* 4. Navigation Buttons (Left/Right Arrows) */}
       <button
         onClick={handlePrev}
+        className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center"
         style={{
           position: "absolute",
           left: "1rem",
           top: "50%",
           transform: "translateY(-50%)",
-          width: "48px",
-          height: "48px",
           borderRadius: "50%",
           backgroundColor: "#FFFFFF",
           border: "none",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           cursor: "pointer",
           zIndex: 20,
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
@@ -175,24 +172,20 @@ function HeroSection() {
         }}
         aria-label="Previous slide"
       >
-        <ChevronLeft size={24} color="#1E1E1E" />
+        <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" color="#1E1E1E" />
       </button>
 
       <button
         onClick={handleNext}
+        className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center"
         style={{
           position: "absolute",
           right: "1rem",
           top: "50%",
           transform: "translateY(-50%)",
-          width: "48px",
-          height: "48px",
           borderRadius: "50%",
           backgroundColor: "#FFFFFF",
           border: "none",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           cursor: "pointer",
           zIndex: 20,
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
@@ -206,7 +199,7 @@ function HeroSection() {
         }}
         aria-label="Next slide"
       >
-        <ChevronRight size={24} color="#1E1E1E" />
+        <ChevronRight className="w-4 h-4 md:w-6 md:h-6" color="#1E1E1E" />
       </button>
 
       {/* 5. Center-Right Content Overlay */}
@@ -239,9 +232,9 @@ function HeroSection() {
 
       {/* 6. Slide Indicator Dots */}
       <div
+        className="bottom-3 md:bottom-6"
         style={{
           position: "absolute",
-          bottom: "1.5rem",
           left: "50%",
           transform: "translateX(-50%)",
           display: "flex",
@@ -293,6 +286,7 @@ function ProductCarouselSection({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const [activeVariants, setActiveVariants] = useState<Record<string, any>>({});
+  const [interactedCards, setInteractedCards] = useState<Record<string, boolean>>({});
 
   const handleScrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -457,6 +451,7 @@ function ProductCarouselSection({
               : displayProducts.map((product) => {
                   const isHovered = hoveredCardId === product.id;
                   const activeVar = activeVariants[product.id] || product.colorVariants?.[0] || null;
+                  const hasInteracted = interactedCards[product.id] || false;
                   
                   const price = (activeVar && activeVar.price) 
                     ? (typeof activeVar.price === "number" ? activeVar.price : parseFloat(activeVar.price || "0")) 
@@ -467,7 +462,9 @@ function ProductCarouselSection({
                     : product.originalPrice;
                   
                   const pTitle = activeVar ? (activeVar.name || product.name || product.title || "Product") : (product.name || product.title || "Product");
-                  const pImage = activeVar ? activeVar.image : (product.image || product.images?.[0]?.node?.url);
+                  const pImage = (product.mockupImage && !hasInteracted)
+                    ? product.mockupImage
+                    : (activeVar ? activeVar.image : (product.image || product.images?.[0]?.node?.url));
                   const pHandle = activeVar ? (activeVar.handle || product.handle) : product.handle;
 
                   return (
@@ -591,11 +588,13 @@ function ProductCarouselSection({
                                   <button
                                     onMouseEnter={() => {
                                       setActiveVariants(prev => ({ ...prev, [product.id]: v }));
+                                      setInteractedCards(prev => ({ ...prev, [product.id]: true }));
                                     }}
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
                                       setActiveVariants(prev => ({ ...prev, [product.id]: v }));
+                                      setInteractedCards(prev => ({ ...prev, [product.id]: true }));
                                     }}
                                     style={{
                                       width: "14px",
@@ -666,33 +665,24 @@ function ProductCarouselSection({
 }
 
 function ImageBanner({
-  image, href, height
+  image, href
 }: {
   image: string;
   href: string;
-  height?: string;
 }) {
-  const desktopHeight = height || "500px";
-  const mobileHeight = height === "700px" ? "350px" : "250px";
+  const isYoutubeBanner = image.includes("youtube");
+  const aspect = isYoutubeBanner ? "2000/923" : "1536/454";
+  const minHeightClass = isYoutubeBanner
+    ? "min-h-[170px] sm:min-h-[290px] md:min-h-[350px] lg:min-h-[470px] xl:min-h-[590px] 2xl:min-h-[700px]"
+    : "min-h-[110px] sm:min-h-[180px] md:min-h-[220px] lg:min-h-[300px] xl:min-h-[370px] 2xl:min-h-[450px]";
 
   return (
     <section
-      className="responsive-image-banner"
+      className={`relative w-full overflow-hidden bg-black ${minHeightClass}`}
       style={{
-        position: "relative",
-        width: "100%",
-        overflow: "hidden",
-        height: desktopHeight,
-        ["--mobile-height" as any]: mobileHeight
+        aspectRatio: aspect,
       }}
     >
-      <style>{`
-        @media (max-width: 768px) {
-          .responsive-image-banner {
-            height: var(--mobile-height) !important;
-          }
-        }
-      `}</style>
       <Link href={href} style={{ position: "relative", display: "block", width: "100%", height: "100%" }}>
         <Image
           src={image}
@@ -700,7 +690,8 @@ function ImageBanner({
           fill
           sizes="100vw"
           style={{
-            objectFit: "cover"
+            objectFit: "cover",
+            objectPosition: "center"
           }}
         />
       </Link>
@@ -864,6 +855,7 @@ export default function HomePage() {
   const [collectionProducts, setCollectionProducts] = useState<Record<string, any[]>>({});
   const [collectionConfigs, setCollectionConfigs] = useState<any[]>([]);
   const [journalArticles, setJournalArticles] = useState<any[]>([]);
+  const [mockups, setMockups] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -873,9 +865,21 @@ export default function HomePage() {
     setCollectionProducts(getCached("collection_products", {}));
     setCollectionConfigs(getCached("collection_configs", []));
     setJournalArticles(getCached("journal", []));
+    setMockups(getCached("product_type_mockups", {}));
 
     const loadHomeData = async () => {
       try {
+        // Fetch Mockup images from Shopify / Fallbacks
+        let mockupLookup = getCached("product_type_mockups", {});
+        try {
+          const res = await api.mockups.get();
+          mockupLookup = res?.mockups || {};
+          setCached("product_type_mockups", mockupLookup);
+        } catch (err) {
+          console.error("Failed to load mockups:", err);
+        }
+        setMockups(mockupLookup);
+
         // 1. Fetch Collections list
         let cols = getCached("collections", []);
         try {
@@ -902,6 +906,7 @@ export default function HomePage() {
               image: node.images?.edges?.[0]?.node?.url || 'https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80',
               badge: node.badge,
               category: node.productType || node.category || 'Tops',
+              productType: node.productType || node.category || 'Tops',
               handle: node.handle,
               createdAt: node.createdAt || '',
             };
@@ -911,7 +916,7 @@ export default function HomePage() {
           console.error("Failed to load products:", err);
         }
 
-        const groupedAll = groupProducts(allProds);
+        const groupedAll = groupProducts(allProds, mockupLookup);
 
         // New Arrivals: newest 8
         const arrivals = [...groupedAll].sort((a: any, b: any) => {
@@ -958,6 +963,7 @@ export default function HomePage() {
                     image: node.images?.edges?.[0]?.node?.url || 'https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80',
                     badge: node.badge,
                     category: node.productType || node.category || 'Tops',
+                    productType: node.productType || node.category || 'Tops',
                     handle: node.handle,
                     createdAt: node.createdAt || '',
                   };
@@ -971,7 +977,7 @@ export default function HomePage() {
               prods = allProds.filter((p: any) => p.category?.toLowerCase() === config.handle.toLowerCase());
             }
           }
-          colProductsMap[config.handle] = groupProducts(prods || []).slice(0, 5);
+          colProductsMap[config.handle] = groupProducts(prods || [], mockupLookup).slice(0, 5);
         }
         setCollectionProducts(colProductsMap);
         setCached("collection_products", colProductsMap);
@@ -1026,12 +1032,12 @@ export default function HomePage() {
       >
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <div style={{ textAlign: "left", marginBottom: "2rem" }}>
-            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 2.5vw, 3.5rem)", fontWeight: 700, color: "#1E1E1E", letterSpacing: "-0.04em" }}>
-              Discover by Collections
+            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2rem, 2.5vw, 3.5rem)", fontWeight: 700, color: "#1E1E1E", letterSpacing: "-0.04em", textAlign: "left" }}>
+              Discover by <br className="md:hidden" /> Collections
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
             {collections.length === 0 && loading
               ? [1, 2, 3, 4, 5].map((i) => (
                   <div key={i} style={{ aspectRatio: "1/1", backgroundColor: "#F0F0F0", borderRadius: "8px", animation: "shimmer 1.5s infinite" }} />
@@ -1089,15 +1095,15 @@ export default function HomePage() {
                             src={getShopifyImageUrl(col.image?.url, 600) || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
                             alt={meta.title}
                             fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
                             style={{ objectFit: "cover" }}
                           />
                         </div>
-                        <div style={{ textAlign: "center", marginTop: "1rem", padding: "0 0.5rem" }}>
-                          <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.125rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>
+                        <div style={{ textAlign: "center", marginTop: "0.75rem", padding: "0 0.5rem" }}>
+                          <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(0.95rem, 1.2vw, 1.125rem)", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>
                             {meta.title}
                           </h3>
-                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.6)", lineHeight: "1.4" }}>
+                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "clamp(0.75rem, 1vw, 0.8125rem)", color: "rgba(30,30,30,0.6)", lineHeight: "1.4" }}>
                             {meta.description}
                           </p>
                         </div>
@@ -1134,7 +1140,6 @@ export default function HomePage() {
       <ImageBanner
         image="/youtube shorts banner 1.jpg"
         href="/brand/story"
-        height="700px"
       />
 
       {/* 6. Collection 1 Section */}
@@ -1194,7 +1199,6 @@ export default function HomePage() {
       <ImageBanner
         image="/Home-Banner2.png"
         href="/"
-        height="420px"
       />
 
       {/* 12. Collection 5 Section */}

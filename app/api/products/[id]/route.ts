@@ -23,6 +23,7 @@ export async function GET(
             title
             description
             handle
+            productType
             images(first: 10) {
               edges {
                 node {

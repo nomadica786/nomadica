@@ -59,6 +59,7 @@ export default async function CollectionPage({ params }: PageProps) {
       hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
       badge: node.badge,
       category: node.productType || node.category || 'Tops',
+      productType: node.productType || node.category || 'Tops',
       createdAt: node.createdAt || '',
     };
   });
