@@ -144,7 +144,7 @@ export default function Navbar() {
     position: "sticky",
     top: 0,
     width: "100%",
-    background: "#fff",
+    background: "#FBF9F7",
     borderBottom: "1px solid #eee",
     zIndex: 100,
   }}
@@ -153,11 +153,10 @@ export default function Navbar() {
     style={{
       maxWidth: "1400px",
       margin: "0 auto",
-      padding: "0 1.5rem",
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      height: "64px",
+      height: "74px",
     }}
   >
     <Link
@@ -171,27 +170,15 @@ export default function Navbar() {
       }}
     >
       <Image
-        src="/Logo.png"
+        src="/Nomadica-main-logo.jpg"
         alt="Nomadica Logo"
-        width={40}
-        height={40}
+        width={225}
+        height={225}
         style={{
           objectFit: "contain",
           display: "block",
         }}
       />
-
-      <span
-        style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: "2Orem",
-          fontWeight: 1000,
-          lineHeight: 1,
-          transform: "translateY(3px)",
-        }}
-      >
-        Nomadica
-      </span>
     </Link>
 
           {/* Desktop Nav */}
