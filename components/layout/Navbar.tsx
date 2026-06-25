@@ -24,17 +24,18 @@ const navLinks = [
   },
   { label: "ARTICLES", href: "/journal" },
   { label: "STORIES", href: "/brand/story" },
-  {
-    label: "BRAND",
-    href: "/brand",
-    children: [
-      { label: "About Us", href: "/brand/about" },
-      { label: "Our Story", href: "/brand/story" },
-      { label: "Journal", href: "/journal" },
-      { label: "Sustainability", href: "/brand/sustainability" },
-    ],
-  },
-  // { label: "SUPPORT", href: "/support/faq" },
+  { label: "ABOUT", href: "/brand/about" },
+  // {
+  //   label: "BRAND",
+  //   href: "/brand",
+  //   children: [
+  //     { label: "About Us", href: "/brand/about" },
+  //     { label: "Our Story", href: "/brand/story" },
+  //     { label: "Journal", href: "/journal" },
+  //     { label: "Sustainability", href: "/brand/sustainability" },
+  //   ],
+  // },
+  // // { label: "SUPPORT", href: "/support/faq" },
 ];
 
 const dropdownItemStyle = {
@@ -183,9 +184,10 @@ export default function Navbar() {
       <span
         style={{
           fontFamily: "'Playfair Display', serif",
-          fontSize: "1.375rem",
+          fontSize: "2Orem",
           fontWeight: 1000,
           lineHeight: 1,
+          transform: "translateY(3px)",
         }}
       >
         Nomadica
@@ -201,7 +203,7 @@ export default function Navbar() {
               left: "50%",
               transform: "translateX(-50%)",
             }}
-            className="hidden md:flex"
+            className="hidden lg:flex"
           >
             {navLinks.map((link) => (
               <div
@@ -281,13 +283,10 @@ export default function Navbar() {
               href="/account/wishlist" 
               style={{ 
                 color: "#1E1E1E", 
-                display: "flex", 
-                flexDirection: "column", 
-                alignItems: "center", 
                 textDecoration: "none",
                 gap: "4px"
               }} 
-              className="hidden sm:flex"
+              className="hidden lg:flex flex-col items-center"
             >
               <Heart size={20} />
               <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
@@ -305,14 +304,11 @@ export default function Navbar() {
                 <Link
                   href="/account/profile"
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
                     textDecoration: "none",
                     color: "#1E1E1E",
                     gap: "4px"
                   }}
-                  className="hidden sm:flex"
+                  className="hidden lg:flex flex-col items-center"
                 >
                   <User size={20} />
                   <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
@@ -382,13 +378,10 @@ export default function Navbar() {
                 href="/account/login" 
                 style={{ 
                   color: "#1E1E1E",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
                   textDecoration: "none",
                   gap: "4px"
                 }} 
-                className="hidden sm:flex"
+                className="hidden lg:flex flex-col items-center"
               >
                 <User size={20} />
                 <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
@@ -435,7 +428,7 @@ export default function Navbar() {
                   {totalItems}
                 </span>
               </div>
-              <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+              <span className="hidden lg:inline-block" style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
                 cart
               </span>
             </button>
@@ -450,7 +443,7 @@ export default function Navbar() {
                 color: "#1E1E1E",
                 padding: "4px",
               }}
-              className="md:hidden flex"
+              className="lg:hidden flex"
               aria-label="Toggle menu"
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -469,10 +462,58 @@ export default function Navbar() {
           transform: mobileOpen ? "translateX(0)" : "translateX(100%)",
           transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
           overflowY: "auto",
-          paddingTop: "64px",
         }}
-        className="md:hidden"
+        className="lg:hidden"
       >
+        {/* Mobile Menu Header */}
+        <div
+          style={{
+            padding: "0 1.5rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            height: "64px",
+            borderBottom: "1px solid rgba(30,30,30,0.08)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Image
+              src="/Logo.png"
+              alt="Nomadica Logo"
+              width={32}
+              height={32}
+              style={{
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
+            <span
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "1.25rem",
+                fontWeight: 1000,
+                lineHeight: 1,
+                transform: "translateY(1px)",
+              }}
+            >
+              Nomadica
+            </span>
+          </div>
+          <button
+            onClick={() => setMobileOpen(false)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#1E1E1E",
+              padding: "4px",
+            }}
+            aria-label="Close menu"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
         <div style={{ padding: "2rem 1.5rem" }}>
           {navLinks.map((link) => (
             <div key={link.label} style={{ borderBottom: "1px solid rgba(30,30,30,0.08)" }}>
@@ -546,6 +587,11 @@ export default function Navbar() {
           ))}
 
           <div style={{ marginTop: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <Link href="/account/wishlist" style={{ textDecoration: "none" }} onClick={() => setMobileOpen(false)}>
+              <button className="btn-outline" style={{ width: "100%", justifyContent: "center" }}>
+                My Wishlist
+              </button>
+            </Link>
             {isAuthenticated ? (
               <>
                 <Link href="/account/profile" style={{ textDecoration: "none" }}>

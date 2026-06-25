@@ -57,6 +57,7 @@ export const STOREFRONT_QUERIES = {
         title
         description
         handle
+        productType
         images(first: 10) {
           edges {
             node {
@@ -91,6 +92,7 @@ export const STOREFRONT_QUERIES = {
               id
               title
               handle
+              productType
               images(first: 1) {
                 edges {
                   node {
@@ -402,6 +404,31 @@ export const STOREFRONT_QUERIES = {
         userErrors {
           field
           message
+        }
+      }
+    }
+  `,
+
+  GET_PRODUCT_TYPE_MOCKUPS: `
+    query GetProductTypeConfigurations {
+      metaobjects(type: "product_type_configuration", first: 50) {
+        nodes {
+          id
+          handle
+          fields {
+            key
+            value
+            reference {
+              ... on MediaImage {
+                image {
+                  url
+                }
+              }
+              ... on GenericFile {
+                url
+              }
+            }
+          }
         }
       }
     }

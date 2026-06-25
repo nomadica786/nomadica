@@ -324,6 +324,17 @@ export const api = {
       return response.json();
     },
   },
+
+  /**
+   * MOCKUPS - Shopify Metaobjects / Fallbacks
+   */
+  mockups: {
+    get: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/mockups`);
+      if (!response.ok) throw new Error('Failed to fetch mockups');
+      return response.json();
+    }
+  }
 };
 
 /**

@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Star, ChevronDown } from "lucide-react";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
+import ProductCard from "@/components/shop/ProductCard";
 import { parseProduct, groupProducts } from "@/utils/productGroup";
 import { useAuth } from "@/utils/hooks/useAuth";
 import Image from "next/image";
@@ -269,7 +270,11 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
 
     const loadVariationsAndRelated = async (rawProduct: any, mappedProduct: ProductDetails) => {
       try {
-        const allRes = await api.products.list(50);
+        const [allRes, mockupsRes] = await Promise.all([
+          api.products.list(50),
+          api.mockups.get().catch(() => ({ mockups: {} }))
+        ]);
+        const mockupLookup = mockupsRes?.mockups || {};
         const allEdges = allRes?.products?.edges || [];
         
         const rawMappedForGroup = {
@@ -279,6 +284,8 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
           price: mappedProduct.price,
           originalPrice: mappedProduct.originalPrice,
           image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
+          category: rawProduct.productType || rawProduct.category || "Tops",
+          productType: rawProduct.productType || rawProduct.category || "Tops",
           createdAt: rawProduct.createdAt || ""
         };
 
@@ -292,12 +299,14 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
               handle: node.handle,
               price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
               image: node.images?.edges?.[0]?.node?.url || "",
+              category: node.productType || node.category || "Tops",
+              productType: node.productType || node.category || "Tops",
               createdAt: node.createdAt || ""
             };
           });
 
         const combinedProducts = [rawMappedForGroup, ...otherMappedForGroup];
-        const groupedCombined = groupProducts(combinedProducts);
+        const groupedCombined = groupProducts(combinedProducts, mockupLookup);
 
         const currentGroup = groupedCombined.find(g => g.colorVariants.some(v => v.id === rawProduct.id));
         const baseName = currentGroup ? currentGroup.name : mappedProduct.name;
@@ -339,10 +348,11 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
             price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
             image: node.images?.edges?.[0]?.node?.url || "",
             category: node.productType || node.category || "Tops",
+            productType: node.productType || node.category || "Tops",
           };
         }) || [];
         
-        const groupedList = groupProducts(listMapped).filter((p: any) => p.id !== rawProduct.id && p.name.toLowerCase() !== baseName.toLowerCase());
+        const groupedList = groupProducts(listMapped, mockupLookup).filter((p: any) => p.id !== rawProduct.id && p.name.toLowerCase() !== baseName.toLowerCase());
         setRelatedProducts(groupedList.slice(0, 4));
       } catch (err) {
         console.error("Failed to fetch variations or related products:", err);
@@ -357,6 +367,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
               price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
               image: node.images?.edges?.[0]?.node?.url || "",
               category: node.productType || node.category || "Tops",
+              productType: node.productType || node.category || "Tops",
             };
           }).filter((p: any) => p.id !== rawProduct.id) || [];
           setRelatedProducts(listMapped.slice(0, 4));
@@ -1086,173 +1097,9 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
             You May Also Like
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "2rem" }}>
-            {relatedProducts.map((p) => {
-              const isHovered = hoveredCardId === p.id;
-              const activeVar = relatedActiveVariants[p.id] || p.colorVariants?.[0] || null;
-              
-              const price = (activeVar && activeVar.price) 
-                ? (typeof activeVar.price === "number" ? activeVar.price : parseFloat(activeVar.price || "0")) 
-                : (typeof p.price === "number" ? p.price : parseFloat(p.price || "0"));
-              
-              const originalPrice = (activeVar && activeVar.originalPrice) 
-                ? activeVar.originalPrice 
-                : p.originalPrice;
-              
-              const pTitle = activeVar ? (activeVar.name || p.name || p.title || "Product") : (p.name || p.title || "Product");
-              const pImage = activeVar ? activeVar.image : (p.image || p.images?.[0]?.node?.url);
-              const pHandle = activeVar ? (activeVar.handle || p.handle) : p.handle;
-
-              return (
-                <div
-                  key={p.id}
-                  style={{
-                    backgroundColor: "#FFFFFF",
-                    border: "1px solid rgba(30, 30, 30, 0.05)",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                    boxShadow: isHovered ? "0 8px 25px rgba(0,0,0,0.06)" : "0 4px 15px rgba(0,0,0,0.02)",
-                    transform: isHovered ? "translateY(-4px)" : "translateY(0)",
-                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                    cursor: "pointer"
-                  }}
-                  onMouseEnter={() => setHoveredCardId(p.id)}
-                  onMouseLeave={() => setHoveredCardId(null)}
-                >
-                  {/* Image Container */}
-                  <Link href={`/products/${pHandle}`} style={{ textDecoration: "none", display: "block" }}>
-                    <div
-                      style={{
-                        position: "relative",
-                        width: "100%",
-                        aspectRatio: "653.27 / 978",
-                        overflow: "hidden",
-                        backgroundColor: "#F9F9F9"
-                      }}
-                    >
-                      <Image
-                        src={getShopifyImageUrl(pImage, 600)}
-                        alt={pTitle}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        style={{
-                          objectFit: "cover",
-                          transform: isHovered ? "scale(1.05)" : "scale(1)",
-                          transition: "transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)"
-                        }}
-                      />
-
-                      {/* Wishlist Heart Button */}
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const event = new CustomEvent("add-to-wishlist", { detail: { handle: pHandle } });
-                          window.dispatchEvent(event);
-                        }}
-                        style={{
-                          position: "absolute",
-                          top: "12px",
-                          right: "12px",
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "50%",
-                          backgroundColor: "#FFFFFF",
-                          border: "none",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                          zIndex: 5,
-                          transition: "transform 0.2s ease"
-                        }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLElement).style.transform = "scale(1)";
-                        }}
-                        aria-label="Add to wishlist"
-                      >
-                        <Heart size={18} color="#1E1E1E" />
-                      </button>
-                    </div>
-                  </Link>
-
-                  {/* Info Container */}
-                  <div style={{ padding: "1.25rem", textAlign: "center" }}>
-                    {/* Title */}
-                    <Link href={`/products/${pHandle}`} style={{ textDecoration: "none" }}>
-                      <h3
-                        style={{
-                          fontFamily: "'Playfair Display', serif",
-                          fontSize: "1.125rem",
-                          fontWeight: 600,
-                          color: isHovered ? "#C1A886" : "#1E1E1E",
-                          margin: "0 0 0.5rem 0",
-                          transition: "color 0.2s ease"
-                        }}
-                      >
-                        {pTitle}
-                      </h3>
-                    </Link>
-
-                    {/* Price */}
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                      <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: "#1E1E1E", fontSize: "1rem" }}>
-                        ₹{price.toLocaleString("en-IN")}
-                      </span>
-                      {originalPrice && (
-                        <span style={{ fontFamily: "'Montserrat', sans-serif", textDecoration: "line-through", color: "rgba(30,30,30,0.4)", fontSize: "0.875rem" }}>
-                          ₹{originalPrice.toLocaleString("en-IN")}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Swatches */}
-                    {p.colorVariants && p.colorVariants.length > 1 && (
-                      <div style={{ display: "flex", justifyContent: "center", gap: "6px", flexWrap: "wrap", minHeight: "22px" }}>
-                        {p.colorVariants.map((v: any) => {
-                          const isSelected = activeVar ? activeVar.id === v.id : false;
-                          const isWhite = v.colorHex?.toLowerCase() === "#ffffff" || v.colorHex?.toLowerCase() === "white";
-                          
-                          return (
-                            <div key={v.id} className="dest-swatch-wrap" style={{ width: "22px", height: "22px" }}>
-                              <button
-                                onMouseEnter={() => {
-                                  setRelatedActiveVariants(prev => ({ ...prev, [p.id]: v }));
-                                }}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setRelatedActiveVariants(prev => ({ ...prev, [p.id]: v }));
-                                }}
-                                style={{
-                                  width: "14px",
-                                  height: "14px",
-                                  borderRadius: "50%",
-                                  backgroundColor: v.colorHex,
-                                  border: isSelected 
-                                    ? "2px solid #1E1E1E" 
-                                    : (isWhite ? "1.5px solid rgba(30, 30, 30, 0.4)" : "1px solid rgba(0,0,0,0.15)"),
-                                  boxShadow: isSelected ? "0 0 0 1.5px #FFFFFF inset" : "none",
-                                  padding: 0,
-                                  cursor: "pointer",
-                                  transition: "all 0.15s ease",
-                                  transform: isSelected ? "scale(1.25)" : "scale(1)",
-                                }}
-                                aria-label={`Select color ${v.colorName}`}
-                                title={v.colorName}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {relatedProducts.map((p) => (
+              <ProductCard key={p.id} {...p} />
+            ))}
           </div>
         </div>
       </div>

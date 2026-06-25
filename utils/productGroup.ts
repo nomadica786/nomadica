@@ -17,13 +17,15 @@ export interface ColorVariant {
 
 export interface GroupedProduct {
   id: string;
-  name: string; // Base cloth name (e.g. "Tees", "Boxy Fit Tees", etc.)
+  name: string; // Product type name (e.g. "Tee")
   price: number;
   originalPrice?: number;
   image: string;
   hoverImage: string;
   badge?: string;
   category: string;
+  productType?: string;
+  mockupImage?: string;
   handle: string;
   colorVariants: ColorVariant[];
   createdAt?: string;
@@ -94,137 +96,70 @@ export function parseProduct(product: any) {
   };
 }
 
-export function groupProducts(products: any[]): GroupedProduct[] {
-  // 1. Prepare word arrays for suffix matching
-  const items = products.map((product) => {
-    let name = (product.name || product.title || "").trim();
-    
-    // Normalization to ensure "White Trekking Tees" and "Red Trekking Regular Fit Tee" group together
-    if (name.toLowerCase().includes("trekking")) {
-      const parts = name.split(/\s+/);
-      const color = parts[0];
-      name = `${color} Trekking Tees`;
-    }
-    
-    const words = name.split(/\s+/);
-    return {
-      product,
-      name,
-      words,
-      maxSuffixLength: 0,
-    };
-  });
-
-  // 2. Perform pairwise suffix matching to find the maximum suffix match for each product
-  for (let i = 0; i < items.length; i++) {
-    for (let j = i + 1; j < items.length; j++) {
-      const itemA = items[i];
-      const itemB = items[j];
-
-      let suffixLen = 0;
-      let idxA = itemA.words.length - 1;
-      let idxB = itemB.words.length - 1;
-
-      while (idxA >= 0 && idxB >= 0) {
-        if (itemA.words[idxA].toLowerCase() === itemB.words[idxB].toLowerCase()) {
-          suffixLen++;
-          idxA--;
-          idxB--;
-        } else {
-          break;
-        }
-      }
-
-      if (suffixLen > 0) {
-        if (suffixLen > itemA.maxSuffixLength) {
-          itemA.maxSuffixLength = suffixLen;
-        }
-        if (suffixLen > itemB.maxSuffixLength) {
-          itemB.maxSuffixLength = suffixLen;
-        }
-      }
-    }
-  }
-
-  // 3. Construct groups based on suffix match or fallback
+export function groupProducts(products: any[], mockupLookup: Record<string, any> = {}): GroupedProduct[] {
   const groups: Record<string, GroupedProduct> = {};
 
-  for (const item of items) {
-    let baseName = "";
-    let colorName = "";
+  for (const product of products) {
+    if (!product) continue;
+    
+    // Normalize names/types
+    const name = (product.name || product.title || "").trim();
+    const rawType = product.productType || product.category || "Tops";
+    const productType = rawType.trim();
 
-    if (item.maxSuffixLength > 0) {
-      // Base name is the matching suffix words (preserve case of the original name)
-      const suffixWords = item.words.slice(item.words.length - item.maxSuffixLength);
-      baseName = suffixWords.join(" ");
-
-      // Color name is the remaining prefix words
-      const prefixWords = item.words.slice(0, item.words.length - item.maxSuffixLength);
-      colorName = prefixWords.join(" ");
-
-      if (!colorName) {
-        colorName = "Original";
-      }
-    } else {
-      // Standalone product fallback
-      const parsed = parseProduct(item.product);
-      baseName = parsed.baseName;
-      colorName = parsed.colorName;
-    }
-
-    // Resolve color hex code case-insensitively
-    const cleanColor = colorName.trim();
-    const mapKey = Object.keys(COLOR_HEX_MAP).find(k => k.toLowerCase() === cleanColor.toLowerCase());
-    let colorHex = mapKey ? COLOR_HEX_MAP[mapKey] : undefined;
-
-    if (!colorHex) {
-      const lastWord = cleanColor.split(" ").pop() || "";
-      const wordKey = Object.keys(COLOR_HEX_MAP).find(k => k.toLowerCase() === lastWord.toLowerCase());
-      colorHex = wordKey ? COLOR_HEX_MAP[wordKey] : "#FFFFFF";
-    }
+    // Parse the color name and hex for this product
+    const parsedColor = parseProduct(product);
 
     const variant: ColorVariant = {
-      id: item.product.id,
-      name: item.product.name,
-      colorName,
-      colorHex,
-      image: item.product.image || item.product.images?.[0] || "",
-      hoverImage: item.product.hoverImage || item.product.images?.[1] || item.product.image || "",
-      price: item.product.price,
-      originalPrice: item.product.originalPrice,
-      handle: item.product.handle,
-      badge: item.product.badge,
-      category: item.product.category,
-      createdAt: item.product.createdAt
+      id: product.id,
+      name: name,
+      colorName: parsedColor.colorName,
+      colorHex: parsedColor.colorHex,
+      image: product.image || product.images?.[0]?.node?.url || product.images?.[0] || "",
+      hoverImage: product.hoverImage || product.images?.[1]?.node?.url || product.images?.[1] || product.image || "",
+      price: product.price,
+      originalPrice: product.originalPrice,
+      handle: product.handle,
+      badge: product.badge,
+      category: product.category,
+      createdAt: product.createdAt
     };
 
-    const groupKey = baseName.toLowerCase();
+    const groupKey = productType.toLowerCase();
+    const config = mockupLookup[productType];
+    const mockupImage = typeof config === "object" ? config.mockupImage : config;
+    const displayName = (typeof config === "object" && config.displayName) ? config.displayName : productType;
 
     if (!groups[groupKey]) {
+      // First product in the group is the default variant
       groups[groupKey] = {
-        id: item.product.id,
-        name: baseName,
-        price: item.product.price,
-        originalPrice: item.product.originalPrice,
-        image: item.product.image || item.product.images?.[0] || "",
-        hoverImage: item.product.hoverImage || item.product.images?.[1] || item.product.image || "",
-        badge: item.product.badge,
-        category: item.product.category || "Tops",
-        handle: item.product.handle,
+        id: product.id,
+        name: displayName, // Use Display Name from configuration
+        price: product.price,
+        originalPrice: product.originalPrice,
+        image: product.image || product.images?.[0]?.node?.url || product.images?.[0] || "",
+        hoverImage: product.hoverImage || product.images?.[1]?.node?.url || product.images?.[1] || product.image || "",
+        badge: product.badge,
+        category: product.category || "Tops",
+        productType: productType,
+        mockupImage: mockupImage || undefined,
+        handle: product.handle,
         colorVariants: [variant],
-        createdAt: item.product.createdAt
+        createdAt: product.createdAt
       };
     } else {
       // Add variant
       groups[groupKey].colorVariants.push(variant);
-      // Bubble up badge if the group doesn't have one but a variant does
+
+      // Bubble up badge if variant has one
       if (!groups[groupKey].badge && variant.badge) {
         groups[groupKey].badge = variant.badge;
       }
-      // Bubble up the newest/latest createdAt date
-      if (item.product.createdAt) {
-        if (!groups[groupKey].createdAt || new Date(item.product.createdAt).getTime() > new Date(groups[groupKey].createdAt || 0).getTime()) {
-          groups[groupKey].createdAt = item.product.createdAt;
+
+      // Bubble up latest createdAt date
+      if (product.createdAt) {
+        if (!groups[groupKey].createdAt || new Date(product.createdAt).getTime() > new Date(groups[groupKey].createdAt || 0).getTime()) {
+          groups[groupKey].createdAt = product.createdAt;
         }
       }
     }
