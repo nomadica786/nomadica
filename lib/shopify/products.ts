@@ -39,3 +39,36 @@ export async function getCollectionByHandle(handle: string, first: number = 20) 
   }
   return null;
 }
+
+export async function getProductTypeMockups() {
+  try {
+    const client = getStorefrontClient();
+    const data: any = await client.request(STOREFRONT_QUERIES.GET_PRODUCT_TYPE_MOCKUPS);
+    const lookup: Record<string, { mockupImage?: string; displayName?: string }> = {};
+    const nodes = data?.metaobjects?.nodes || [];
+    
+    for (const node of nodes) {
+      const fields = node?.fields || [];
+      const productTypeField = fields.find((f: any) => f.key === "product_type");
+      const displayNameField = fields.find((f: any) => f.key === "display_name");
+      const mockupImageField = fields.find((f: any) => f.key === "mockup_image");
+      
+      if (productTypeField) {
+        const typeValue = productTypeField.value;
+        const imageUrl = mockupImageField?.reference?.image?.url || mockupImageField?.reference?.url || "";
+        const displayName = displayNameField?.value || "";
+        if (typeValue) {
+          lookup[typeValue] = {
+            mockupImage: imageUrl || undefined,
+            displayName: displayName || undefined
+          };
+        }
+      }
+    }
+    return lookup;
+  } catch (error) {
+    console.error("Failed to fetch product type mockups:", error);
+    return {};
+  }
+}
+

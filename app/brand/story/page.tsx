@@ -173,17 +173,27 @@ export default function BrandStoryPage() {
     <div className="min-h-screen bg-[#FFFFFF] text-[#1E1E1E]">
       {/* Hero Banner Section */}
       <section 
+        className="min-h-[140px] sm:min-h-[250px] md:min-h-[400px] lg:min-h-[450px]"
         style={{ 
-          backgroundImage: "url('/Shorts Banner.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          width: "100%",
-          minHeight: "60vh",
           position: "relative",
+          width: "100%",
+          aspectRatio: "2000/693",
+          overflow: "hidden",
           marginBottom: "3rem"
         }}
-      />
+      >
+        <Image
+          src="/Shorts Banner.jpg"
+          alt="Shorts Banner"
+          fill
+          priority
+          sizes="100vw"
+          style={{
+            objectFit: "cover",
+            objectPosition: "center"
+          }}
+        />
+      </section>
 
       {/* Travel Shorts Wall */}
       <main className="w-full mx-auto" style={{ paddingLeft: "8%", paddingRight: "8%", paddingBottom: "4rem" }}>

@@ -9,6 +9,7 @@ export interface MockProduct {
   hoverImage?: string;
   badge?: string;
   category: string;
+  productType?: string;
   handle: string;
   description: string;
   materials: string;
@@ -30,6 +31,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     hoverImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
     badge: "New",
     category: "Tops",
+    productType: "Shirt",
     handle: "nomad-linen-shirt",
     description: "Crafted from 100% European linen, the Nomad Linen Shirt is designed for the traveller who refuses to sacrifice style for comfort. Its relaxed silhouette breathes beautifully in tropical climates while looking effortlessly polished at dinner.",
     materials: "100% European Linen. Machine wash cold. Hang dry.",
@@ -52,6 +54,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600&q=80",
     badge: "Best Seller",
     category: "Bottoms",
+    productType: "Trousers",
     handle: "desert-trek-trousers",
     description: "Built for versatility and comfort on the road. Features dynamic stretch fabric, reinforced stitching, and security pockets for travel essentials.",
     materials: "97% Cotton, 3% Elastane. Machine wash warm. Tumble dry low.",
@@ -69,6 +72,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80",
     badge: "Limited",
     category: "Outerwear",
+    productType: "Jacket",
     handle: "horizon-canvas-jacket",
     description: "A rugged, classic outer layer that gets better with age. Weather-resistant waxed canvas shell with organic cotton flannel lining.",
     materials: "100% Waxed Cotton Canvas. Flannel lining. Spot clean only.",
@@ -87,6 +91,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80",
     badge: "Sale",
     category: "Knits",
+    productType: "Sweater",
     handle: "terra-wool-sweater",
     description: "Knitted from super-soft Merino wool. Outstanding temperature regulation keeps you warm in transit and cool at your destination.",
     materials: "100% Extra-fine Merino Wool. Hand wash cold. Dry flat.",
@@ -103,6 +108,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     price: 1999,
     image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80",
     category: "Tops",
+    productType: "Tee",
     handle: "drift-cotton-tee",
     description: "The ultimate travel tee. Mid-weight organic cotton slub with a vintage wash and a fit that looks clean tucked or untucked.",
     materials: "100% Organic Cotton. Machine wash cold. Tumble dry low.",
@@ -119,6 +125,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     price: 5299,
     image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&q=80",
     category: "Bottoms",
+    productType: "Cargo Pants",
     handle: "summit-cargo-pants",
     description: "Functional cargo design without the bulk. Water-repellent ripstop fabric with secure zip pockets and articulated knees for mobility.",
     materials: "90% Nylon, 10% Spandex Ripstop. Machine wash cold.",
@@ -135,6 +142,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     price: 3799,
     image: "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&q=80",
     category: "Bottoms",
+    productType: "Linen Trousers",
     handle: "dusk-linen-trousers",
     description: "Breathable linen woven with cotton for structure and wrinkle-resistance. Perfect for sunset dinners and warm-weather transit.",
     materials: "55% Linen, 45% Cotton. Dry clean recommended or hand wash.",
@@ -151,6 +159,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     price: 6299,
     image: "https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80",
     category: "Outerwear",
+    productType: "Hoodie",
     handle: "wander-merino-hoodie",
     description: "Lightweight merino hoodie built for layering. Odour-resistant, highly breathable, and packs down small in your carry-on.",
     materials: "100% Merino Wool. Machine wash cold on wool cycle.",
@@ -168,6 +177,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     image: "https://images.unsplash.com/photo-1612825173281-9a193378527e?w=600&q=80",
     badge: "New",
     category: "Bottoms",
+    productType: "Shorts",
     handle: "route-linen-shorts",
     description: "Easy-wearing linen shorts with an elastic drawstring waist. Lightweight, comfortable, and perfect for exploring coastal cities.",
     materials: "100% Linen. Machine wash cold.",
@@ -187,7 +197,7 @@ export function formatProductGraphQL(product: MockProduct) {
     description: product.description,
     handle: product.handle,
     category: product.category,
-    productType: product.category,
+    productType: product.productType || product.category || "Tops",
     badge: product.badge,
     rating: product.rating,
     reviews: product.reviews,

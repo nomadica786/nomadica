@@ -35,13 +35,22 @@ function Countdown({ targetDate }: { targetDate: Date }) {
 
 export default function LimitedDropsPage() {
   const target = new Date(Date.now() + 48 * 3600 * 1000);
-  const { data, loading } = useApi(() => api.products.list(50));
+  const { data: pageData, loading } = useApi(async () => {
+    const [productsRes, mockupsRes] = await Promise.all([
+      api.products.list(50),
+      api.mockups.get().catch(() => ({ mockups: {} }))
+    ]);
+    return {
+      products: productsRes,
+      mockups: mockupsRes?.mockups || {}
+    };
+  });
 
   if (loading) {
     return <PageLoader />;
   }
 
-  const allProducts = data?.products?.edges?.map((edge: any) => {
+  const allProducts = pageData?.products?.products?.edges?.map((edge: any) => {
     const node = edge.node;
     const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
     const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
@@ -54,12 +63,13 @@ export default function LimitedDropsPage() {
       hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
       badge: node.badge,
       category: node.productType || node.category || 'Tops',
+      productType: node.productType || node.category || 'Tops',
       createdAt: node.createdAt || '',
       handle: node.handle,
     };
   }) || [];
 
-  const groupedProducts = groupProducts(allProducts);
+  const groupedProducts = groupProducts(allProducts, pageData?.mockups || {});
   const drops = groupedProducts.filter((p: any) => p.badge?.toLowerCase() === 'limited');
   const baseList = drops.length > 0 ? drops : groupedProducts.slice(0, 3);
 

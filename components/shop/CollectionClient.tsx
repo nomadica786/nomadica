@@ -28,6 +28,20 @@ export default function CollectionClient({
   const [sortBy, setSortBy] = useState("Featured");
   const [loading, setLoading] = useState(!initialProducts);
   const [productsState, setProductsState] = useState<any[]>(initialProducts || []);
+  const [mockups, setMockups] = useState<Record<string, string>>({});
+
+  // Fetch mockups on mount
+  useEffect(() => {
+    const fetchMockups = async () => {
+      try {
+        const mRes = await api.mockups.get();
+        setMockups(mRes?.mockups || {});
+      } catch (err) {
+        console.error("Failed to load mockups in CollectionClient:", err);
+      }
+    };
+    fetchMockups();
+  }, []);
 
   // Fetch categories/collections list on mount if not provided
   useEffect(() => {
@@ -89,6 +103,7 @@ export default function CollectionClient({
             hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
             badge: node.badge,
             category: node.productType || node.category || 'Tops',
+            productType: node.productType || node.category || 'Tops',
             createdAt: node.createdAt || '',
           };
         }) || [];
@@ -115,7 +130,7 @@ export default function CollectionClient({
     return <PageLoader />;
   }
 
-  const groupedProducts = groupProducts(productsState);
+  const groupedProducts = groupProducts(productsState, mockups);
 
   // Apply "new arrivals first" partition and badge mapping
   const { sorted: sortedProducts, newestIds } = sortNewArrivalsFirst(groupedProducts, 3);

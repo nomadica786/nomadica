@@ -38,6 +38,7 @@ interface ProductCardProps {
   href?: string;
   colorVariants?: ColorVariant[];
   handle?: string;
+  mockupImage?: string;
 }
 
 export default function ProductCard({
@@ -52,6 +53,7 @@ export default function ProductCard({
   href,
   colorVariants,
   handle,
+  mockupImage,
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -60,6 +62,7 @@ export default function ProductCard({
   const [addingToCart, setAddingToCart] = useState(false);
 
   const [activeVariant, setActiveVariant] = useState<ColorVariant | null>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
     if (colorVariants && colorVariants.length > 0) {
@@ -76,7 +79,9 @@ export default function ProductCard({
     : name;
   const currentPrice = activeVariant ? activeVariant.price : price;
   const currentOriginalPrice = activeVariant ? activeVariant.originalPrice : originalPrice;
-  const currentImage = activeVariant ? activeVariant.image : image;
+  const currentImage = (mockupImage && !hasInteracted)
+    ? mockupImage
+    : (activeVariant ? activeVariant.image : image);
   const currentBadge = activeVariant ? (activeVariant.badge || badge) : badge;
   const currentHandle = activeVariant ? activeVariant.handle : handle;
 
@@ -248,11 +253,15 @@ export default function ProductCard({
               return (
                 <div key={v.id} className="dest-swatch-wrap" style={{ width: "22px", height: "22px" }}>
                   <button
-                    onMouseEnter={() => setActiveVariant(v)}
+                    onMouseEnter={() => {
+                      setActiveVariant(v);
+                      setHasInteracted(true);
+                    }}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       setActiveVariant(v);
+                      setHasInteracted(true);
                     }}
                     style={{
                       width: "14px",

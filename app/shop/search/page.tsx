@@ -19,15 +19,22 @@ export default function SearchPage() {
     const initProducts = async () => {
       setLoadingInitial(true);
       try {
-        const cached = localStorage.getItem("nomadica_cached_products_grouped");
-        if (cached) {
-          setAllProducts(JSON.parse(cached));
-          setLoadingInitial(false);
-          return;
+        if (process.env.NODE_ENV !== "development") {
+          const cached = localStorage.getItem("nomadica_cached_products_grouped");
+          if (cached) {
+            setAllProducts(JSON.parse(cached));
+            setLoadingInitial(false);
+            return;
+          }
         }
 
-        const data = await api.products.list(250);
-        const mappedProducts = data?.products?.edges?.map((edge: any) => {
+        const [productsRes, mockupsRes] = await Promise.all([
+          api.products.list(250),
+          api.mockups.get().catch(() => ({ mockups: {} }))
+        ]);
+        const mockupLookup = mockupsRes?.mockups || {};
+
+        const mappedProducts = productsRes?.products?.edges?.map((edge: any) => {
           const node = edge.node;
           const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
           const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
@@ -40,13 +47,14 @@ export default function SearchPage() {
             hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
             badge: node.badge,
             category: node.productType || node.category || 'Tops',
+            productType: node.productType || node.category || 'Tops',
             description: node.description || '',
             createdAt: node.createdAt || '',
             handle: node.handle,
           };
         }) || [];
 
-        const grouped = groupProducts(mappedProducts);
+        const grouped = groupProducts(mappedProducts, mockupLookup);
 
         if (grouped.length > 0) {
           localStorage.setItem("nomadica_cached_products_grouped", JSON.stringify(grouped));
