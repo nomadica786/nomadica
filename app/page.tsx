@@ -359,7 +359,7 @@ function ProductCarouselSection({
               style={{
                 fontFamily: "'Playfair Display', sans-serif",
                 fontSize: "clamp(1.75rem, 2.5vw, 2.5rem)",
-                fontWeight: 600,
+                fontWeight: 700,
                 color: "#111111",
                 letterSpacing: "-0.01em",
                 margin: 0
