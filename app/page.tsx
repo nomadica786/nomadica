@@ -1,17 +1,16 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Heart, LucideIcon, TrendingUp, MapPin, LocateIcon } from "lucide-react";
-import ProductCard from "@/components/shop/ProductCard";
-import { CardSkeleton } from "@/components/ui/SnowBallLoader";
 import { api } from "@/components/api/api";
 import { groupProducts } from "@/utils/productGroup";
 import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
-import { color } from "framer-motion";
 
 const heroImage =
   "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80";
+
 
 const testimonials = [
   {
@@ -84,6 +83,8 @@ function HeroSection() {
     setCurrentSlide((prev) => (prev + 1) % bannerImages.length);
   };
 
+  const router = useRouter();
+
   return (
     <section
       className="min-h-[140px] sm:min-h-[250px] md:min-h-[400px] lg:min-h-[450px]"
@@ -96,32 +97,42 @@ function HeroSection() {
         backgroundColor: "#000000",
       }}
     >
-      {/* 1. Slides (Background Images) */}
-      {bannerImages.map((img, index) => (
-        <div
-          key={img}
-          style={{
-            position: "absolute",
-            inset: 0,
-            opacity: currentSlide === index ? 1 : 0,
-            transform: loaded && currentSlide === index ? "scale(1)" : "scale(1.05)",
-            transition: "opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
-            zIndex: currentSlide === index ? 1 : 0,
-          }}
-        >
-          <Image
-            src={img}
-            alt={`Nomadica Banner ${index + 1}`}
-            fill
-            priority={index === 0}
-            sizes="100vw"
+      {/* 1. Sliding Track */}
+      <div
+        onClick={() => router.push("/shop")}
+        style={{
+          display: "flex",
+          width: `${bannerImages.length * 100}%`,
+          height: "100%",
+          transform: `translateX(-${currentSlide * (100 / bannerImages.length)}%)`,
+          transition: "transform 1.0s cubic-bezier(0.4, 0, 0.2, 1)",
+          cursor: "pointer",
+        }}
+      >
+        {bannerImages.map((img, index) => (
+          <div
+            key={img}
             style={{
-              objectFit: "cover",
-              objectPosition: "center",
+              position: "relative",
+              width: `${100 / bannerImages.length}%`,
+              height: "100%",
+              flexShrink: 0,
             }}
-          />
-        </div>
-      ))}
+          >
+            <Image
+              src={img}
+              alt={`Nomadica Banner ${index + 1}`}
+              fill
+              priority={index === 0}
+              sizes="100vw"
+              style={{
+                objectFit: "cover",
+                objectPosition: "center",
+              }}
+            />
+          </div>
+        ))}
+      </div>
 
       {/* 2. Gradient Overlay */}
       <div
@@ -129,6 +140,7 @@ function HeroSection() {
           position: "absolute",
           inset: 0,
           zIndex: 2,
+          pointerEvents: "none",
         }}
       />
 
@@ -346,8 +358,8 @@ function ProductCarouselSection({
             <h2
               style={{
                 fontFamily: "'Playfair Display', sans-serif",
-                fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
-                fontWeight: 750,
+                fontSize: "clamp(1.75rem, 2.5vw, 2.5rem)",
+                fontWeight: 700,
                 color: "#111111",
                 letterSpacing: "-0.01em",
                 margin: 0
@@ -581,37 +593,50 @@ function ProductCarouselSection({
                               const isWhite = v.colorHex?.toLowerCase() === "#ffffff" || v.colorHex?.toLowerCase() === "white";
                               
                               return (
-                                <div key={v.id} className="dest-swatch-wrap" style={{ width: "22px", height: "22px" }}>
-                                  <button
-                                    onMouseEnter={() => {
-                                      setActiveVariants(prev => ({ ...prev, [product.id]: v }));
-                                      setInteractedCards(prev => ({ ...prev, [product.id]: true }));
-                                    }}
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      setActiveVariants(prev => ({ ...prev, [product.id]: v }));
-                                      setInteractedCards(prev => ({ ...prev, [product.id]: true }));
-                                    }}
-                                    style={{
-                                      width: "14px",
-                                      height: "14px",
-                                      borderRadius: "50%",
-                                      backgroundColor: v.colorHex,
-                                      border: isSelected 
-                                        ? "2px solid var(--charcoal)" 
-                                        : (isWhite ? "1.5px solid rgba(30, 30, 30, 0.4)" : "1px solid rgba(0,0,0,0.15)"),
-                                      boxShadow: isSelected ? "0 0 0 1.5px #FFFFFF inset" : "none",
-                                      padding: 0,
-                                      cursor: "pointer",
-                                      transition: "all 0.15s ease",
-                                      transform: isSelected ? "scale(1.25)" : "scale(1)",
-                                    }}
-                                    aria-label={`Select color ${v.colorName}`}
-                                    title={v.colorName}
-                                  />
-                                </div>
-                              );
+                                      <div
+                                        key={v.id}
+                                        className="dest-swatch-wrap"
+                                        style={{
+                                          width: "28px",
+                                          height: "28px",
+                                          borderRadius: "50%",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          border: isSelected
+                                            ? "2px solid rgba(0, 0, 0, 1)"
+                                            : "1px solid #CCCCCC",
+                                          background: "transparent",
+                                          transition: "all 0.15s ease",
+                                        }}
+                                      >
+                                        <button
+                                          onMouseEnter={() => {
+                                            setActiveVariants(prev => ({ ...prev, [product.id]: v }));
+                                            setInteractedCards(prev => ({ ...prev, [product.id]: true }));
+                                          }}
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setActiveVariants(prev => ({ ...prev, [product.id]: v }));
+                                            setInteractedCards(prev => ({ ...prev, [product.id]: true }));
+                                          }}
+                                          style={{
+                                            width: "20px",
+                                            height: "20px",
+                                            borderRadius: "50%",
+                                            backgroundColor: v.colorHex,
+                                            border: isWhite
+                                              ? "1px solid rgba(30,30,30,0.25)"
+                                              : "none",
+                                            padding: 0,
+                                            cursor: "pointer",
+                                          }}
+                                          aria-label={`Select color ${v.colorName}`}
+                                          title={v.colorName}
+                                        />
+                                      </div>
+                                    );
                             })}
                           </div>
                         )}
