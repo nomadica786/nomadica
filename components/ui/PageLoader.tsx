@@ -1,99 +1,38 @@
+// components/ui/PageLoader.tsx
 "use client";
-import { useEffect, useState } from "react";
 
 export function PageLoader() {
-  const [phase, setPhase] = useState<"enter" | "hold" | "exit">("enter");
-
-  useEffect(() => {
-    const t1 = setTimeout(() => setPhase("hold"), 400);
-    const t2 = setTimeout(() => setPhase("exit"), 1800);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, []);
-
   return (
     <div
       style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        backgroundColor: "#1E1E1E",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        flexDirection: "column",
-        transition: "opacity 0.5s ease",
-        opacity: phase === "exit" ? 0 : 1,
-        pointerEvents: phase === "exit" ? "none" : "all",
+        padding: "3rem 1.5rem",
+        width: "100%",
+        fontFamily: "'Montserrat', sans-serif"
       }}
     >
-      {/* Animated text */}
       <div
         style={{
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "0.5rem",
+          width: "24px",
+          height: "24px",
+          border: "2px solid rgba(196, 181, 160, 0.2)",
+          borderTop: "2px solid #C4B5A0",
+          borderRadius: "50%",
+          animation: "spin 0.8s linear infinite",
+          marginRight: "0.75rem"
         }}
-      >
-        <span
-          style={{
-            fontFamily: "'Playfair Display', sans-serif",
-            color: "#FFFFFF",
-            fontSize: phase === "hold" ? "clamp(4rem, 12vw, 9rem)" : phase === "exit" ? "clamp(1rem, 3vw, 2rem)" : "clamp(2rem, 6vw, 5rem)",
-            fontWeight: 600,
-            letterSpacing: "-0.02em",
-            lineHeight: 1,
-            transition: "font-size 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)",
-            opacity: phase === "enter" ? 0 : phase === "exit" ? 0 : 1,
-            transform: phase === "enter" ? "translateY(40px)" : phase === "exit" ? "translateY(-20px) scale(0.3)" : "translateY(0) scale(1)",
-            display: "block",
-            textAlign: "center",
-          }}
-        >
-          NOMADICA
-        </span>
-        <span
-          style={{
-            fontFamily: "'Montserrat', sans-serif",
-            color: "#1E1E1E",
-            fontSize: "clamp(0.75rem, 2vw, 1rem)",
-            letterSpacing: "0.3em",
-            textTransform: "uppercase",
-            fontWeight: 500,
-            transition: "opacity 0.5s ease 0.3s",
-            opacity: phase === "hold" ? 1 : 0,
-          }}
-        >
-          Travel. Wear. Live.
-        </span>
-      </div>
-
-      {/* Progress bar */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "3rem",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "120px",
-          height: "1px",
-          backgroundColor: "rgba(255, 255, 255, 0.15)",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            height: "100%",
-            backgroundColor: "#1E1E1E",
-            width: phase === "enter" ? "0%" : phase === "hold" ? "70%" : "100%",
-            transition: "width 1.4s cubic-bezier(0.16, 1, 0.3, 1)",
-          }}
-        />
-      </div>
+      />
+      <span style={{ fontSize: "0.8rem", color: "rgba(30, 30, 30, 0.5)", fontWeight: 600, letterSpacing: "0.08em" }}>
+        LOADING
+      </span>
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
