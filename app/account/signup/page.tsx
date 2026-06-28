@@ -1,16 +1,15 @@
+// app/account/signup/page.tsx
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
-import Image from "next/image";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [activeSlide, setActiveSlide] = useState(1);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,6 +17,12 @@ export default function SignupPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -39,113 +44,329 @@ export default function SignupPage() {
     }
   };
 
-  const slides = [
-    { image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80", quote: "Join a community of conscious travellers." },
-    { image: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80", quote: "Premium gear, ethically made for every adventure." },
-    { image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80", quote: "Your journey, your style, your story." },
-  ];
-
   return (
-    <div style={{ paddingTop: "64px", minHeight: "100svh", display: "flex", backgroundColor: "#FFFFFF" }}>
-      {/* Left – Image Slider (hidden on mobile) */}
-      <div style={{ flex: 1, position: "relative", overflow: "hidden" }} className="hidden md:block">
-        {slides.map((slide, i) => (
-          <div key={i} style={{ position: "absolute", inset: 0, opacity: activeSlide === i ? 1 : 0, transition: "opacity 0.8s ease" }}>
-            <img src={slide.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30,30,30,0.7) 0%, transparent 60%)" }} />
-            <div style={{ position: "absolute", bottom: "3rem", left: "3rem", right: "3rem" }}>
-              <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 500, color: "#FFFFFF", maxWidth: "360px" }}>&quot;{slide.quote}&quot;</p>
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.5rem" }}>
-                {slides.map((_, idx) => (
-                  <button key={idx} onClick={() => setActiveSlide(idx)} style={{ width: activeSlide === idx ? "24px" : "8px", height: "3px", backgroundColor: activeSlide === idx ? "#FFFFFF" : "rgba(255, 255, 255,0.4)", border: "none", cursor: "pointer", transition: "all 0.3s ease", padding: 0 }} />
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Right – Form */}
-      <div style={{ width: "100%", maxWidth: "480px", display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem 2rem", backgroundColor: "#FFFFFF" }}>
-        <div style={{ maxWidth: "400px", margin: "0 auto", width: "100%" }}>
-          <Link
-            href="/"
-            style={{
-              fontFamily: "'Playfair Display', sans-serif",
-              fontSize: "1.25rem",
-              fontWeight: 600,
+    <div 
+      style={{ 
+        backgroundColor: "#F5F5F0", 
+        minHeight: "100vh", 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center",
+        padding: "2rem 1.5rem"
+      }}
+    >
+      {/* Content Card */}
+      <div 
+        style={{ 
+          backgroundColor: "#FFFFFF", 
+          border: "1px solid rgba(0,0,0,0.06)", 
+          borderRadius: "8px", 
+          padding: "3.5rem 3rem",
+          boxShadow: "0 10px 40px rgba(0,0,0,0.02)",
+          width: "100%",
+          maxWidth: "480px"
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+          <h1 
+            style={{ 
+              fontFamily: "'Playfair Display', serif", 
+              fontSize: "2rem", 
+              fontWeight: 600, 
               color: "#1E1E1E",
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              marginBottom: "3rem",
+              margin: "0 0 0.5rem"
             }}
           >
-            <Image
-              src="/Logo.png"
-              alt="Nomadica Logo"
-              width={28}
-              height={28}
-              style={{ objectFit: "contain" }}
-            />
-            <span>NOMADICA</span>
-          </Link>
-
-          <h1 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "2.25rem", fontWeight: 600, color: "#1E1E1E", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
-            Create account
+            Join Nomadica
           </h1>
-          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9375rem", color: "rgba(30,30,30,0.55)", marginBottom: "2.5rem" }}>
-            Join the Nomadica community
-          </p>
-
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {error && (
-              <p style={{ fontFamily: "Montserrat", fontSize: "0.875rem", color: "#d9534f", margin: "0.5rem 0" }}>
-                {error}
-              </p>
-            )}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-              <div style={{ position: "relative" }}>
-                <User size={15} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30, 30, 30, 0.35)" }} />
-                <input type="text" placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="form-input" style={{ paddingLeft: "2.5rem" }} required />
-              </div>
-              <input type="text" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="form-input" required />
-            </div>
-
-            <div style={{ position: "relative" }}>
-              <Mail size={15} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30, 30, 30, 0.35)" }} />
-              <input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className="form-input" style={{ paddingLeft: "2.75rem" }} required />
-            </div>
-
-            <div style={{ position: "relative" }}>
-              <Lock size={15} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "rgba(30, 30, 30, 0.35)" }} />
-              <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="form-input" style={{ paddingLeft: "2.75rem", paddingRight: "3rem" }} required />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(30,30,30,0.35)" }}>
-                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
-
-            <label style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", cursor: "pointer" }}>
-              <input type="checkbox" style={{ marginTop: "2px", accentColor: "#1E1E1E" }} />
-              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }}>
-                I agree to the{" "}
-                <Link href="/support/terms" style={{ color: "#1E1E1E", textDecoration: "none" }}>Terms</Link>
-                {" "}and{" "}
-                <Link href="/support/privacy-policy" style={{ color: "#1E1E1E", textDecoration: "none" }}>Privacy Policy</Link>
-              </span>
-            </label>
-
-            <button className="btn-primary" type="submit" disabled={loading} style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem", opacity: loading ? 0.7 : 1 }}>
-              {loading ? "Creating Account..." : "Create Account"}
-            </button>
-          </form>
-
-          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", textAlign: "center", marginTop: "2rem" }}>
-            Already have an account?{" "}
-            <Link href="/account/login" style={{ color: "#1E1E1E", textDecoration: "none", fontWeight: 500 }}>Sign in</Link>
+          <p 
+            style={{ 
+              fontFamily: "'Montserrat', sans-serif", 
+              fontSize: "0.85rem", 
+              color: "rgba(30,30,30,0.5)",
+              margin: 0
+            }}
+          >
+            Create your account to start shopping
           </p>
         </div>
+
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+          {error && (
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8rem", color: "#DC2626", margin: 0, fontWeight: 500 }}>
+              {error}
+            </p>
+          )}
+
+          {/* First / Last name grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div>
+              <label 
+                style={{ 
+                  display: "block", 
+                  fontFamily: "'Montserrat', sans-serif", 
+                  fontSize: "0.6875rem", 
+                  fontWeight: 700, 
+                  letterSpacing: "0.08em", 
+                  textTransform: "uppercase", 
+                  color: "#1E1E1E",
+                  marginBottom: "0.5rem"
+                }}
+              >
+                First Name
+              </label>
+              <input
+                type="text"
+                placeholder="First name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.85rem 1rem",
+                  backgroundColor: "#F5F3F0",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.85rem",
+                  color: "#1E1E1E",
+                  outline: "none"
+                }}
+              />
+            </div>
+            <div>
+              <label 
+                style={{ 
+                  display: "block", 
+                  fontFamily: "'Montserrat', sans-serif", 
+                  fontSize: "0.6875rem", 
+                  fontWeight: 700, 
+                  letterSpacing: "0.08em", 
+                  textTransform: "uppercase", 
+                  color: "#1E1E1E",
+                  marginBottom: "0.5rem"
+                }}
+              >
+                Last Name
+              </label>
+              <input
+                type="text"
+                placeholder="Last name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.85rem 1rem",
+                  backgroundColor: "#F5F3F0",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.85rem",
+                  color: "#1E1E1E",
+                  outline: "none"
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Email field */}
+          <div>
+            <label 
+              style={{ 
+                display: "block", 
+                fontFamily: "'Montserrat', sans-serif", 
+                fontSize: "0.6875rem", 
+                fontWeight: 700, 
+                letterSpacing: "0.08em", 
+                textTransform: "uppercase", 
+                color: "#1E1E1E",
+                marginBottom: "0.5rem"
+              }}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{
+                width: "100%",
+                padding: "0.85rem 1rem",
+                backgroundColor: "#F5F3F0",
+                border: "none",
+                borderRadius: "4px",
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.85rem",
+                color: "#1E1E1E",
+                outline: "none"
+              }}
+            />
+          </div>
+
+          {/* Password field */}
+          <div>
+            <label 
+              style={{ 
+                display: "block", 
+                fontFamily: "'Montserrat', sans-serif", 
+                fontSize: "0.6875rem", 
+                fontWeight: 700, 
+                letterSpacing: "0.08em", 
+                textTransform: "uppercase", 
+                color: "#1E1E1E",
+                marginBottom: "0.5rem"
+              }}
+            >
+              Password
+            </label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.85rem 2.75rem 0.85rem 1rem",
+                  backgroundColor: "#F5F3F0",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.85rem",
+                  color: "#1E1E1E",
+                  outline: "none"
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "1rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "rgba(30,30,30,0.35)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0
+                }}
+              >
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                    <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                    <line x1="2" x2="22" y1="2" y2="22"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm Password field */}
+          <div>
+            <label 
+              style={{ 
+                display: "block", 
+                fontFamily: "'Montserrat', sans-serif", 
+                fontSize: "0.6875rem", 
+                fontWeight: 700, 
+                letterSpacing: "0.08em", 
+                textTransform: "uppercase", 
+                color: "#1E1E1E",
+                marginBottom: "0.5rem"
+              }}
+            >
+              Confirm Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              style={{
+                width: "100%",
+                padding: "0.85rem 1rem",
+                backgroundColor: "#F5F3F0",
+                border: "none",
+                borderRadius: "4px",
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.85rem",
+                color: "#1E1E1E",
+                outline: "none"
+              }}
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            style={{ 
+              width: "100%", 
+              padding: "0.85rem",
+              backgroundColor: "#C4B5A0",
+              color: "#FFFFFF",
+              border: "none",
+              borderRadius: "4px",
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: "0.85rem",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              cursor: "pointer",
+              transition: "background-color 0.2s",
+              marginTop: "0.5rem"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#6B4E37"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#C4B5A0"}
+          >
+            {loading ? "Creating Account..." : "Create Account"}
+          </button>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: "0.5rem 0" }}>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(0,0,0,0.06)" }} />
+            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.7rem", color: "rgba(30,30,30,0.35)", fontWeight: 700 }}>OR</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "rgba(0,0,0,0.06)" }} />
+          </div>
+
+          <p 
+            style={{ 
+              fontFamily: "'Montserrat', sans-serif", 
+              fontSize: "0.8rem", 
+              color: "rgba(30,30,30,0.6)", 
+              textAlign: "center", 
+              margin: 0 
+            }}
+          >
+            Already have an account?{" "}
+            <Link 
+              href="/account/login" 
+              style={{ 
+                color: "#C4B5A0", 
+                textDecoration: "none", 
+                fontWeight: 600 
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "#6B4E37"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "#C4B5A0"}
+            >
+              Sign in
+            </Link>
+          </p>
+        </form>
       </div>
     </div>
   );
