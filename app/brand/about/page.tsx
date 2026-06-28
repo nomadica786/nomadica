@@ -41,15 +41,15 @@ export default function AboutPage() {
   ];
 
   return (
-    <div style={{ backgroundColor: "#FDFDFD", minHeight: "100vh", fontFamily: "'Montserrat', sans-serif" }}>
+    <div style={{ backgroundColor: "#FDFDFD", minHeight: "120vh", fontFamily: "'Montserrat', sans-serif" }}>
       
       {/* 1. Top Banner Image - Fills page width and height constraint */}
       <div 
         style={{ 
           position: "relative", 
           width: "100%", 
-          height: "clamp(300px, 50vw, 570px)", 
-          overflow: "hidden" 
+          height: "100vh", 
+          overflow: "hidden"
         }}
       >
         <img 
@@ -59,13 +59,13 @@ export default function AboutPage() {
             width: "100%", 
             height: "100%", 
             objectFit: "cover",
-            display: "block"
+            display: "block",
           }} 
         />
       </div>
 
       {/* Main Section */}
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "4rem 1.5rem" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "5rem 1.5rem" }}>
         
         {/* 2. Page Title Header */}
         <div style={{ textAlign: "center", marginBottom: "5rem" }}>
@@ -112,7 +112,8 @@ export default function AboutPage() {
               lineHeight: 1.9, 
               display: "flex", 
               flexDirection: "column", 
-              gap: "1.5rem" 
+              gap: "1.5rem",
+              textAlign: "left"
             }}
           >
             <p>
