@@ -1161,14 +1161,11 @@ export default function HomePage() {
         image="/youtube shorts banner 1.jpg"
         href="/brand/story"
       />
-
-      {/* Infinite Scrolling Strip Marquee (Left to Right) */}
       <div 
         style={{ 
           width: "100%", 
           overflow: "hidden", 
-          backgroundColor: "#FFFFFF", 
-          padding: "1.5rem 0",
+          backgroundColor: "#FFFFFF",
           borderTop: "1px solid rgba(0,0,0,0.04)",
           borderBottom: "1px solid rgba(0,0,0,0.04)",
           position: "relative" 
@@ -1187,10 +1184,9 @@ export default function HomePage() {
               src="/Strip.jpg" 
               alt="Nomadica Ticker Strip" 
               style={{ 
-                height: "50px",
+                height: "60px",
                 width: "auto",
-                objectFit: "contain",
-                padding: "0 2rem"
+                objectFit: "contain"
               }} 
             />
           ))}
