@@ -63,8 +63,8 @@ const globalForLimiter = globalThis as unknown as {
   limiter?: TokenBucketLimiter;
 };
 
-// Capacity: 30 tokens, Refill rate: 5 tokens/second (adds 1 token every 200ms)
-export const limiter = globalForLimiter.limiter ?? new TokenBucketLimiter(30, 5);
+// Capacity: 100 tokens, Refill rate: 20 tokens/second (adds 1 token every 50ms)
+export const limiter = globalForLimiter.limiter ?? new TokenBucketLimiter(100, 20);
 
 if (process.env.NODE_ENV !== "production") {
   globalForLimiter.limiter = limiter;

@@ -25,7 +25,14 @@ export const api = {
       if (after) params.append('after', after);
 
       const response = await fetch(`${API_BASE_URL}/api/products?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch products');
+      if (!response.ok) {
+        console.error('[API CLIENT ERROR] list products failed:', response.status, response.statusText);
+        try {
+          const text = await response.text();
+          console.error('[API CLIENT ERROR] Response body:', text);
+        } catch {}
+        throw new Error('Failed to fetch products');
+      }
       return response.json();
     },
 

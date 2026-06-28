@@ -415,10 +415,6 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
 
   const handleAddToBag = async () => {
     if (!product) return;
-    if (!isAuthenticated) {
-      router.push("/account/login");
-      return;
-    }
     setCartAdding(true);
     
     const baseSize = selectedSize.split(" - ")[0] || selectedSize;

@@ -2,51 +2,51 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
-import { User, Package, Heart, MapPin, Settings, LogOut, ChevronRight, Star, Plus, X } from "lucide-react";
-import ProductCard from "@/components/shop/ProductCard";
+import { useRouter } from "next/navigation";
+import { User, LogOut, Plus, X, Edit, MapPin } from "lucide-react";
 import { useAuth } from "@/utils/hooks/useAuth";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 
-const tabs = [
-  { id: "overview", label: "Overview", icon: User },
-  { id: "orders", label: "Orders", icon: Package },
-  { id: "wishlist", label: "Wishlist", icon: Heart },
-  { id: "addresses", label: "Addresses", icon: MapPin },
+const INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+  "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+  "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+  "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
 ];
 
 function ProfileContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab");
-
   const { isAuthenticated, user, loading: authLoading, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
-
-  // State for fetched data
-  const [orders, setOrders] = useState<any[]>([]);
-  const [wishlist, setWishlist] = useState<any[]>([]);
+  
+  // Data States
   const [addresses, setAddresses] = useState<any[]>([]);
   const [loadingData, setLoadingData] = useState(false);
 
-  // Address form state
+  // Address Modal States
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [newAddr, setNewAddr] = useState({
-    label: "Home",
     name: "",
     address1: "",
     address2: "",
     city: "",
     province: "",
     zip: "",
+    phone: "",
+    label: "Home"
   });
 
-  useEffect(() => {
-    if (tabParam) {
-      setActiveTab(tabParam);
-    }
-  }, [tabParam]);
+  // Edit Profile Modal States
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: ""
+  });
 
   // Auth protection redirect
   useEffect(() => {
@@ -55,75 +55,66 @@ function ProfileContent() {
     }
   }, [authLoading, isAuthenticated, router]);
 
-  // Fetch data if authenticated
+  // Fetch addresses and sync profile form
   useEffect(() => {
     if (isAuthenticated) {
-      const fetchData = async () => {
+      const fetchAddresses = async () => {
         setLoadingData(true);
         try {
-          // Fetch orders
-          const ordersRes = await api.orders.list();
-          const ordersList = ordersRes?.orders?.edges?.map((edge: any) => {
-            const node = edge.node;
-            return {
-              id: node.id,
-              orderNumber: node.orderNumber,
-              date: new Date(node.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
-              status: node.status || (node.fulfillmentStatus === 'FULFILLED' ? 'Delivered' : 'In Transit'),
-              total: parseFloat(node.totalPrice?.amount || '0'),
-              items: node.lineItems?.edges?.length || 0,
-              image: node.lineItems?.edges?.[0]?.node?.variant?.image?.url || 'https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=300&q=80',
-            };
-          }) || [];
-          setOrders(ordersList);
-
-          // Fetch wishlist
-          const wishlistRes = await api.wishlist.list();
-          const wishlistItems = wishlistRes?.wishlist || [];
-          setWishlist(wishlistItems);
-
-          // Fetch addresses
-          const addressesRes = await api.customer.addresses();
-          setAddresses(addressesRes?.addresses || []);
+          const res = await api.customer.addresses();
+          setAddresses(res?.addresses || []);
         } catch (err) {
-          console.error("Failed to load customer profile details:", err);
+          console.error("Failed to load customer addresses:", err);
         } finally {
           setLoadingData(false);
         }
       };
+      fetchAddresses();
 
-      fetchData();
+      if (user) {
+        setProfileData({
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          email: user.email || "",
+          phone: (user as any).phone || ""
+        });
+      }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.customer.createAddress(newAddr);
+      await api.customer.createAddress({
+        ...newAddr,
+        label: newAddr.label || "Home"
+      });
       const addressesRes = await api.customer.addresses();
       setAddresses(addressesRes?.addresses || []);
       setShowAddAddress(false);
       setNewAddr({
-        label: "Home",
         name: "",
         address1: "",
         address2: "",
         city: "",
         province: "",
         zip: "",
+        phone: "",
+        label: "Home"
       });
     } catch (err) {
       console.error("Failed to add address:", err);
     }
   };
 
-  const handleRemoveWishlist = async (productId: string) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      await api.wishlist.remove(productId);
-      const wishlistRes = await api.wishlist.list();
-      setWishlist(wishlistRes?.wishlist || []);
+      await api.customer.updateProfile(profileData);
+      // Trigger local storage refresh or page refresh to pull latest user
+      window.location.reload();
     } catch (err) {
-      console.error("Failed to remove wishlisted item:", err);
+      console.error("Failed to update profile:", err);
     }
   };
 
@@ -131,359 +122,753 @@ function ProfileContent() {
     return <PageLoader />;
   }
 
-  function statusColor(status: string) {
-    if (status === "Delivered" || status === "FULFILLED") return "#4F6B5A";
-    if (status === "In Transit" || status === "PARTIALLY_FULFILLED") return "#1E1E1E";
-    return "#1E1E1E";
-  }
-
   const displayName = user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Traveler";
-  const userInitials = user?.firstName ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ""}`.toUpperCase() : "T";
-  const totalSpent = orders.reduce((acc, order) => acc + order.total, 0);
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "3rem 1.5rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: "3rem", alignItems: "start" }} className="lg:grid-cols-[240px_1fr] grid-cols-1">
+    <div style={{ paddingTop: "0px", backgroundColor: "#FDFDFD", minHeight: "50vh" }}>
+      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
+        
+        {/* Header Title with Logout */}
+        <div 
+          style={{ 
+            display: "flex", 
+            justifyContent: "space-between", 
+            alignItems: "center", 
+            borderBottom: "1px solid rgba(0,0,0,0.06)",
+            paddingBottom: "1.5rem",
+            marginBottom: "2.5rem" 
+          }}
+        >
+          <h1 
+            style={{ 
+              fontFamily: "'Playfair Display', serif", 
+              fontSize: "clamp(2rem, 3.5vw, 2.75rem)", 
+              fontWeight: 500, 
+              color: "#1E1E1E",
+              margin: 0
+            }}
+          >
+            Profile
+          </h1>
+          <button
+            onClick={logout}
+            style={{
+              backgroundColor: "#FFFFFF",
+              color: "#1E1E1E",
+              border: "1px solid rgba(30, 30, 30, 0.4)",
+              borderRadius: "4px",
+              padding: "0.6rem 1.5rem",
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              letterSpacing: "0.08em",
+              cursor: "pointer",
+              transition: "background-color 0.2s ease, border-color 0.2s ease"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.02)";
+              e.currentTarget.style.borderColor = "#1E1E1E";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#FFFFFF";
+              e.currentTarget.style.borderColor = "rgba(30, 30, 30, 0.4)";
+            }}
+          >
+            LOGOUT
+          </button>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div 
+          style={{ 
+            display: "flex", 
+            gap: "2rem", 
+            borderBottom: "1px solid rgba(0,0,0,0.06)", 
+            marginBottom: "2.5rem",
+            paddingBottom: "0.25rem"
+          }}
+        >
+          <Link 
+            href="/account/profile" 
+            style={{ 
+              textDecoration: "none", 
+              fontFamily: "'Montserrat', sans-serif", 
+              fontSize: "0.85rem", 
+              fontWeight: 600, 
+              color: "#1E1E1E", 
+              borderBottom: "2.5px solid #C4B5A0", 
+              paddingBottom: "0.75rem",
+              letterSpacing: "0.05em"
+            }}
+          >
+            PROFILE DETAILS
+          </Link>
+          <Link 
+            href="/account/orders" 
+            style={{ 
+              textDecoration: "none", 
+              fontFamily: "'Montserrat', sans-serif", 
+              fontSize: "0.85rem", 
+              fontWeight: 500, 
+              color: "rgba(30,30,30,0.45)", 
+              paddingBottom: "0.75rem",
+              letterSpacing: "0.05em",
+              transition: "color 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "#1E1E1E"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "rgba(30,30,30,0.45)"}
+          >
+            MY ORDERS
+          </Link>
+          <Link 
+            href="/account/wishlist" 
+            style={{ 
+              textDecoration: "none", 
+              fontFamily: "'Montserrat', sans-serif", 
+              fontSize: "0.85rem", 
+              fontWeight: 500, 
+              color: "rgba(30,30,30,0.45)", 
+              paddingBottom: "0.75rem",
+              letterSpacing: "0.05em",
+              transition: "color 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "#1E1E1E"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "rgba(30,30,30,0.45)"}
+          >
+            MY WISHLIST
+          </Link>
+        </div>
+
+        {/* Two-Column Cards Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "2rem" }}>
           
-          {/* Sidebar */}
-          <div>
-            {/* Avatar */}
-            <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-              <div
+          {/* Card 1: Personal Details */}
+          <div 
+            style={{ 
+              backgroundColor: "#FFFFFF", 
+              border: "1px solid rgba(0,0,0,0.06)", 
+              borderRadius: "8px", 
+              padding: "2rem",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.01)" 
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem" }}>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", margin: 0 }}>
+                Personal Details
+              </h2>
+              <button
+                onClick={() => setShowEditProfile(true)}
                 style={{
-                  width: "80px",
-                  height: "80px",
-                  borderRadius: "50%",
-                  backgroundColor: "#1E1E1E",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 1rem",
+                  gap: "0.5rem",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid rgba(0, 0, 0, 0.15)",
+                  borderRadius: "4px",
+                  padding: "0.5rem 0.85rem",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  color: "#1E1E1E"
                 }}
               >
-                <span style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#FFFFFF" }}>
-                  {userInitials}
-                </span>
-              </div>
-              <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.125rem", fontWeight: 600, color: "#1E1E1E" }}>{displayName}</p>
-              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)" }}>{user?.email}</p>
+                <Edit size={12} />
+                Edit Profile
+              </button>
             </div>
- 
-            {/* Nav tabs */}
-            <nav style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-              {tabs.map(({ id, label, icon: Icon }) => (
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+              <div>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(30,30,30,0.45)", margin: "0 0 0.5rem" }}>
+                  First Name
+                </p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.95rem", color: "#1E1E1E", fontWeight: 500, margin: 0 }}>
+                  {user?.firstName || "-"}
+                </p>
+              </div>
+
+              <div>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(30,30,30,0.45)", margin: "0 0 0.5rem" }}>
+                  Last Name
+                </p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.95rem", color: "#1E1E1E", fontWeight: 500, margin: 0 }}>
+                  {user?.lastName || "-"}
+                </p>
+              </div>
+
+              <div style={{ gridColumn: "span 2" }}>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(30,30,30,0.45)", margin: "0 0 0.5rem" }}>
+                  Email
+                </p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.95rem", color: "#1E1E1E", fontWeight: 500, margin: 0 }}>
+                  {user?.email || "-"}
+                </p>
+              </div>
+
+              <div style={{ gridColumn: "span 2" }}>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(30,30,30,0.45)", margin: "0 0 0.5rem" }}>
+                  Phone Number
+                </p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.95rem", color: "#1E1E1E", fontWeight: 500, margin: 0 }}>
+                  {(user as any)?.phone || "Not added yet"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Addresses */}
+          <div 
+            style={{ 
+              backgroundColor: "#FFFFFF", 
+              border: "1px solid rgba(0,0,0,0.06)", 
+              borderRadius: "8px", 
+              padding: "2rem",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.01)" 
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem" }}>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", margin: 0 }}>
+                Addresses
+              </h2>
+              <button
+                onClick={() => setShowAddAddress(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid rgba(0, 0, 0, 0.15)",
+                  borderRadius: "4px",
+                  padding: "0.5rem 0.85rem",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  color: "#1E1E1E"
+                }}
+              >
+                <Plus size={12} />
+                Add Address
+              </button>
+            </div>
+
+            {loadingData ? (
+              <div style={{ padding: "2rem 0", textAlign: "center" }}><PageLoader /></div>
+            ) : addresses.length === 0 ? (
+              <div 
+                style={{ 
+                  display: "flex", 
+                  flexDirection: "column", 
+                  justifyContent: "center", 
+                  alignItems: "center", 
+                  padding: "3rem 1rem", 
+                  border: "1px dashed rgba(0,0,0,0.1)", 
+                  borderRadius: "6px",
+                  textAlign: "center"
+                }}
+              >
+                <MapPin size={32} style={{ color: "rgba(0,0,0,0.15)", marginBottom: "1rem" }} />
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30, 30, 30, 0.6)", margin: "0 0 0.5rem" }}>
+                  No saved addresses yet
+                </p>
                 <button
-                  key={id}
-                  onClick={() => setActiveTab(id)}
+                  onClick={() => setShowAddAddress(true)}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.75rem",
-                    padding: "0.75rem 1rem",
+                    backgroundColor: "transparent",
                     border: "none",
-                    backgroundColor: activeTab === id ? "#1E1E1E" : "transparent",
-                    color: activeTab === id ? "#FFFFFF" : "rgba(30,30,30,0.6)",
-                    cursor: "pointer",
                     fontFamily: "'Montserrat', sans-serif",
-                    fontSize: "0.875rem",
-                    fontWeight: activeTab === id ? 500 : 400,
-                    textAlign: "left",
-                    transition: "all 0.15s ease",
+                    fontSize: "0.85rem",
+                    fontWeight: 600,
+                    color: "#1E1E1E",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                    padding: 0
                   }}
                 >
-                  <Icon size={16} />
-                  {label}
+                  + Add your first address
                 </button>
-              ))}
- 
-              <div style={{ height: "1px", backgroundColor: "rgba(30,30,30,0.1)", margin: "0.75rem 0" }} />
- 
-              <button
-                onClick={logout}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  padding: "0.75rem 1rem",
-                  border: "none",
-                  backgroundColor: "transparent",
-                  color: "rgba(180,60,60,0.7)",
-                  cursor: "pointer",
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.875rem",
-                  textAlign: "left",
-                }}
-              >
-                <LogOut size={16} />
-                Sign Out
-              </button>
-            </nav>
-          </div>
- 
-          {/* Main content */}
-          <div>
-            {loadingData ? (
-              <div style={{ padding: "4rem 0" }}><PageLoader /></div>
+              </div>
             ) : (
-              <>
-                {activeTab === "overview" && (
-                  <div>
-                    <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem" }}>
-                      My Account
-                    </h2>
- 
-                    {/* Stats */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "1rem", marginBottom: "3rem" }}>
-                      {[
-                        { label: "Total Orders", value: orders.length.toString() },
-                        { label: "Wishlist Items", value: wishlist.length.toString() },
-                        { label: "Total Spent", value: `₹${totalSpent.toLocaleString("en-IN")}` },
-                        { label: "Rewards Points", value: (orders.length * 100).toString() },
-                      ].map(({ label, value }) => (
-                        <div key={label} style={{ backgroundColor: "#FFFFFF", padding: "1.5rem 1.25rem" }}>
-                          <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.5rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{value}</p>
-                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", letterSpacing: "0.04em" }}>{label}</p>
-                        </div>
-                      ))}
-                    </div>
- 
-                    {/* Recent orders preview */}
-                    <h3 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.25rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "1.25rem" }}>Recent Orders</h3>
-                    {orders.length === 0 ? (
-                      <p style={{ fontFamily: "Montserrat", color: "rgba(30,30,30,0.5)" }}>You have no orders yet.</p>
-                    ) : (
-                      <div className="horizontal-scroll" style={{ display: "flex", gap: "1.5rem", paddingBottom: "1rem", overflowX: "auto" }}>
-                        {orders.slice(0, 3).map((order) => (
-                          <div key={order.id} style={{ flexShrink: 0, width: "260px", backgroundColor: "#fff", padding: "1.25rem", border: "1px solid rgba(30,30,30,0.07)" }}>
-                            <img src={order.image} alt="" style={{ width: "100%", height: "120px", objectFit: "cover", marginBottom: "0.875rem" }} />
-                            <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{order.orderNumber}</p>
-                            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.5)", marginBottom: "0.5rem" }}>{order.date}</p>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: statusColor(order.status), fontWeight: 600 }}>{order.status}</span>
-                              <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E" }}>₹{order.total.toLocaleString("en-IN")}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
- 
-                {activeTab === "orders" && (
-                  <div>
-                    <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem" }}>My Orders</h2>
-                    {orders.length === 0 ? (
-                      <p style={{ fontFamily: "Montserrat", color: "rgba(30,30,30,0.5)" }}>You have no orders yet.</p>
-                    ) : (
-                      <div className="horizontal-scroll" style={{ display: "flex", gap: "1.5rem", overflowX: "auto" }}>
-                        {orders.map((order) => (
-                          <div key={order.id} style={{ flexShrink: 0, width: "280px", backgroundColor: "#fff", border: "1px solid rgba(30,30,30,0.07)" }}>
-                            <img src={order.image} alt="" style={{ width: "100%", height: "160px", objectFit: "cover" }} />
-                            <div style={{ padding: "1.25rem" }}>
-                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                                <p style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E" }}>{order.orderNumber}</p>
-                                <span
-                                  style={{
-                                    fontSize: "0.6875rem",
-                                    fontFamily: "'Montserrat', sans-serif",
-                                    fontWeight: 600,
-                                    color: statusColor(order.status),
-                                    backgroundColor: `${statusColor(order.status)}15`,
-                                    padding: "0.2rem 0.5rem",
-                                    letterSpacing: "0.05em",
-                                  }}
-                                >
-                                  {order.status}
-                                </span>
-                              </div>
-                              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.45)", marginBottom: "0.75rem" }}>{order.date} · {order.items} item{order.items > 1 ? "s" : ""}</p>
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1rem", fontWeight: 700, color: "#1E1E1E" }}>₹{order.total.toLocaleString("en-IN")}</span>
-                                <Link href={`/order-tracking?order=${order.orderNumber}&email=${user?.email}`} style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "#1E1E1E", textDecoration: "none", fontWeight: 500 }}>
-                                  Track Details
-                                </Link>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
- 
-                {activeTab === "wishlist" && (
-                  <div>
-                    <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "2rem" }}>My Wishlist</h2>
-                    {wishlist.length === 0 ? (
-                      <p style={{ fontFamily: "Montserrat", color: "rgba(30,30,30,0.5)" }}>Your wishlist is empty.</p>
-                    ) : (
-                      <div className="horizontal-scroll" style={{ display: "flex", gap: "1.5rem", overflowX: "auto", paddingBottom: "1.5rem" }}>
-                        {wishlist.map((item) => (
-                          <div key={item.id} style={{ flexShrink: 0, width: "240px", position: "relative" }}>
-                            <button
-                              onClick={() => handleRemoveWishlist(item.id)}
-                              style={{
-                                position: "absolute",
-                                top: "0.75rem",
-                                right: "0.75rem",
-                                zIndex: 10,
-                                backgroundColor: "rgba(255, 255, 255,0.9)",
-                                border: "none",
-                                borderRadius: "50%",
-                                width: "32px",
-                                height: "32px",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center"
-                              }}
-                            >
-                              <X size={14} color="#1E1E1E" />
-                            </button>
-                            <ProductCard {...item} />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
- 
-                {activeTab === "addresses" && (
-                  <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-                      <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "1.75rem", fontWeight: 600, color: "#1E1E1E" }}>Addresses</h2>
-                      <button
-                        onClick={() => setShowAddAddress(!showAddAddress)}
-                        className="btn-outline"
-                        style={{ fontSize: "0.8125rem", padding: "0.625rem 1.25rem", display: "flex", alignItems: "center", gap: "6px" }}
-                      >
-                        {showAddAddress ? <X size={14} /> : <Plus size={14} />}
-                        {showAddAddress ? "Cancel" : "Add New"}
-                      </button>
-                    </div>
- 
-                    {/* Add Address Form */}
-                    {showAddAddress && (
-                      <form
-                        onSubmit={handleAddAddress}
-                        style={{
-                          backgroundColor: "#fff",
-                          padding: "2rem",
-                          border: "1px solid rgba(30,30,30,0.08)",
-                          marginBottom: "2rem",
-                          display: "grid",
-                          gap: "1rem"
+              <div style={{ display: "grid", gap: "1rem" }}>
+                {addresses.map((addr) => (
+                  <div 
+                    key={addr.id} 
+                    style={{ 
+                      padding: "1.25rem", 
+                      border: addr.default ? "1px solid #1E1E1E" : "1px solid rgba(0,0,0,0.08)", 
+                      borderRadius: "6px",
+                      position: "relative", 
+                      backgroundColor: "#FFFFFF" 
+                    }}
+                  >
+                    {addr.default && (
+                      <span 
+                        style={{ 
+                          position: "absolute", 
+                          top: "0.75rem", 
+                          right: "0.75rem", 
+                          fontFamily: "'Montserrat', sans-serif", 
+                          fontSize: "0.6rem", 
+                          fontWeight: 600, 
+                          letterSpacing: "0.1em", 
+                          textTransform: "uppercase", 
+                          backgroundColor: "#1E1E1E", 
+                          color: "#FFFFFF", 
+                          padding: "0.2rem 0.5rem",
+                          borderRadius: "2px"
                         }}
                       >
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                          <div>
-                            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Label</label>
-                            <input
-                              type="text"
-                              value={newAddr.label}
-                              onChange={(e) => setNewAddr({ ...newAddr, label: e.target.value })}
-                              placeholder="e.g. Home, Office"
-                              className="form-input"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Recipient Name</label>
-                            <input
-                              type="text"
-                              value={newAddr.name}
-                              onChange={(e) => setNewAddr({ ...newAddr, name: e.target.value })}
-                              placeholder="Full Name"
-                              className="form-input"
-                              required
-                            />
-                          </div>
-                        </div>
- 
-                        <div>
-                          <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Address Line 1</label>
-                          <input
-                            type="text"
-                            value={newAddr.address1}
-                            onChange={(e) => setNewAddr({ ...newAddr, address1: e.target.value })}
-                            placeholder="Street address, P.O. box, company name"
-                            className="form-input"
-                            required
-                          />
-                        </div>
- 
-                        <div>
-                          <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>Address Line 2 (Optional)</label>
-                          <input
-                            type="text"
-                            value={newAddr.address2}
-                            onChange={(e) => setNewAddr({ ...newAddr, address2: e.target.value })}
-                            placeholder="Apartment, suite, unit, building, floor, etc."
-                            className="form-input"
-                          />
-                        </div>
- 
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }} className="grid-cols-1 md:grid-cols-3">
-                          <div>
-                            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>City</label>
-                            <input
-                              type="text"
-                              value={newAddr.city}
-                              onChange={(e) => setNewAddr({ ...newAddr, city: e.target.value })}
-                              className="form-input"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>State / Province</label>
-                            <input
-                              type="text"
-                              value={newAddr.province}
-                              onChange={(e) => setNewAddr({ ...newAddr, province: e.target.value })}
-                              className="form-input"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label style={{ display: "block", fontFamily: "Montserrat", fontSize: "0.8125rem", marginBottom: "0.375rem" }}>PIN / Zip Code</label>
-                            <input
-                              type="text"
-                              value={newAddr.zip}
-                              onChange={(e) => setNewAddr({ ...newAddr, zip: e.target.value })}
-                              className="form-input"
-                              required
-                            />
-                          </div>
-                        </div>
- 
-                        <button className="btn-primary" type="submit" style={{ justifySelf: "start", marginTop: "0.5rem" }}>
-                          Save Address
-                        </button>
-                      </form>
+                        Default
+                      </span>
                     )}
- 
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem" }}>
-                      {addresses.map((addr) => (
-                        <div key={addr.id} style={{ padding: "1.5rem", border: addr.default ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.15)", position: "relative", backgroundColor: "#fff" }}>
-                          {addr.default && (
-                            <span style={{ position: "absolute", top: "0.75rem", right: "0.75rem", fontFamily: "'Montserrat', sans-serif", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", backgroundColor: "#1E1E1E", color: "#FFFFFF", padding: "0.2rem 0.5rem" }}>
-                              Default
-                            </span>
-                          )}
-                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.625rem" }}>{addr.label}</p>
-                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9375rem", fontWeight: 600, color: "#1E1E1E", marginBottom: "0.25rem" }}>{addr.name}</p>
-                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6 }}>{addr.address1} {addr.address2 ? `, ${addr.address2}` : ""}</p>
-                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.6)" }}>{addr.city}, {addr.province} {addr.zip}</p>
-                        </div>
-                      ))}
-                    </div>
+                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#C4B5A0", margin: "0 0 0.5rem" }}>
+                      {addr.label || "Address"}
+                    </p>
+                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.9rem", fontWeight: 600, color: "#1E1E1E", margin: "0 0 0.25rem" }}>
+                      {addr.name}
+                    </p>
+                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.5, margin: 0 }}>
+                      {addr.address1} {addr.address2 ? `, ${addr.address2}` : ""}
+                    </p>
+                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8rem", color: "rgba(30,30,30,0.6)", margin: 0 }}>
+                      {addr.city}, {addr.province} {addr.zip}
+                    </p>
                   </div>
-                )}
-              </>
+                ))}
+              </div>
             )}
           </div>
         </div>
+
+        {/* Add Address Modal */}
+        {showAddAddress && (
+          <div 
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 3000,
+              backgroundColor: "rgba(0, 0, 0, 0.4)",
+              backdropFilter: "blur(4px)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "1rem"
+            }}
+          >
+            <div 
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderRadius: "8px",
+                width: "100%",
+                maxWidth: "600px",
+                padding: "2rem",
+                boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+                position: "relative",
+                maxHeight: "90vh",
+                overflowY: "auto"
+              }}
+            >
+              <button
+                onClick={() => setShowAddAddress(false)}
+                style={{
+                  position: "absolute",
+                  top: "1.5rem",
+                  right: "1.5rem",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "rgba(0,0,0,0.4)"
+                }}
+              >
+                <X size={20} />
+              </button>
+
+              <h2 
+                style={{ 
+                  fontFamily: "'Playfair Display', serif", 
+                  fontSize: "1.5rem", 
+                  fontWeight: 600, 
+                  color: "#1E1E1E",
+                  margin: "0 0 2rem" 
+                }}
+              >
+                Add New Address
+              </h2>
+
+              <form onSubmit={handleAddAddress} style={{ display: "grid", gap: "1.25rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+                  <div>
+                    <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newAddr.name}
+                      onChange={(e) => setNewAddr({ ...newAddr, name: e.target.value })}
+                      placeholder="e.g. Arjun Mehta"
+                      style={{
+                        width: "100%",
+                        padding: "0.75rem 1rem",
+                        border: "1px solid rgba(0,0,0,0.12)",
+                        borderRadius: "4px",
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "0.9rem"
+                      }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={newAddr.phone}
+                      onChange={(e) => setNewAddr({ ...newAddr, phone: e.target.value })}
+                      placeholder="10-digit number"
+                      style={{
+                        width: "100%",
+                        padding: "0.75rem 1rem",
+                        border: "1px solid rgba(0,0,0,0.12)",
+                        borderRadius: "4px",
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "0.9rem"
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                    Address Line 1
+                  </label>
+                  <input
+                    type="text"
+                    value={newAddr.address1}
+                    onChange={(e) => setNewAddr({ ...newAddr, address1: e.target.value })}
+                    placeholder="House no, Building, Street"
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 1rem",
+                      border: "1px solid rgba(0,0,0,0.12)",
+                      borderRadius: "4px",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.9rem"
+                    }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                    Address Line 2 (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={newAddr.address2}
+                    onChange={(e) => setNewAddr({ ...newAddr, address2: e.target.value })}
+                    placeholder="Landmark, Area"
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 1rem",
+                      border: "1px solid rgba(0,0,0,0.12)",
+                      borderRadius: "4px",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.9rem"
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1.25rem" }}>
+                  <div>
+                    <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      value={newAddr.city}
+                      onChange={(e) => setNewAddr({ ...newAddr, city: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "0.75rem 1rem",
+                        border: "1px solid rgba(0,0,0,0.12)",
+                        borderRadius: "4px",
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "0.9rem"
+                      }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                      State
+                    </label>
+                    <select
+                      value={newAddr.province}
+                      onChange={(e) => setNewAddr({ ...newAddr, province: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "0.75rem 1rem",
+                        border: "1px solid rgba(0,0,0,0.12)",
+                        borderRadius: "4px",
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "0.9rem",
+                        backgroundColor: "#FFFFFF",
+                        height: "45px"
+                      }}
+                      required
+                    >
+                      <option value="">Select state</option>
+                      {INDIAN_STATES.map((st) => (
+                        <option key={st} value={st}>{st}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                      Pincode
+                    </label>
+                    <input
+                      type="text"
+                      value={newAddr.zip}
+                      onChange={(e) => setNewAddr({ ...newAddr, zip: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "0.75rem 1rem",
+                        border: "1px solid rgba(0,0,0,0.12)",
+                        borderRadius: "4px",
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "0.9rem"
+                      }}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddAddress(false)}
+                    style={{
+                      flex: 1,
+                      backgroundColor: "#FFFFFF",
+                      color: "#1E1E1E",
+                      border: "1px solid rgba(30, 30, 30, 0.4)",
+                      borderRadius: "4px",
+                      padding: "0.85rem 1.5rem",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
+                      cursor: "pointer"
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    style={{
+                      flex: 1,
+                      backgroundColor: "#C4B5A0",
+                      color: "#FFFFFF",
+                      border: "none",
+                      borderRadius: "4px",
+                      padding: "0.85rem 1.5rem",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "background-color 0.2s"
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#6B4E37"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#C4B5A0"; }}
+                  >
+                    SAVE ADDRESS
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Profile Modal */}
+        {showEditProfile && (
+          <div 
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 3000,
+              backgroundColor: "rgba(0, 0, 0, 0.4)",
+              backdropFilter: "blur(4px)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "1rem"
+            }}
+          >
+            <div 
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderRadius: "8px",
+                width: "100%",
+                maxWidth: "500px",
+                padding: "2rem",
+                boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+                position: "relative"
+              }}
+            >
+              <button
+                onClick={() => setShowEditProfile(false)}
+                style={{
+                  position: "absolute",
+                  top: "1.5rem",
+                  right: "1.5rem",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "rgba(0,0,0,0.4)"
+                }}
+              >
+                <X size={20} />
+              </button>
+
+              <h2 
+                style={{ 
+                  fontFamily: "'Playfair Display', serif", 
+                  fontSize: "1.5rem", 
+                  fontWeight: 600, 
+                  color: "#1E1E1E",
+                  margin: "0 0 2rem" 
+                }}
+              >
+                Edit Profile
+              </h2>
+
+              <form onSubmit={handleUpdateProfile} style={{ display: "grid", gap: "1.25rem" }}>
+                <div>
+                  <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.firstName}
+                    onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 1rem",
+                      border: "1px solid rgba(0,0,0,0.12)",
+                      borderRadius: "4px",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.9rem"
+                    }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.lastName}
+                    onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 1rem",
+                      border: "1px solid rgba(0,0,0,0.12)",
+                      borderRadius: "4px",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.9rem"
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={profileData.email}
+                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 1rem",
+                      border: "1px solid rgba(0,0,0,0.12)",
+                      borderRadius: "4px",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.9rem"
+                    }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={profileData.phone}
+                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                    placeholder="e.g. +91 98765 43210"
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 1rem",
+                      border: "1px solid rgba(0,0,0,0.12)",
+                      borderRadius: "4px",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.9rem"
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditProfile(false)}
+                    style={{
+                      flex: 1,
+                      backgroundColor: "#FFFFFF",
+                      color: "#1E1E1E",
+                      border: "1px solid rgba(30, 30, 30, 0.4)",
+                      borderRadius: "4px",
+                      padding: "0.85rem 1.5rem",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
+                      cursor: "pointer"
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    style={{
+                      flex: 1,
+                      backgroundColor: "#C4B5A0",
+                      color: "#FFFFFF",
+                      border: "none",
+                      borderRadius: "4px",
+                      padding: "0.85rem 1.5rem",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "background-color 0.2s"
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#6B4E37"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#C4B5A0"; }}
+                  >
+                    SAVE CHANGES
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

@@ -1,250 +1,238 @@
+// components/layout/Footer.tsx
 "use client";
 import Link from "next/link";
 
-const Mail = ({ size }: { size: number }) => (
-  <span
-    style={{
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: size,
-      height: size,
-      fontSize: size * 0.9,
-    }}
-  >
-    ✉
-  </span>
+const InstagramIcon = ({ size = 18 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
 );
 
-const Instagram = ({ size }: { size: number }) => (
-  <span style={{ fontSize: size }}>📷</span>
-);
-const Twitter = ({ size }: { size: number }) => (
-  <span style={{ fontSize: size }}>🐦</span>
-);
-const Facebook = ({ size }: { size: number }) => (
-  <span style={{ fontSize: size }}>📘</span>
-);
-const Youtube = ({ size }: { size: number }) => (
-  <span style={{ fontSize: size }}>▶</span>
+const FacebookIcon = ({ size = 18 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
 );
 
-const footerLinks = {
-  Shop: [
-    { label: "New Arrivals", href: "/shop/new-arrivals" },
-    { label: "Best Sellers", href: "/shop/best-sellers" },
-    { label: "Collections", href: "/shop/collections" },
-    { label: "Limited Drops", href: "/shop/limited-drops" },
-  ],
-  Collections: [
+const MailIcon = ({ size = 18 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="16" x="2" y="4" rx="2" />
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+  </svg>
+);
+
+export default function Footer() {
+  const collectionsLinks = [
     { label: "Destination", href: "/collections/destination-collection" },
     { label: "Wildlife & Safari", href: "/collections/wildlife-and-safari" },
     { label: "Adventure & Trekking", href: "/collections/adventure-and-trekking-collections" },
     { label: "Travel Quotes", href: "/collections/travel-quotes" },
     { label: "Beach Vibes", href: "/collections/beach-vibes" },
-  ],
-  Brand: [
-    { label: "About Us", href: "/brand/about" },
-    { label: "Our Story", href: "/brand/story" },
-    { label: "Journal", href: "/journal" },
-    { label: "Sustainability", href: "/brand/sustainability" },
-  ],
-  Support: [
-    { label: "FAQ", href: "/support/faq" },
+  ];
+
+  const customerServiceLinks = [
     { label: "Contact Us", href: "/support/contact" },
     { label: "Shipping Policy", href: "/support/shipping-policy" },
-    { label: "Return Policy", href: "/support/return-policy" },
-    { label: "Order Tracking", href: "/utility/order-tracking" },
-  ],
-  Legal: [
+    { label: "Returns & Exchanges", href: "/support/return-policy" },
     { label: "Privacy Policy", href: "/support/privacy-policy" },
-    { label: "Terms & Conditions", href: "/support/terms" },
-  ],
-};
+    { label: "Terms and Conditions", href: "/support/terms" },
+  ];
 
-export default function Footer() {
   return (
     <footer
       style={{
-        backgroundColor: "var(--charcoal)",
+        backgroundColor: "#2E2E2E",
         color: "#FFFFFF",
-        paddingTop: "5rem",
+        paddingTop: "4rem",
         paddingBottom: "2rem",
+        fontFamily: "'Montserrat', sans-serif"
       }}
     >
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 1.5rem" }}>
-        {/* Top section */}
+      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
+        
+        {/* Main Grid Section */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
             gap: "3rem",
-            paddingBottom: "4rem",
-            borderBottom: "1px solid rgba(255, 255, 255,0.1)",
+            paddingBottom: "3rem",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
           }}
         >
-          {/* Brand */}
-          <div style={{ gridColumn: "span 2" }} className="col-span-2 sm:col-span-1">
-            <div
-              style={{
-                fontFamily: "'Playfair Display', sans-serif",
-                fontSize: "1.75rem",
-                fontWeight: 600,
-                marginBottom: "1rem",
-                color: "#FFFFFF",
-              }}
-            >
-              NOMADICA
+          {/* Column 1: Brand Info */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <div style={{ display: "block" }}>
+              <img 
+                src="/Dark-Nomadica-Log.jpg" 
+                alt="Nomadica" 
+                style={{ 
+                  height: "70px", 
+                  width: "auto", 
+                  display: "block",
+                  objectFit: "contain"
+                }} 
+              />
             </div>
+            
             <p
               style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "0.875rem",
-                color: "rgba(255, 255, 255,0.55)",
-                lineHeight: 1.7,
-                maxWidth: "260px",
-                marginBottom: "1.5rem",
+                fontSize: "0.85rem",
+                color: "rgba(255, 255, 255, 0.7)",
+                lineHeight: "1.7",
+                margin: 0,
+                maxWidth: "320px",
               }}
             >
-              Premium travel lifestyle brand. Designed for those who move through the world with intention.
+              Wear your wanderlust. Premium travel-inspired apparel for the modern explorer.
             </p>
 
-            {/* Newsletter */}
-            <div style={{ display: "flex", gap: "0", marginBottom: "1.5rem", maxWidth: "280px" }}>
-              <input
-                type="email"
-                placeholder="Your email"
+            {/* Social Icons */}
+            <div style={{ display: "flex", gap: "1.25rem", marginTop: "0.25rem" }}>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
-                  flex: 1,
-                  padding: "0.75rem 1rem",
-                  background: "rgba(255, 255, 255,0.07)",
-                  border: "1px solid rgba(255, 255, 255,0.15)",
-                  borderRight: "none",
                   color: "#FFFFFF",
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.8125rem",
-                  outline: "none",
-                }}
-              />
-              <button
-                style={{
-                  padding: "0.75rem 1rem",
-                  backgroundColor: "var(--charcoal)",
-                  border: "none",
-                  cursor: "pointer",
+                  transition: "opacity 0.2s",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#FFFFFF",
+                  alignItems: "center"
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.7"}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
               >
-                <Mail size={16} />
-              </button>
-            </div>
-
-            {/* Social */}
-            <div style={{ display: "flex", gap: "1rem" }}>
-              {[Instagram, Twitter, Facebook, Youtube].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  style={{
-                    color: "rgba(255, 255, 255,0.4)",
-                    transition: "color 0.2s ease, transform 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "var(--primary-gold)";
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255,0.4)";
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                  }}
-                >
-                  <Icon size={18} />
-                </a>
-              ))}
+                <InstagramIcon size={18} />
+              </a>
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: "#FFFFFF",
+                  transition: "opacity 0.2s",
+                  display: "flex",
+                  alignItems: "center"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.7"}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+              >
+                <FacebookIcon size={18} />
+              </a>
+              <a
+                href="mailto:support@nomadica.com"
+                style={{
+                  color: "#FFFFFF",
+                  transition: "opacity 0.2s",
+                  display: "flex",
+                  alignItems: "center"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.7"}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+              >
+                <MailIcon size={18} />
+              </a>
             </div>
           </div>
 
-          {/* Links */}
-          {Object.entries(footerLinks).map(([section, links]) => (
-            <div key={section}>
-              <h4
-                style={{
-                  fontFamily: "'Playfair Display', sans-serif",
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "#FFFFFF",
-                  marginBottom: "1.25rem",
-                }}
-              >
-                {section}
-              </h4>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                {links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      style={{
-                        fontFamily: "'Montserrat', sans-serif",
-                        fontSize: "0.875rem",
-                        color: "rgba(255, 255, 255,0.5)",
-                        textDecoration: "none",
-                        transition: "color 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#FFFFFF")}
-                      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255,0.5)")}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div>
+            <p
+              style={{
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                fontFamily: "'Montserrat', sans-serif",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "#FFFFFF",
+                marginBottom: "1.5rem",
+              }}
+            >
+              COLLECTIONS
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {collectionsLinks.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "rgba(255, 255, 255, 0.7)",
+                      textDecoration: "none",
+                      transition: "color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#FFFFFF")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255, 0.7)")}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Customer Service Links */}
+          <div>
+            <p
+              style={{
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                fontFamily: "'Montserrat', sans-serif",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "#FFFFFF",
+                marginBottom: "1.5rem",
+              }}
+            >
+              CUSTOMER SERVICE
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {customerServiceLinks.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "rgba(255, 255, 255, 0.7)",
+                      textDecoration: "none",
+                      transition: "color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#FFFFFF")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255, 0.7)")}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
         </div>
 
-        {/* Bottom */}
+        {/* Bottom Section */}
         <div
           style={{
-            paddingTop: "1.5rem",
+            paddingTop: "1rem",
             display: "flex",
             flexWrap: "wrap",
-            gap: "1rem",
+            gap: "1.5rem",
             justifyContent: "space-between",
             alignItems: "center",
           }}
         >
           <p
             style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.8125rem",
-              color: "rgba(255, 255, 255,0.3)",
+              fontSize: "0.8rem",
+              color: "rgba(255, 255, 255, 0.5)",
+              margin: 0,
             }}
           >
-            © 2025 Nomadica. All rights reserved.
+            © 2026 Nomadica. All rights reserved.
           </p>
-          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            {["Visa", "Mastercard", "UPI", "Razorpay"].map((method) => (
-              <span
-                key={method}
-                style={{
-                  padding: "0.25rem 0.5rem",
-                  border: "1px solid rgba(255, 255, 255,0.15)",
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.625rem",
-                  color: "rgba(255, 255, 255,0.35)",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                {method}
-              </span>
-            ))}
-          </div>
+
         </div>
+
       </div>
     </footer>
   );
