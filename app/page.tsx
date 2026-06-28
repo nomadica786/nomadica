@@ -1367,32 +1367,169 @@ export default function HomePage() {
 
 
       {/* 14. About Nomadica Section */}
-      <section style={{ backgroundColor: "#FFFFFF", padding: "6rem 1.5rem" }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "4rem", alignItems: "center" }}>
-          <div>
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(30,30,30,0.5)", marginBottom: "1rem" }}>
-              Our Story
-            </p>
-            <h2 style={{ fontFamily: "'Playfair Display', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 600, color: "#1E1E1E", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>
-              Apparel for the Modern Explorer.
-            </h2>
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1rem", color: "rgba(30,30,30,0.7)", lineHeight: 1.8, marginBottom: "2rem" }}>
-              Nomadica was born out of a desire to create a wardrobe that works anywhere in the world. We design premium travel lifestyle apparel that balances functional utility with refined, modern aesthetics. Made for adventurers, creatives, and global citizens.
-            </p>
-            <Link href="/brand/about" style={{ textDecoration: "none" }}>
-              <button className="btn-primary">
-                Our Philosophy <ArrowRight size={14} />
-              </button>
-            </Link>
-          </div>
-          <div style={{ aspectRatio: "1", overflow: "hidden", position: "relative" }}>
+      <section style={{ backgroundColor: "#F5F3F0", padding: "clamp(2rem, 1vw, 6rem) 1.5rem" }}>
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center"
+          style={{
+            maxWidth: "1400px",
+            margin: "0 auto",
+          }}
+        >
+          {/* Left Column: Image */}
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "clamp(250px, 34vw, 570px)",
+              borderRadius: "8px",
+              overflow: "hidden",
+            }}
+          >
             <Image
-              src="https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?w=800&q=80"
-              alt="Nomad desk with maps"
+              src="/About-us.jpg"
+              alt="About Nomadica"
               fill
-              sizes="(max-width: 768px) 100vw, 50vw"
+              sizes="(max-width: 768px) 80vw, 40vw"
               style={{ objectFit: "cover" }}
+              priority
             />
+          </div>
+
+          {/* Right Column: Content */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <h2
+              style={{
+                fontFamily: "'Playfair Display', sans-serif",
+                fontSize: "clamp(2rem, 3.5vw, 2.5rem)",
+                fontWeight: 600,
+                color: "#1E1E1E",
+                lineHeight: 1.4,
+                letterSpacing: "-0.01em",
+                margin: 0,
+              }}
+            >
+              About Nomadica
+            </h2>
+            
+            <p
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.95rem",
+                color: "rgba(30, 30, 30, 0.7)",
+                lineHeight: 1.8,
+                margin: 0,
+              }}
+            >
+              Born from a passion for travel and timeless design, Nomadica celebrates the spirit of exploration through premium apparel. Each piece is thoughtfully crafted to reflect the beauty of destinations, wildlife, and adventures that inspire us to wander.
+            </p>
+
+            <p
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.95rem",
+                color: "rgba(30, 30, 30, 0.7)",
+                lineHeight: 1.8,
+                margin: 0,
+                marginBottom: "0.5rem",
+              }}
+            >
+              We believe in quality over quantity, sustainability over fast fashion, and designs that tell stories.
+            </p>
+
+            {/* List Features */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", marginBottom: "1rem" }}>
+              {/* Item 1 */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "1.5rem",
+                  paddingLeft: "1rem",
+                  borderLeft: "2px solid #c4a77d",
+                }}
+              >
+                <span
+                  style={{
+                    flex: "0 0 155px",
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: "1.2rem",
+                    fontWeight: 600,
+                    color: "#1E1E1E",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Premium Quality
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "0.9rem",
+                    color: "rgba(30, 30, 30, 0.6)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Soft, durable fabrics that feel as good as they look
+                </span>
+              </div>
+
+              {/* Item 2 */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "1.5rem",
+                  paddingLeft: "1rem",
+                  borderLeft: "2px solid #c4a77d",
+                }}
+              >
+                <span
+                  style={{
+                    flex: "0 0 160px",
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: "1.2rem",
+                    fontWeight: 600,
+                    color: "#1E1E1E",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Unique Designs
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "0.9rem",
+                    color: "rgba(30, 30, 30, 0.6)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Original artwork celebrating travel and adventure
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <Link href="/brand/about" style={{ textDecoration: "none" }}>
+                <button
+                  style={{
+                    backgroundColor: "#c4a77d",
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "0.85rem 2rem",
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                    letterSpacing: "0.08em",
+                    cursor: "pointer",
+                    transition: "background-color 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#b0936b"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#c4a77d"; }}
+                >
+                  LEARN MORE ABOUT US
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
