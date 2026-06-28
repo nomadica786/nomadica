@@ -1162,6 +1162,51 @@ export default function HomePage() {
         href="/brand/story"
       />
 
+      {/* Infinite Scrolling Strip Marquee (Left to Right) */}
+      <div 
+        style={{ 
+          width: "100%", 
+          overflow: "hidden", 
+          backgroundColor: "#FFFFFF", 
+          padding: "1.5rem 0",
+          borderTop: "1px solid rgba(0,0,0,0.04)",
+          borderBottom: "1px solid rgba(0,0,0,0.04)",
+          position: "relative" 
+        }}
+      >
+        <div 
+          style={{ 
+            display: "flex", 
+            width: "max-content",
+            animation: "marquee-right-strip 25s linear infinite" 
+          }}
+        >
+          {[1, 2, 3, 4].map((num) => (
+            <img 
+              key={num}
+              src="/Strip.jpg" 
+              alt="Nomadica Ticker Strip" 
+              style={{ 
+                height: "50px",
+                width: "auto",
+                objectFit: "contain",
+                padding: "0 2rem"
+              }} 
+            />
+          ))}
+        </div>
+        <style>{`
+          @keyframes marquee-right-strip {
+            0% {
+              transform: translateX(-50%);
+            }
+            100% {
+              transform: translateX(0%);
+            }
+          }
+        `}</style>
+      </div>
+
       {/* 6. Collection 1 Section */}
       {collectionConfigs[0] && (
         <ProductCarouselSection
