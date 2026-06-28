@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Search, ShoppingBag, User, Heart, Menu, X, ChevronDown,
 } from "lucide-react";
@@ -54,6 +54,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
+  const router = useRouter();
   const pathname = usePathname();
 
   const checkActive = (href: string) => {
@@ -124,13 +125,13 @@ export default function Navbar() {
     const handleCartUpdate = (e: any) => {
       fetchCart();
       if (e.detail?.openDrawer !== false) {
-        setCartOpen(true);
+        router.push("/cart");
       }
     };
 
     window.addEventListener("cart-updated", handleCartUpdate);
     return () => window.removeEventListener("cart-updated", handleCartUpdate);
-  }, []);
+  }, [router]);
 
   const totalItems = cart?.lines?.edges?.reduce((acc: number, edge: any) => acc + edge.node.quantity, 0) || 0;
   const userInitials = user?.firstName ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ""}`.toUpperCase() : "T";
@@ -318,7 +319,7 @@ export default function Navbar() {
                     }}
                   >
                     <Link
-                      href="/account/profile?tab=overview"
+                      href="/account/profile"
                       style={dropdownItemStyle}
                       onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(122, 92, 62, 0.08)"; }}
                       onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
@@ -326,7 +327,7 @@ export default function Navbar() {
                       Profile Hub
                     </Link>
                     <Link
-                      href="/account/profile?tab=orders"
+                      href="/account/orders"
                       style={dropdownItemStyle}
                       onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(122, 92, 62, 0.08)"; }}
                       onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
@@ -334,7 +335,7 @@ export default function Navbar() {
                       My Orders
                     </Link>
                     <Link
-                      href="/account/profile?tab=wishlist"
+                      href="/account/wishlist"
                       style={dropdownItemStyle}
                       onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(122, 92, 62, 0.08)"; }}
                       onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
@@ -377,15 +378,13 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Shopping Bag Button */}
-            <button
-              onClick={() => setCartOpen(true)}
+            {/* Shopping Bag Link */}
+            <Link
+              href="/cart"
               style={{
                 position: "relative",
                 color: "#1E1E1E",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
+                textDecoration: "none",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -418,7 +417,7 @@ export default function Navbar() {
               <span className="hidden lg:inline-block" style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
                 cart
               </span>
-            </button>
+            </Link>
 
             {/* Burger */}
             <button

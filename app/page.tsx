@@ -1533,6 +1533,100 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 15. Journey Banner Section */}
+      <section
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "500px",
+          overflow: "hidden",
+        }}
+      >
+        <Image
+          src="/paddy-img.jpg"
+          alt="Start Your Journey"
+          fill
+          sizes="100vw"
+          style={{
+            objectFit: "cover",
+            objectPosition: "center 100%",
+          }}
+          priority
+        />
+
+        {/* Center Content */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            padding: "0 1.5rem",
+            zIndex: 2,
+            color: "#FFFFFF",
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "clamp(2.5rem, 3vw, 3.5rem)",
+              fontWeight: 500,
+              marginBottom: "1rem",
+              lineHeight: 1.2,
+              letterSpacing: "-0.01em",
+              textShadow: "0 2px 4px rgba(0,0,0,0.15)",
+            }}
+          >
+            Start Your Journey
+          </h2>
+          
+          <p
+            style={{
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
+              fontWeight: 400,
+              marginBottom: "2rem",
+              opacity: 0.95,
+              textShadow: "0 1px 2px rgba(0,0,0,0.15)",
+            }}
+          >
+            Join thousands of travelers wearing their stories
+          </p>
+
+          <Link href="/shop" style={{ textDecoration: "none" }}>
+            <button
+              style={{
+                backgroundColor: "#C4B5A0",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "4px",
+                padding: "0.5rem 8rem",
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                transition: "background-color 0.3s ease, transform 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#6B4E37";
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#C4B5A0";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              SHOP THE COLLECTION
+            </button>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

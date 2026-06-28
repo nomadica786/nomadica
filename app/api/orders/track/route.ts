@@ -44,12 +44,36 @@ export async function POST(request: NextRequest) {
                     }
                   }
                   displayFulfillmentStatus
+                  shippingAddress {
+                    firstName
+                    lastName
+                    address1
+                    address2
+                    city
+                    province
+                    zip
+                    country
+                  }
+                  fulfillments(first: 5) {
+                    trackingInfo(first: 5) {
+                      number
+                      company
+                      url
+                    }
+                  }
                   lineItems(first: 50) {
                     edges {
                       node {
                         id
                         title
                         quantity
+                        variant {
+                          id
+                          price
+                          image {
+                            url
+                          }
+                        }
                       }
                     }
                   }
@@ -72,6 +96,8 @@ export async function POST(request: NextRequest) {
               currencyCode: orderNode.totalPriceSet?.shopMoney?.currencyCode || 'INR'
             },
             fulfillmentStatus: orderNode.displayFulfillmentStatus,
+            shippingAddress: orderNode.shippingAddress,
+            trackingInfo: orderNode.fulfillments?.[0]?.trackingInfo?.[0] || null,
             lineItems: {
               edges: orderNode.lineItems?.edges?.map((itemEdge: any) => {
                 const itemNode = itemEdge.node;
@@ -79,7 +105,16 @@ export async function POST(request: NextRequest) {
                   node: {
                     id: itemNode.id,
                     title: itemNode.title,
-                    quantity: itemNode.quantity
+                    quantity: itemNode.quantity,
+                    variant: itemNode.variant ? {
+                      price: {
+                        amount: itemNode.variant.price || '0',
+                        currencyCode: 'INR'
+                      },
+                      image: itemNode.variant.image ? {
+                        url: itemNode.variant.image.url
+                      } : null
+                    } : null
                   }
                 };
               })
@@ -92,7 +127,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fallback to mock order tracking
+    // 1. Try to find order in custom mock orders cookie first!
+    const mockOrdersCookie = cookieStore.get('mock_orders')?.value;
+    if (mockOrdersCookie) {
+      try {
+        const parsedOrders = JSON.parse(mockOrdersCookie);
+        const foundCustom = parsedOrders.find((edge: any) => {
+          const node = edge.node;
+          return (
+            (node.orderNumber.toLowerCase() === orderNumber.toLowerCase() ||
+             node.orderNumber.replace('NMD-', '').toLowerCase() === orderNumber.toLowerCase() ||
+             node.orderNumber.replace('#', '').toLowerCase() === orderNumber.replace('#', '').toLowerCase()) &&
+            node.email.toLowerCase() === email.toLowerCase()
+          );
+        });
+        if (foundCustom) {
+          console.log('[TRACK API] Found order in local custom mock_orders cookie:', foundCustom.node.orderNumber);
+          return NextResponse.json({ order: foundCustom.node });
+        }
+      } catch (e) {
+        console.error('[TRACK API] Failed to parse custom mock_orders cookie:', e);
+      }
+    }
+
+    // 2. Fallback to hardcoded mock order tracking
     const order = MOCK_ORDERS.find(o =>
       (o.orderNumber.toLowerCase() === orderNumber.toLowerCase() ||
        o.orderNumber.replace('NMD-', '').toLowerCase() === orderNumber.toLowerCase()) &&

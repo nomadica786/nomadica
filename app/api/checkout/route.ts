@@ -324,6 +324,16 @@ export async function POST(request: NextRequest) {
             currencyCode: body.currency || 'INR'
           },
           status: paymentMethod === 'cod' || paymentMethod === 'COD' ? 'Pending COD' : 'In Transit',
+          shippingAddress: {
+            firstName: body.firstName || 'Traveler',
+            lastName: body.lastName || 'Guest',
+            address1: body.address1 || '123 Main St',
+            address2: body.address2 || '',
+            city: body.city || 'Mumbai',
+            province: body.province || 'Maharashtra',
+            zip: body.zip || '400001',
+            country: 'India'
+          },
           lineItems: {
             edges: (body.lineItems || []).map((item: any, idx: number) => ({
               node: {

@@ -229,7 +229,7 @@ function CheckoutContent() {
                 window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: false } }));
 
                 setTimeout(() => {
-                  router.replace("/account/profile?tab=orders");
+                  router.replace("/account/orders");
                 }, 3000);
               } else {
                 setErrorMessage(verifyResult.error || "Payment verification failed.");
@@ -288,9 +288,9 @@ function CheckoutContent() {
           // Dispatch event to clear badge in navbar
           window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: false } }));
 
-          // Redirect to profile orders tab after 3 seconds
+          // Redirect to /account/orders after 3 seconds
           setTimeout(() => {
-            router.replace("/account/profile?tab=orders");
+            router.replace("/account/orders");
           }, 3000);
         } else {
           setErrorMessage(result.message || "Failed to process order.");
@@ -332,8 +332,25 @@ function CheckoutContent() {
             Thank you for shopping with Nomadica. We have successfully processed your payment. You will be redirected to your profile dashboard shortly to track your shipment.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>
-            <Link href="/account/profile?tab=orders" style={{ textDecoration: "none" }}>
-              <button className="btn-primary" style={{ padding: "0.75rem 1.5rem" }}>Track Orders</button>
+            <Link href="/account/orders" style={{ textDecoration: "none" }}>
+              <button
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  backgroundColor: "#C4B5A0",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "background-color 0.2s"
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#6B4E37"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#C4B5A0"; }}
+              >
+                Track Orders
+              </button>
             </Link>
           </div>
         </div>
@@ -589,8 +606,25 @@ function CheckoutContent() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary"
-              style={{ width: "100%", padding: "1rem", justifyContent: "center", fontSize: "0.9375rem", letterSpacing: "0.05em", textTransform: "uppercase", height: "52px" }}
+              style={{
+                width: "100%",
+                padding: "1rem",
+                justifyContent: "center",
+                fontSize: "0.9375rem",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+                height: "52px",
+                backgroundColor: "#C4B5A0",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "4px",
+                fontFamily: "'Montserrat', sans-serif",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "background-color 0.2s ease"
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#6B4E37"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#C4B5A0"; }}
             >
               {isSubmitting ? "Processing Payment..." : `Pay ₹${total.toLocaleString("en-IN")}`}
             </button>
