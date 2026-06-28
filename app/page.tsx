@@ -1191,6 +1191,7 @@ export default function HomePage() {
             />
           ))}
         </div>
+        
         <style>{`
           @keyframes marquee-right-strip {
             0% {
