@@ -126,7 +126,7 @@ export default function CartPage() {
   const totalAmount = currentSubtotal - couponSavings;
 
   return (
-    <div style={{ paddingTop: "80px", backgroundColor: "#FDFDFD", minHeight: "100vh" }}>
+    <div style={{ paddingTop: "0px", backgroundColor: "#F5F5F0", minHeight: "100vh" }}>
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
         
         {/* Title */}
