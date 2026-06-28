@@ -39,7 +39,7 @@ export default function ContactPage() {
       </div>
 
       {/* Content Card */}
-      <div style={{ maxWidth: "800px", margin: "-3rem auto 0", padding: "0 1.5rem" }}>
+      <div style={{ maxWidth: "800px", margin: "2rem auto 0", padding: "0 1.5rem" }}>
         <div 
           style={{ 
             backgroundColor: "#FFFFFF", 
