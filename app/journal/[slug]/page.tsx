@@ -67,40 +67,12 @@ export default async function ArticlePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] text-[#1E1E1E] w-full flex flex-col items-center">
-      <div style={{ paddingTop: "75px" }}></div>
+      <div className="pt-[75px]"></div>
       <JsonLd schema={articleSchema} />
       <JsonLd schema={breadcrumbSchema} />
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        .journal-rich-content {
-          font-family: 'Montserrat', sans-serif;
-          font-size: clamp(0.95rem, 1.6vw, 1.05rem);
-          line-height: 1.85;
-          color: rgba(30, 30, 30, 0.75);
-        }
-        .journal-rich-content p {
-          margin-bottom: 1.75rem;
-        }
-        .journal-rich-content h2, 
-        .journal-rich-content h3 {
-          font-family: 'Playfair Display', serif;
-          font-weight: 600;
-          color: #1E1E1E;
-          margin-top: 3rem;
-          margin-bottom: 1.25rem;
-          font-size: clamp(1.4rem, 2.5vw, 1.85rem);
-        }
-        .journal-rich-content ul, 
-        .journal-rich-content ol {
-          margin-bottom: 2rem;
-          padding-left: 1.5rem;
-        }
-        .journal-rich-content li {
-          margin-bottom: 0.5rem;
-        }
-      `}} />
-
       <main className="w-full max-w-5xl px-4 pt-10 pb-16 sm:px-8 flex flex-col items-center">
+        {/* 1. Navigation / Back to Articles link (Aligned left matching cover image boundary) */}
         <div className="w-full max-w-4xl flex justify-start mb-6">
           <Link 
             href="/journal" 
@@ -125,45 +97,30 @@ export default async function ArticlePage({ params }: PageProps) {
         )}
 
         {/* 3. Title (Centered Playfair Display serif) */}
-        <div style={{ textAlign: "center", marginBottom: "2rem", width: "100%", maxWidth: "860px" }}>
-          <h1 
-            style={{ 
-              fontFamily: "'Playfair Display', serif", 
-              fontSize: "clamp(2rem, 5vw, 3.25rem)", 
-              fontWeight: 500, 
-              color: "#1E1E1E",
-              lineHeight: 1.25,
-              margin: "0 0 1rem"
-            }}
-          >
+        <div className="text-center mb-8 w-full max-w-[860px] mx-auto">
+          <h1 className="font-['Playfair_Display',_serif] text-[clamp(2rem,5vw,3.25rem)] font-medium text-[#1E1E1E] leading-tight mb-4">
             {article.title}
           </h1>
 
           {/* 4. Subtext metadata (date and reading time) */}
-          <p 
-            style={{ 
-              fontFamily: "'Montserrat', sans-serif", 
-              fontSize: "0.85rem", 
-              color: "rgba(30,30,30,0.45)", 
-              fontWeight: 500,
-              margin: 0 
-            }}
-          >
+          <p className="font-['Montserrat',_sans-serif] text-[0.85rem] text-[#1E1E1E]/45 font-medium m-0">
             {dateFormatted} &nbsp;&middot;&nbsp; {readingTime} min read
           </p>
         </div>
 
         {/* 5. Article Rich HTML Content (Inside responsive broader text container with explicit padding) */}
-        <div 
-          style={{
-            width: "100%",
-            maxWidth: "860px",
-            margin: "0 auto",
-            padding: "0 1.5rem"
-          }}
-        >
+        <div className="w-full max-w-[860px] mx-auto px-4 sm:px-8">
           <article 
-            className="journal-rich-content py-4 w-full"
+            className="
+              py-4 w-full
+              font-['Montserrat',_sans-serif] text-[clamp(0.95rem,1.6vw,1.05rem)] leading-[1.85] text-[#1E1E1E]/80
+              [&_p]:mb-7
+              [&_h2]:font-['Playfair_Display',_serif] [&_h2]:font-semibold [&_h2]:text-[#1E1E1E] [&_h2]:mt-12 [&_h2]:mb-5 [&_h2]:text-[clamp(1.4rem,2.5vw,1.85rem)]
+              [&_h3]:font-['Playfair_Display',_serif] [&_h3]:font-semibold [&_h3]:text-[#1E1E1E] [&_h3]:mt-10 [&_h3]:mb-4 [&_h3]:text-[clamp(1.2rem,2vw,1.5rem)]
+              [&_ul]:mb-8 [&_ul]:pl-6 [&_ul]:list-disc
+              [&_ol]:mb-8 [&_ol]:pl-6 [&_ol]:list-decimal
+              [&_li]:mb-2
+            "
             dangerouslySetInnerHTML={{ __html: article.contentHtml }}
           />
 
