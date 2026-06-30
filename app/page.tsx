@@ -97,7 +97,6 @@ function HeroSection() {
         backgroundColor: "#000000",
       }}
     >
-      {/* 1. Sliding Track */}
       <div
         onClick={() => router.push("/shop")}
         style={{
@@ -1205,23 +1204,23 @@ export default function HomePage() {
       </div>
 
       {/* 6. Collection 1 Section */}
-      {collectionConfigs[0] && (
+      {collectionConfigs[2] && (
         <ProductCarouselSection
-          title={collectionConfigs[0].title}
-          products={collectionProducts[collectionConfigs[0].handle] || []}
+          title={collectionConfigs[2].title}
+          products={collectionProducts[collectionConfigs[2].handle] || []}
           loading={loading}
-          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[0].handle)}`}
+          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[2].handle)}`}
           viewAllText="VIEW ALL"
         />
       )}
 
       {/* 7. Collection 2 Section */}
-      {collectionConfigs[1] && (
+      {collectionConfigs[4] && (
         <ProductCarouselSection
-          title={collectionConfigs[1].title}
-          products={collectionProducts[collectionConfigs[1].handle] || []}
+          title={collectionConfigs[4].title}
+          products={collectionProducts[collectionConfigs[4].handle] || []}
           loading={loading}
-          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[1].handle)}`}
+          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[4].handle)}`}
           viewAllText="VIEW ALL"
           backgroundColor="#FFFFFF"
         />
@@ -1231,12 +1230,12 @@ export default function HomePage() {
       <TestimonialsSection bgTint={true} />
 
       {/* 9. Collection 3 Section */}
-      {collectionConfigs[2] && (
+      {collectionConfigs[0] && (
         <ProductCarouselSection
-          title={collectionConfigs[2].title}
-          products={collectionProducts[collectionConfigs[2].handle] || []}
+          title={collectionConfigs[0].title}
+          products={collectionProducts[collectionConfigs[0].handle] || []}
           loading={loading}
-          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[2].handle)}`}
+          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[0].handle)}`}
           viewAllText="VIEW ALL"
         />
       )}
@@ -1260,12 +1259,12 @@ export default function HomePage() {
       />
 
       {/* 12. Collection 5 Section */}
-      {collectionConfigs[4] && (
+      {collectionConfigs[1] && (
         <ProductCarouselSection
-          title={collectionConfigs[4].title}
-          products={collectionProducts[collectionConfigs[4].handle] || []}
+          title={collectionConfigs[1].title}
+          products={collectionProducts[collectionConfigs[1].handle] || []}
           loading={loading}
-          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[4].handle)}`}
+          viewAllLink={`/collections/${encodeURIComponent(collectionConfigs[1].handle)}`}
           viewAllText="VIEW ALL"
           backgroundColor="#FFFFFF"
         />
