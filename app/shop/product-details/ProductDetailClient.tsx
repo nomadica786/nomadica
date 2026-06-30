@@ -806,8 +806,8 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                       }
                     }}
                     style={{
-                      width: "28px",
-                      height: "28px",
+                      width: "44px",
+                      height: "44px",
                       borderRadius: "50%",
                       backgroundColor: v.colorHex,
                       border: (isCurrent || isHovered)
