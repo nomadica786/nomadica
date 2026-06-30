@@ -146,23 +146,29 @@ export default function CartPage() {
           <div 
             style={{ 
               textAlign: "center", 
-              padding: "5rem 1.5rem", 
-              backgroundColor: "#FFFFFF", 
-              border: "1px solid rgba(0,0,0,0.06)", 
+              width: "40%",
+              height: "40vh",
+              margin: "auto",
+              padding: "5rem 1.5rem",
               borderRadius: "8px" 
             }}
           >
-            <ShoppingBag size={48} style={{ color: "rgba(0,0,0,0.15)", marginBottom: "1.5rem" }} />
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1.1rem", fontWeight: 500, color: "#1E1E1E", marginBottom: "1.5rem" }}>
-              Your shopping cart is empty
+            <ShoppingBag size={60} style={{ color: "rgba(0,0,0,0.15)", marginBottom: "0.5rem"}} />
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "2rem", fontWeight: 800, color: "#1E1E1E", marginBottom: "0.5rem" }}>
+              Your Travel Bag is Empty
+              </p>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", fontWeight: 400, color: "rgba(30,30,30,0.5)", marginLeft: "0.5rem", marginBottom: "1rem" }}>
+            Start your adventure by adding some travel-inspired pieces to your cart.
             </p>
             <Link href="/shop" style={{ textDecoration: "none" }}>
               <button
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#c4a77dd6"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#C4A77D"}
                 style={{
-                  backgroundColor: "#C4B5A0",
+                  backgroundColor: "#C4A77D",
                   color: "#FFFFFF",
                   border: "none",
-                  borderRadius: "4px",
+                  borderRadius: "12px",
                   padding: "0.85rem 2rem",
                   fontFamily: "'Montserrat', sans-serif",
                   fontSize: "0.85rem",
@@ -170,7 +176,7 @@ export default function CartPage() {
                   cursor: "pointer"
                 }}
               >
-                Continue Shopping
+                Explore Collection
               </button>
             </Link>
           </div>
