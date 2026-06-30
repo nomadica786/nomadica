@@ -109,18 +109,9 @@ export default async function ArticlePage({ params }: PageProps) {
         </div>
 
         {/* 5. Article Rich HTML Content (Inside responsive broader text container with explicit padding) */}
-        <div className="w-full max-w-[860px] mx-auto px-4 sm:px-8">
+        <div className="w-full max-w-4xl mx-auto px-6 md:px-16 lg:px-24">
           <article 
-            className="
-              py-4 w-full
-              font-['Montserrat',_sans-serif] text-[clamp(0.95rem,1.6vw,1.05rem)] leading-[1.85] text-[#1E1E1E]/80
-              [&_p]:mb-7
-              [&_h2]:font-['Playfair_Display',_serif] [&_h2]:font-semibold [&_h2]:text-[#1E1E1E] [&_h2]:mt-12 [&_h2]:mb-5 [&_h2]:text-[clamp(1.4rem,2.5vw,1.85rem)]
-              [&_h3]:font-['Playfair_Display',_serif] [&_h3]:font-semibold [&_h3]:text-[#1E1E1E] [&_h3]:mt-10 [&_h3]:mb-4 [&_h3]:text-[clamp(1.2rem,2vw,1.5rem)]
-              [&_ul]:mb-8 [&_ul]:pl-6 [&_ul]:list-disc
-              [&_ol]:mb-8 [&_ol]:pl-6 [&_ol]:list-decimal
-              [&_li]:mb-2
-            "
+            className="journal-rich-content w-full"
             dangerouslySetInnerHTML={{ __html: article.contentHtml }}
           />
 
