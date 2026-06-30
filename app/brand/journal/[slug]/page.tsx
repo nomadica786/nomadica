@@ -73,7 +73,6 @@ export default async function ArticlePage({ params }: PageProps) {
 
   const readingTime = getReadingTime(article.contentHtml);
 
-  // Structured Article Schema for Search Engine SEO crawlers
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -104,28 +103,7 @@ export default async function ArticlePage({ params }: PageProps) {
       />
 
       {/* Custom styles for responsive text width and content HTML formatting */}
-      <style>{`
-        .article-container {
-          width: 100%;
-          max-width: 860px;
-          margin: 0 auto;
-        }
-        @media (max-width: 1024px) {
-          .article-container {
-            max-width: 720px;
-          }
-        }
-        @media (max-width: 768px) {
-          .article-container {
-            max-width: 620px;
-          }
-        }
-        @media (max-width: 480px) {
-          .article-container {
-            max-width: 100%;
-            padding: 0 1.25rem;
-          }
-        }
+      <style dangerouslySetInnerHTML={{ __html: `
         .journal-rich-content {
           font-family: 'Montserrat', sans-serif;
           font-size: clamp(0.95rem, 1.6vw, 1.05rem);
@@ -152,9 +130,9 @@ export default async function ArticlePage({ params }: PageProps) {
         .journal-rich-content li {
           margin-bottom: 0.5rem;
         }
-      `}</style>
+      `}} />
 
-      <main className="w-full max-w-5xl px-6 pt-16 pb-16 sm:px-8 flex flex-col items-center">
+      <main className="w-full max-w-5xl px-4 pt-10 pb-16 sm:px-8 flex flex-col items-center">
         {/* 1. Navigation / Back to Articles link (Aligned left matching cover image boundary) */}
         <div className="w-full max-w-4xl flex justify-start mb-6">
           <Link 
@@ -208,8 +186,15 @@ export default async function ArticlePage({ params }: PageProps) {
           </p>
         </div>
 
-        {/* 5. Article Rich HTML Content (Inside responsive broader text container) */}
-        <div className="article-container">
+        {/* 5. Article Rich HTML Content (Inside responsive broader text container with explicit padding) */}
+        <div 
+          style={{
+            width: "100%",
+            maxWidth: "860px",
+            margin: "0 auto",
+            padding: "0 1.5rem"
+          }}
+        >
           <article 
             className="journal-rich-content py-4 w-full"
             dangerouslySetInnerHTML={{ __html: article.contentHtml }}
