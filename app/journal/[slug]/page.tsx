@@ -57,7 +57,6 @@ export default async function ArticlePage({ params }: PageProps) {
 
   const readingTime = getReadingTime(article.contentHtml);
 
-  // Structured Article Schema for Search Engine SEO crawlers
   const articleSchema = getArticleSchema(article);
   const breadcrumbSchema = getBreadcrumbSchema([
     { name: "Home", path: "/" },
@@ -67,13 +66,11 @@ export default async function ArticlePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] text-[#1E1E1E] w-full flex flex-col items-center">
-      <div className="pt-[75px]"></div>
       <JsonLd schema={articleSchema} />
       <JsonLd schema={breadcrumbSchema} />
 
-      <main className="w-full max-w-5xl px-4 pt-10 pb-16 sm:px-8 flex flex-col items-center">
-        {/* 1. Navigation / Back to Articles link (Aligned left matching cover image boundary) */}
-        <div className="w-full max-w-4xl flex justify-start mb-6">
+      <main className="w-full max-w-[1800px] px-2 pt-5 pb-16 sm:px-8 flex flex-col items-center">
+        <div className="w-full px-6 lg:px-12">
           <Link 
             href="/journal" 
             className="inline-flex items-center gap-2 text-xs font-bold tracking-wider uppercase text-black/40 hover:text-black transition-colors duration-300"
@@ -81,23 +78,24 @@ export default async function ArticlePage({ params }: PageProps) {
             <span>&larr;</span> Back to Articles
           </Link>
         </div>
-
+        <div style={{ height: "28px" }}></div>
+ 
         {/* 2. Cover Image (Situated above the title) */}
         {article.image?.url && (
-          <div className="relative w-full max-w-4xl aspect-[16/9] overflow-hidden rounded-3xl bg-[#FFFFFF] border border-black/5 shadow-sm mb-12">
+          <div className="relative w-250 aspect-[16/9] overflow-hidden rounded-3xl bg-[#FFFFFF] border border-black/5 shadow-sm mb-12">
             <Image
               src={article.image.url}
               alt={article.image.altText || article.title}
               fill
               priority
-              sizes="(max-width: 1024px) 100vw, 1200px"
+              sizes="(max-width: 1024px) 120vw, 1400px"
               className="object-cover hover:scale-[1.02] transition-transform duration-700"
             />
           </div>
         )}
 
         {/* 3. Title (Centered Playfair Display serif) */}
-        <div className="text-center mb-8 w-full max-w-[860px] mx-auto">
+        <div className="text-center mb-8 w-full max-w-[1800px] mx-auto">
           <h1 className="font-['Playfair_Display',_serif] text-[clamp(2rem,5vw,3.25rem)] font-medium text-[#1E1E1E] leading-tight mb-4">
             {article.title}
           </h1>
@@ -109,7 +107,7 @@ export default async function ArticlePage({ params }: PageProps) {
         </div>
 
         {/* 5. Article Rich HTML Content (Inside responsive broader text container with explicit padding) */}
-        <div className="w-full max-w-4xl mx-auto px-6 md:px-16 lg:px-24">
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-16 lg:px-24">
           <article 
             className="journal-rich-content w-full"
             dangerouslySetInnerHTML={{ __html: article.contentHtml }}
@@ -121,7 +119,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
         {/* 7. More Travel Tips Section */}
         {otherArticles.length > 0 && (
-          <section className="w-full border-t border-black/5 pt-20 mt-12 max-w-5xl">
+          <section className="w-full border-t border-black/5 pt-20 mt-12 max-w-[1700px]">
             <h2 
               style={{
                 fontFamily: "'Playfair Display', serif",
@@ -148,7 +146,7 @@ export default async function ArticlePage({ params }: PageProps) {
                         src={other.image?.url || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
                         alt={other.title}
                         fill
-                        sizes="(max-width: 640px) 100vw, 33vw"
+                        sizes="(max-width: 680px) 140vw, 33vw"
                         style={{ objectFit: "cover" }}
                       />
                     </div>
