@@ -1,7 +1,7 @@
 // components/journal/ShareButtons.tsx
 "use client";
 import React, { useState, useEffect } from "react";
-import { Twitter, Facebook, Linkedin, Copy, Check } from "lucide-react";
+import { X, Copy, Check } from "lucide-react";
 
 export function ShareButtons() {
   const [copied, setCopied] = useState(false);
@@ -76,7 +76,7 @@ export function ShareButtons() {
           onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
           onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
         >
-          <Twitter size={14} fill="#FFFFFF" />
+          <X size={14} fill="#FFFFFF" />
         </button>
 
         {/* Facebook */}
@@ -99,7 +99,7 @@ export function ShareButtons() {
           onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
           onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
         >
-          <Facebook size={14} fill="#FFFFFF" />
+          <X size={14} fill="#FFFFFF" />
         </button>
 
         {/* LinkedIn */}
@@ -122,7 +122,7 @@ export function ShareButtons() {
           onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
           onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
         >
-          <Linkedin size={14} fill="#FFFFFF" />
+          <X size={14} fill="#FFFFFF" />
         </button>
 
         {/* Copy Link */}
