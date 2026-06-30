@@ -25,17 +25,6 @@ const navLinks = [
   { label: "ARTICLES", href: "/journal" },
   { label: "STORIES", href: "/brand/story" },
   { label: "ABOUT", href: "/brand/about" },
-  // {
-  //   label: "BRAND",
-  //   href: "/brand",
-  //   children: [
-  //     { label: "About Us", href: "/brand/about" },
-  //     { label: "Our Story", href: "/brand/story" },
-  //     { label: "Journal", href: "/journal" },
-  //     { label: "Sustainability", href: "/brand/sustainability" },
-  //   ],
-  // },
-  // // { label: "SUPPORT", href: "/support/faq" },
 ];
 
 const dropdownItemStyle = {
@@ -206,12 +195,12 @@ export default function Navbar() {
                   style={{
                     fontFamily: "'Montserrat', sans-serif",
                     fontSize: "0.875rem",
-                    fontWeight: 500,
+                    fontWeight: 600,
                     textDecoration: "none",
                     letterSpacing: "0.02em",
                     display: "flex",
                     alignItems: "center",
-                    gap: "4px",
+                    gap: "5px",
                     padding: "0.5rem 0",
                   }}
                 >
@@ -240,7 +229,7 @@ export default function Navbar() {
                         href={child.href}
                         style={{
                           display: "block",
-                          padding: "0.625rem 1.25rem",
+                          padding: "0.5rem 1.25rem",
                           fontFamily: "'Montserrat', sans-serif",
                           fontSize: "0.875rem",
                           color: "#1E1E1E",
@@ -265,7 +254,6 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right icons */}
           <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
             <Link 
               href="/account/wishlist" 
