@@ -17,7 +17,7 @@ export default async function BrandJournalPage() {
   const { articles, pageInfo } = await getBlogArticles(12);
 
   return (
-    <div className="min-h-screen bg-var(--sand) text-[#1E1E1E] pt-[64px] flex flex-col items-center w-full">
+    <div className="min-h-screen bg-var(--sand) text-[#1E1E1E] flex flex-col items-center w-full">
       <JournalGridClient 
         initialArticles={articles} 
         initialPageInfo={pageInfo} 
