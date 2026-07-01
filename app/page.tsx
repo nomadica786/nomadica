@@ -1148,7 +1148,7 @@ export default function HomePage() {
 
       {/* 4. Best Sellers Section */}
       <ProductCarouselSection
-        title="Best Sellers"
+        title="Bestsellers"
         products={bestSellers}
         loading={loading}
         viewAllLink="/shop/best-sellers"
