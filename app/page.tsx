@@ -449,9 +449,10 @@ function ProductCarouselSection({
                     style={{
                       flex: "0 0 calc(25% - 1.125rem)",
                       minWidth: "280px",
-                      aspectRatio: "653.27 / 978",
+                      aspectRatio: "274 / 477",
                       backgroundColor: "#F0F0F0",
-                      borderRadius: "8px",
+                      borderRadius: "10px",
+                      border: "1 px solid #EAEAEA",
                       animation: "shimmer 1.5s infinite"
                     }}
                   />
@@ -499,7 +500,7 @@ function ProductCarouselSection({
                           style={{
                             position: "relative",
                             width: "100%",
-                            aspectRatio: "750 / 978",
+                            aspectRatio: "285 / 356",
                             overflow: "hidden",
                             backgroundColor: "#F9F9F9"
                           }}
@@ -1043,7 +1044,7 @@ export default function HomePage() {
       <section
         style={{
           position: "relative",
-          backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url('/Map.png')",
+          backgroundImage: "linear-gradient(#faf9f7a6, #faf9f7a6), url('/Map.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
