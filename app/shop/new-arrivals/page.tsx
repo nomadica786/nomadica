@@ -3,6 +3,7 @@ import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts } from "@/utils/productGroup";
+import { ProductCarouselSection } from "@/components/shop/ProductCarouselSection";
 
 export default function NewArrivalsPage() {
   const { data: pageData, loading } = useApi(async () => {
@@ -74,17 +75,14 @@ export default function NewArrivalsPage() {
         </div>
       </div>
 
-      {/* Grid */}
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
-          {displayProducts.map((p: any) => (
-            <ProductCard
-              key={p.id}
-              {...p}
-              badge={newestIds.has(p.id) ? "New" : p.badge}
-            />
-          ))}
-        </div>
+      {/* Carousel */}
+      <div style={{ paddingBottom: "4rem" }}>
+        <ProductCarouselSection
+          title="New Arrivals"
+          products={displayProducts.map((p: any) => ({ ...p, badge: newestIds.has(p.id) ? "New" : p.badge }))}
+          loading={loading}
+          backgroundColor="#FAF9F7"
+        />
       </div>
     </div>
   );

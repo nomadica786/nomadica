@@ -5,6 +5,7 @@ import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts, sortNewArrivalsFirst } from "@/utils/productGroup";
+import { ProductCarouselSection } from "@/components/shop/ProductCarouselSection";
 
 const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
 
@@ -257,26 +258,14 @@ export default function CollectionClient({
         </div>
       </div>
 
-      {/* Products grid */}
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "3rem 1.5rem" }}>
-        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", color: "rgba(30,30,30,0.5)", marginBottom: "2rem" }}>
-          {finalProducts.length} items
-        </p>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: "1.5rem",
-          }}
-        >
-          {finalProducts.map((product: any) => (
-            <ProductCard
-              key={product.id}
-              {...product}
-              badge={newestIds.has(product.id) ? "New" : product.badge}
-            />
-          ))}
-        </div>
+      {/* Products carousel */}
+      <div style={{ paddingBottom: "3rem" }}>
+        <ProductCarouselSection
+          title={pageTitle}
+          products={finalProducts.map(p => ({ ...p, badge: newestIds.has(p.id) ? "New" : p.badge }))}
+          loading={loading}
+          backgroundColor="#FAF9F7"
+        />
       </div>
     </div>
   );

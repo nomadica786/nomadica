@@ -6,6 +6,7 @@ import { Heart, ShoppingCart, Star, ChevronDown } from "lucide-react";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import ProductCard from "@/components/shop/ProductCard";
+import { ProductCarouselSection } from "@/components/shop/ProductCarouselSection";
 import { parseProduct, groupProducts } from "@/utils/productGroup";
 import { useAuth } from "@/utils/hooks/useAuth";
 import Image from "next/image";
@@ -1077,28 +1078,14 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
       </div>
 
       {/* Related products */}
-      <div style={{ backgroundColor: "#F5F3F0", width: "100%", padding: "5rem 0", marginTop: "4rem" }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 1.5rem" }}>
-          <h2
-            style={{
-              fontFamily: "'Playfair Display', sans-serif",
-              fontSize: "2rem",
-              fontWeight: 600,
-              color: "#1E1E1E",
-              marginBottom: "3rem",
-              letterSpacing: "-0.01em",
-              textAlign: "center"
-            }}
-          >
-            You May Also Like
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "2rem" }}>
-            {relatedProducts.map((p) => (
-              <ProductCard key={p.id} {...p} />
-            ))}
-          </div>
-        </div>
-      </div>
+      {relatedProducts.length > 0 && (
+        <ProductCarouselSection
+          title="You May Also Like"
+          products={relatedProducts}
+          loading={false}
+          backgroundColor="#F5F3F0"
+        />
+      )}
     </div>
   );
 }
