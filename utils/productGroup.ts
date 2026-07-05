@@ -16,6 +16,7 @@ export interface ColorVariant {
 }
 
 export interface GroupedProduct {
+  variants?: any; // kept for backwards compatibility just in case
   id: string;
   name: string; // Product type name (e.g. "Tee")
   price: number;
@@ -29,6 +30,8 @@ export interface GroupedProduct {
   handle: string;
   colorVariants: ColorVariant[];
   createdAt?: string;
+  collections?: string[];
+  allVariants?: any[];
 }
 
 export const COLOR_HEX_MAP: Record<string, string> = {
@@ -145,11 +148,17 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
         mockupImage: mockupImage || undefined,
         handle: product.handle,
         colorVariants: [variant],
-        createdAt: product.createdAt
+        createdAt: product.createdAt,
+        collections: product.collections || [],
+        allVariants: product.variants?.edges ? [...product.variants.edges] : [],
       };
     } else {
       // Add variant
       groups[groupKey].colorVariants.push(variant);
+      
+      if (product.variants?.edges) {
+        groups[groupKey].allVariants?.push(...product.variants.edges);
+      }
 
       // Bubble up badge if variant has one
       if (!groups[groupKey].badge && variant.badge) {

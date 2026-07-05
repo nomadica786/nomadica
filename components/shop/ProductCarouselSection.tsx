@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Heart, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
+import { style } from "framer-motion/client";
 
 export function ProductCarouselSection({
   icon,
@@ -295,7 +296,6 @@ export function ProductCarouselSection({
                             }}
                           />
 
-                          {/* Wishlist Heart Button */}
                           <button
                             onClick={(e) => {
                               e.preventDefault();
@@ -328,7 +328,9 @@ export function ProductCarouselSection({
                             }}
                             aria-label="Add to wishlist"
                           >
-                            <Heart size={18} color="#1E1E1E" />
+                            <Heart size={18} color="#1E1E1E" onClick={() => {
+                              backgroundColor: "red"
+                            }} />
                           </button>
                         </div>
                       </Link>

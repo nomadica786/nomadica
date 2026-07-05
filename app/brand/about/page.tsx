@@ -6,12 +6,12 @@ import { Sparkles, Leaf, Check } from "lucide-react";
 export default function AboutPage() {
   const standForItems = [
     {
-      icon: <Sparkles size={28} style={{ color: "#8E7F6A" }} />,
+      icon: <Sparkles size={36} style={{ color: "#8B9A7D" }} />,
       title: "Premium Quality",
       desc: "We use carefully selected cotton blends that are soft, breathable, and long-lasting. Every piece is made to feel luxurious while being durable enough for everyday adventures."
     },
     {
-      icon: <Leaf size={28} style={{ color: "#8E7F6A" }} />,
+      icon: <Leaf size={36} style={{ color: "#8B9A7D" }} />,
       title: "Original Designs",
       desc: "Each design is created by our team of travel-loving artists. We transform real destinations and experiences into distinctive, story-driven artwork you won't find anywhere else."
     }
@@ -41,7 +41,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div style={{ backgroundColor: "#FDFDFD", minHeight: "120vh", fontFamily: "'Montserrat', sans-serif" }}>
+    <div style={{ backgroundColor: "#FBF9F7", minHeight: "120vh", fontFamily: "'Montserrat', sans-serif" }}>
       
       {/* 1. Top Banner Image - Fills page width and height constraint */}
       <div 
@@ -65,15 +65,15 @@ export default function AboutPage() {
       </div>
 
       {/* Main Section */}
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "5rem 1.5rem" }}>
+      <div style={{ maxWidth: "100%", margin: "0 auto", padding: "4rem 0rem" }}>
         
         {/* 2. Page Title Header */}
         <div style={{ textAlign: "center", marginBottom: "5rem" }}>
           <h1 
             style={{ 
               fontFamily: "'Playfair Display', serif", 
-              fontSize: "clamp(2.5rem, 5vw, 3.5rem)", 
-              fontWeight: 500, 
+              fontSize: "clamp(1.5rem, 3.25rem, 5.5rem)", 
+              fontWeight: 300, 
               color: "#1E1E1E",
               margin: "0 0 0.5rem" 
             }}
@@ -82,8 +82,8 @@ export default function AboutPage() {
           </h1>
           <p 
             style={{ 
-              fontSize: "1rem", 
-              color: "rgba(30,30,30,0.5)", 
+              fontSize: "1.25rem", 
+              color: "rgb(102, 102, 102)",
               letterSpacing: "0.05em",
               margin: 0
             }}
@@ -97,8 +97,9 @@ export default function AboutPage() {
           <h2 
             style={{ 
               fontFamily: "'Playfair Display', serif", 
-              fontSize: "2rem", 
-              fontWeight: 600, 
+              marginTop: "160px",
+              fontSize: "2.625rem", 
+              fontWeight: 300, 
               color: "#1E1E1E", 
               marginBottom: "2rem" 
             }}
@@ -107,8 +108,8 @@ export default function AboutPage() {
           </h2>
           <div 
             style={{ 
-              fontSize: "0.95rem", 
-              color: "rgba(30, 30, 30, 0.72)", 
+              fontSize: "1.063rem", 
+              color: "rgb(102, 102, 102)", 
               lineHeight: 1.9, 
               display: "flex", 
               flexDirection: "column", 
@@ -125,18 +126,19 @@ export default function AboutPage() {
             <p>
               We believe in quality over quantity, sustainability over fast fashion, and designs that tell meaningful stories. Our collections are thoughtfully crafted using premium fabrics and high-end printing techniques to ensure they last through countless journeys.
             </p>
-            <p style={{ fontStyle: "italic", color: "rgba(30, 30, 30, 0.5)", margin: "0.5rem 0" }}>
+            <p>
               From the romantic streets of Paris to the wild African safaris...<br />
               From the serene mountains of Patagonia to golden coastal sunsets...
             </p>
-            <p style={{ fontWeight: 600, color: "#1E1E1E" }}>
+            <p>
               We bring these moments to life — not just as memories, but as wearable art.
             </p>
           </div>
         </div>
 
         {/* 4. What We Stand For Section */}
-        <div style={{ marginBottom: "6rem" }}>
+      <div style={{backgroundColor: "rgb(245, 245, 245)", padding: "80px 0"}}>
+        <div style={{ marginBottom: "1rem" }}>
           <div style={{ textAlign: "center", marginBottom: "3rem" }}>
             <h2 
               style={{ 
@@ -159,20 +161,20 @@ export default function AboutPage() {
               display: "grid", 
               gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", 
               gap: "2.5rem",
-              maxWidth: "960px",
+              maxWidth: "800px",
               margin: "0 auto" 
             }}
           >
-            {standForItems.map((item, idx) => (
+            { standForItems.map((item, idx) => (
               <div 
                 key={idx}
                 style={{
                   backgroundColor: "#FFFFFF",
                   border: "1px solid rgba(0,0,0,0.06)",
                   borderRadius: "12px",
-                  padding: "3rem 2rem",
+                  padding: "40px 32px",
                   textAlign: "center",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.015)"
+                  boxShadow: "rgba(0, 0, 0, 0.08) 0px 4px 12px"
                 }}
               >
                 <div style={{ display: "inline-flex", marginBottom: "1.5rem" }}>
@@ -189,13 +191,14 @@ export default function AboutPage() {
                 >
                   {item.title}
                 </h3>
-                <p style={{ fontSize: "0.85rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.7, margin: 0 }}>
+                <p style={{ fontSize: "0.938rem", color: "rgb(102, 102, 102)", lineHeight: 1.7, margin: 0 }}>
                   {item.desc}
                 </p>
               </div>
             ))}
           </div>
         </div>
+      </div>
 
         {/* 5. Why Choose Nomadica Section */}
         <div style={{ marginBottom: "6rem" }}>
@@ -203,10 +206,10 @@ export default function AboutPage() {
             <h2 
               style={{ 
                 fontFamily: "'Playfair Display', serif", 
-                fontSize: "2.25rem", 
-                fontWeight: 600, 
+                fontSize: "2.625rem", 
+                fontWeight: 300, 
                 color: "#1E1E1E", 
-                margin: 0 
+                marginTop: "80px"
               }}
             >
               Why Choose Nomadica
@@ -237,13 +240,13 @@ export default function AboutPage() {
                     marginTop: "0.2rem"
                   }}
                 >
-                  <Check size={16} strokeWidth={3} />
+                  <Check size={22} strokeWidth={3} />
                 </div>
                 <div>
-                  <h4 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#1E1E1E", margin: "0 0 0.4rem" }}>
+                  <h4 style={{ fontSize: "1.125rem", fontWeight: 600, color: "#1E1E1E", margin: "0 0 0.4rem" }}>
                     {item.title}
                   </h4>
-                  <p style={{ fontSize: "0.825rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6, margin: 0 }}>
+                  <p style={{ fontSize: "0.938rem", color: "rgba(30,30,30,0.6)", lineHeight: 1.6, margin: 0 }}>
                     {item.desc}
                   </p>
                 </div>
@@ -252,62 +255,6 @@ export default function AboutPage() {
           </div>
         </div>
 
-      </div>
-
-      {/* 6. Join Our Community Banner */}
-      <div 
-        style={{ 
-          backgroundColor: "#3A2E26", 
-          padding: "5rem 1.5rem", 
-          textAlign: "center", 
-          color: "#FFFFFF" 
-        }}
-      >
-        <div style={{ maxWidth: "680px", margin: "0 auto" }}>
-          <h2 
-            style={{ 
-              fontFamily: "'Playfair Display', serif", 
-              fontSize: "clamp(2rem, 4vw, 2.5rem)", 
-              fontWeight: 500, 
-              marginBottom: "1rem" 
-            }}
-          >
-            Join Our Community
-          </h2>
-          <p 
-            style={{ 
-              fontSize: "0.95rem", 
-              color: "rgba(255,255,255,0.75)", 
-              lineHeight: 1.8, 
-              marginBottom: "2.5rem" 
-            }}
-          >
-            Wear your wanderlust. Start your collection today and join thousands of travelers expressing their passion for adventure.
-          </p>
-
-          <Link href="/shop" style={{ textDecoration: "none" }}>
-            <button
-              style={{
-                backgroundColor: "#C4B5A0",
-                color: "#FFFFFF",
-                border: "none",
-                borderRadius: "4px",
-                padding: "1rem 2.5rem",
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                transition: "background-color 0.2s"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#6B4E37"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#C4B5A0"}
-            >
-              SHOP THE COLLECTION
-            </button>
-          </Link>
-        </div>
       </div>
 
     </div>

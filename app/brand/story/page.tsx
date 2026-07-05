@@ -1,10 +1,9 @@
 // app/brand/story/page.tsx
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, memo } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import Image from "next/image";
 import { Play, X, Compass, Loader2 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
 
 interface TravelShort {
   id: string;
@@ -94,9 +93,12 @@ export default function BrandStoryPage() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
+  const isFetchingRef = useRef(false);
+
   // Fetch travel shorts from endpoint
   const fetchShorts = useCallback(async (token: string) => {
-    if (isLoading || !token) return;
+    if (isFetchingRef.current || !token) return;
+    isFetchingRef.current = true;
     setIsLoading(true);
 
     try {
@@ -104,15 +106,20 @@ export default function BrandStoryPage() {
       if (!response.ok) throw new Error("Failed to fetch travel shorts");
       
       const data = await response.json();
-      setVideos((prev) => [...prev, ...data.videos]);
+      setVideos((prev) => {
+        const existingIds = new Set(prev.map(v => v.id));
+        const newVideos = data.videos.filter((v: TravelShort) => !existingIds.has(v.id));
+        return [...prev, ...newVideos];
+      });
       setPageToken(data.nextPageToken);
       setIsInitialLoad(false);
     } catch (error) {
       console.error("Error loading travel shorts:", error);
     } finally {
       setIsLoading(false);
+      isFetchingRef.current = false;
     }
-  }, [isLoading]);
+  }, []);
 
   // Initial load
   useEffect(() => {
@@ -196,7 +203,7 @@ export default function BrandStoryPage() {
       </section>
 
       {/* Travel Shorts Wall */}
-      <main className="w-full mx-auto" style={{ paddingLeft: "8%", paddingRight: "8%", paddingBottom: "4rem" }}>
+      <main className="w-full mx-auto" style={{ paddingLeft: "10%", paddingRight: "10%", paddingBottom: "4rem" }}>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {videos.map((video, idx) => (
             <VideoCard
