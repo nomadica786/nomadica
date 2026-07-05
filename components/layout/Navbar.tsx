@@ -254,18 +254,20 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
             <Link 
               href="/account/wishlist" 
               style={{ 
                 color: "#1E1E1E", 
                 textDecoration: "none",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
                 gap: "4px"
               }} 
-              className="hidden lg:flex flex-col items-center"
             >
               <Heart size={20} />
-              <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+              <span className="hidden lg:block" style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
                 wishlist
               </span>
             </Link>
@@ -282,12 +284,14 @@ export default function Navbar() {
                   style={{
                     textDecoration: "none",
                     color: "#1E1E1E",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
                     gap: "4px"
                   }}
-                  className="hidden lg:flex flex-col items-center"
                 >
                   <User size={20} />
-                  <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+                  <span className="hidden lg:block" style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
                     {user?.firstName || "profile"}
                   </span>
                 </Link>
@@ -355,12 +359,14 @@ export default function Navbar() {
                 style={{ 
                   color: "#1E1E1E",
                   textDecoration: "none",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
                   gap: "4px"
                 }} 
-                className="hidden lg:flex flex-col items-center"
               >
                 <User size={20} />
-                <span style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
+                <span className="hidden lg:block" style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
                   log in
                 </span>
               </Link>
