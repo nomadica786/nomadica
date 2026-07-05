@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import ProductCard from "@/components/shop/ProductCard";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
-import { groupProducts, sortNewArrivalsFirst } from "@/utils/productGroup";
+import { groupProducts } from "@/utils/productGroup";
+import { ProductCarouselSection } from "@/components/shop/ProductCarouselSection";
+import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
 
 function Countdown({ targetDate }: { targetDate: Date }) {
   const [time, setTime] = useState({ h: 0, m: 0, s: 0 });
@@ -36,15 +37,24 @@ function Countdown({ targetDate }: { targetDate: Date }) {
 export default function LimitedDropsPage() {
   const target = new Date(Date.now() + 48 * 3600 * 1000);
   const { data: pageData, loading } = useApi(async () => {
-    const [productsRes, mockupsRes] = await Promise.all([
+    const [productsRes, mockupsRes, collectionsRes] = await Promise.all([
       api.products.list(50),
-      api.mockups.get().catch(() => ({ mockups: {} }))
+      api.mockups.get().catch(() => ({ mockups: {} })),
+      api.collections.list().catch(() => ({ collections: { edges: [] } }))
     ]);
     return {
       products: productsRes,
-      mockups: mockupsRes?.mockups || {}
+      mockups: mockupsRes?.mockups || {},
+      collections: collectionsRes?.collections?.edges?.map((e: any) => e.node.title) || []
     };
   });
+
+  const categories = ["All", ...(pageData?.collections || [])];
+
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedSize, setSelectedSize] = useState<string>("All");
+  const [selectedColor, setSelectedColor] = useState<string>("All");
+  const [sortBy, setSortBy] = useState<string>("Featured");
 
   if (loading) {
     return <PageLoader />;
@@ -66,6 +76,8 @@ export default function LimitedDropsPage() {
       productType: node.productType || node.category || 'Tops',
       createdAt: node.createdAt || '',
       handle: node.handle,
+      collections: node.collections?.edges?.map((e: any) => e.node.title) || [],
+      variants: node.variants
     };
   }) || [];
 
@@ -73,7 +85,50 @@ export default function LimitedDropsPage() {
   const drops = groupedProducts.filter((p: any) => p.badge?.toLowerCase() === 'limited');
   const baseList = drops.length > 0 ? drops : groupedProducts.slice(0, 3);
 
-  const { sorted: displayProducts, newestIds } = sortNewArrivalsFirst(baseList, 3);
+  // Apply filtering
+  const filteredProducts = baseList.filter(product => {
+    if (selectedCategory !== "All") {
+      const expectedCat = selectedCategory.toLowerCase();
+      const matchesCollection = product.collections?.some((c: string) => c.toLowerCase() === expectedCat);
+      const matchesType = (product.productType || product.category || "").toLowerCase() === expectedCat;
+      if (!matchesCollection && !matchesType) return false;
+    }
+    if (selectedSize !== "All") {
+      const hasSize = product.allVariants?.some((edge: any) => 
+        edge.node?.title?.toLowerCase().includes(selectedSize.toLowerCase()) || 
+        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "size" && opt.value.toLowerCase() === selectedSize.toLowerCase())
+      );
+      if (!hasSize) return false;
+    }
+    if (selectedColor !== "All") {
+      const hasColor = product.allVariants?.some((edge: any) => 
+        edge.node?.title?.toLowerCase().includes(selectedColor.toLowerCase()) || 
+        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "color" && opt.value.toLowerCase() === selectedColor.toLowerCase())
+      );
+      if (!hasColor) return false;
+    }
+    return true;
+  });
+
+  // Apply sorting
+  const finalProducts = (() => {
+    let sorted = [...filteredProducts];
+    if (sortBy === "Price: Low to High") {
+      sorted.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "Price: High to Low") {
+      sorted.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "Newest") {
+      sorted.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    } else {
+      const newestPart = [...sorted].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 3);
+      const otherPart = sorted.filter(p => !newestPart.find(n => n.id === p.id));
+      otherPart.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      return [...newestPart, ...otherPart];
+    }
+    return sorted;
+  })();
+
+  const newestIds = new Set([...baseList].sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 3).map(p => p.id));
 
   return (
     <div style={{ paddingTop: "0px", backgroundColor: "#FAF9F7", minHeight: "100vh" }}>
@@ -118,9 +173,23 @@ export default function LimitedDropsPage() {
         </div>
       </div>
 
+      <ShopFilterBar 
+        categories={categories}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        selectedSize={selectedSize}
+        setSelectedSize={setSelectedSize}
+        selectedColor={selectedColor}
+        setSelectedColor={setSelectedColor}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        productCount={finalProducts.length}
+      />
+
+      {/* Products Grid */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
-          {displayProducts.map((p: any) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {finalProducts.map((p: any) => (
             <ProductCard
               key={p.id}
               {...p}

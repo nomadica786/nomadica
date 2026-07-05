@@ -36,12 +36,12 @@ export function JournalCard({ article, priority = false }: { article: ShopifyArt
   return (
     <Link href={`/journal/${article.handle}`} style={{ textDecoration: "none", display: "block", width: "100%" }}>
       <div className="journal-card">
-        <div className="journal-card-image-wrap" style={{ aspectRatio: "16/10", position: "relative", width: "100%", overflow: "hidden" }}>
+        <div className="journal-card-image-wrap" style={{ aspectRatio: "15/10", position: "relative", width: "100%", overflow: "hidden" }}>
           <Image
             src={article.image?.url || "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80"}
             alt={article.title}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 640px) 120vw, (max-width: 1024px) 60vw, 33vw"
             style={{ objectFit: "cover" }}
             priority={priority}
           />
@@ -68,8 +68,8 @@ export function JournalCard({ article, priority = false }: { article: ShopifyArt
           <h3
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              fontSize: "1.125rem",
-              fontWeight: 600,
+              fontSize: "1.25rem",
+              fontWeight: 500,
               color: "#111111",
               marginBottom: "0.75rem",
               lineHeight: 1.4,
@@ -89,18 +89,6 @@ export function JournalCard({ article, priority = false }: { article: ShopifyArt
           >
             {article.excerpt}
           </p>
-          <span
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.75rem",
-              color: "rgba(30,30,30,0.45)",
-              display: "block",
-              marginBottom: "1.5rem",
-              marginTop: "auto",
-            }}
-          >
-            By {article.authorV2?.name || "Nomadica Editor"}
-          </span>
           <div
             style={{
               fontFamily: "'Montserrat', sans-serif",
@@ -170,7 +158,7 @@ export default function JournalGridClient({
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           width: "100%",
-          minHeight: "200px",
+          minHeight: "120px",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -249,7 +237,7 @@ export default function JournalGridClient({
       </section>
 
       {/* Main Content Area */}
-      <main className="w-full max-w-[1400px] mx-auto px-8 pt-20 pb-32 sm:px-12 flex flex-col items-center justify-center" style={{ marginTop: "4rem" }}>
+      <main className="w-full max-w-[1800px] mx-auto px-8 pt-20 pb-32 sm:px-12 flex flex-col items-center justify-center" style={{ marginTop: "-2rem" }}>
         {/* Grid containing cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full justify-items-center justify-center">
           {filteredArticles.map((article, idx) => (

@@ -198,6 +198,16 @@ export function formatProductGraphQL(product: MockProduct) {
     handle: product.handle,
     category: product.category,
     productType: product.productType || product.category || "Tops",
+    collections: {
+      edges: [
+        {
+          node: {
+            title: product.category,
+            handle: product.category.toLowerCase().replace(/\s+/g, '-')
+          }
+        }
+      ]
+    },
     badge: product.badge,
     rating: product.rating,
     reviews: product.reviews,
@@ -217,6 +227,10 @@ export function formatProductGraphQL(product: MockProduct) {
         node: {
           id: `gid://shopify/ProductVariant/${product.id}00${idx}`,
           title: size,
+          selectedOptions: [
+            { name: "Size", value: size },
+            ...(product.colors.length > 0 ? [{ name: "Color", value: product.colors[0] }] : [])
+          ],
           price: {
             amount: String(product.price),
             currencyCode: "INR"

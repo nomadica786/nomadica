@@ -2,10 +2,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ProductCard from "@/components/shop/ProductCard";
-import { api, useApi } from "@/components/api/api";
+import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
-import { groupProducts, sortNewArrivalsFirst } from "@/utils/productGroup";
-import { ProductCarouselSection } from "@/components/shop/ProductCarouselSection";
+import { groupProducts } from "@/utils/productGroup";
+import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
 
 const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
 
@@ -30,6 +30,13 @@ export default function CollectionClient({
   const [loading, setLoading] = useState(!initialProducts);
   const [productsState, setProductsState] = useState<any[]>(initialProducts || []);
   const [mockups, setMockups] = useState<Record<string, string>>({});
+
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    categoryParam.toLowerCase() === "all" ? "All" : 
+    (categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1))
+  );
+  const [selectedSize, setSelectedSize] = useState<string>("All");
+  const [selectedColor, setSelectedColor] = useState<string>("All");
 
   // Fetch mockups on mount
   useEffect(() => {
@@ -106,6 +113,8 @@ export default function CollectionClient({
             category: node.productType || node.category || 'Tops',
             productType: node.productType || node.category || 'Tops',
             createdAt: node.createdAt || '',
+            collections: node.collections?.edges?.map((e: any) => e.node.title) || [],
+            variants: node.variants,
           };
         }) || [];
         setProductsState(mapped);
@@ -133,29 +142,51 @@ export default function CollectionClient({
 
   const groupedProducts = groupProducts(productsState, mockups);
 
-  // Apply "new arrivals first" partition and badge mapping
-  const { sorted: sortedProducts, newestIds } = sortNewArrivalsFirst(groupedProducts, 3);
-
-  // Sort other products (not in the top 3 newest) based on user's sorting option
-  const finalProducts = (() => {
-    const newestPart = sortedProducts.filter(p => newestIds.has(p.id));
-    const otherPart = sortedProducts.filter(p => !newestIds.has(p.id));
-
-    if (sortBy === "Price: Low to High") {
-      otherPart.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "Price: High to Low") {
-      otherPart.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "Newest") {
-      otherPart.sort((a, b) => {
-        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-      });
+  // Apply filtering
+  const filteredProducts = groupedProducts.filter(product => {
+    if (selectedCategory !== "All") {
+      const expectedCat = selectedCategory.toLowerCase();
+      const matchesCollection = product.collections?.some((c: string) => c.toLowerCase() === expectedCat);
+      const matchesType = (product.productType || product.category || "").toLowerCase() === expectedCat;
+      if (!matchesCollection && !matchesType) return false;
     }
+    if (selectedSize !== "All") {
+      const hasSize = product.allVariants?.some((edge: any) => 
+        edge.node?.title?.toLowerCase().includes(selectedSize.toLowerCase()) || 
+        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "size" && opt.value.toLowerCase() === selectedSize.toLowerCase())
+      );
+      if (!hasSize) return false;
+    }
+    if (selectedColor !== "All") {
+      const hasColor = product.allVariants?.some((edge: any) => 
+        edge.node?.title?.toLowerCase().includes(selectedColor.toLowerCase()) || 
+        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "color" && opt.value.toLowerCase() === selectedColor.toLowerCase())
+      );
+      if (!hasColor) return false;
+    }
+    return true;
+  });
 
-    return [...newestPart, ...otherPart];
+  // Apply sorting
+  const finalProducts = (() => {
+    let sorted = [...filteredProducts];
+    if (sortBy === "Price: Low to High") {
+      sorted.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "Price: High to Low") {
+      sorted.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "Newest") {
+      sorted.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    } else {
+      const newestPart = [...sorted].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 3);
+      const otherPart = sorted.filter(p => !newestPart.find(n => n.id === p.id));
+      otherPart.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      return [...newestPart, ...otherPart];
+    }
+    return sorted;
   })();
 
-  const isAll = categoryParam.toLowerCase() === "all";
-  const pageTitle = initialCollectionTitle || (isAll ? "All Collections" : (categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)));
+  const isAll = selectedCategory === "All";
+  const pageTitle = initialCollectionTitle || (isAll ? "All Collections" : selectedCategory);
   const pageLabel = isAll ? "Explore" : "Collection";
 
   return (
@@ -182,90 +213,29 @@ export default function CollectionClient({
         </div>
       </div>
 
-      {/* Filter bar */}
-      <div
-        style={{
-          position: "sticky",
-          top: "64px",
-          zIndex: 100,
-          backgroundColor: "#FFFFFF",
-          borderBottom: "1px solid rgba(30,30,30,0.1)",
-          padding: "0 1.5rem",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1400px",
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "1rem",
-            overflowX: "auto",
-            padding: "1rem 0",
-          }}
-        >
-          {/* Category tabs */}
-          <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
-            {categories.map((cat) => {
-              const isSelected = categoryParam.toLowerCase() === cat.handle.toLowerCase();
-              return (
-                <button
-                  key={cat.handle}
-                  onClick={() => handleCategoryChange(cat.handle)}
-                  style={{
-                    padding: "0.5rem 1rem",
-                    border: isSelected ? "1px solid #1E1E1E" : "1px solid rgba(30,30,30,0.2)",
-                    backgroundColor: isSelected ? "#1E1E1E" : "transparent",
-                    color: isSelected ? "#FFFFFF" : "#1E1E1E",
-                    fontFamily: "'Montserrat', sans-serif",
-                    fontSize: "0.8125rem",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {cat.title}
-                </button>
-              );
-            })}
-          </div>
+      <ShopFilterBar 
+        categories={categories.map(c => c.title)}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        selectedSize={selectedSize}
+        setSelectedSize={setSelectedSize}
+        selectedColor={selectedColor}
+        setSelectedColor={setSelectedColor}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        productCount={finalProducts.length}
+      />
 
-          {/* Sort */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
-            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)" }}>
-              Sort:
-            </span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "0.8125rem",
-                color: "#1E1E1E",
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                outline: "none",
-              }}
-            >
-              {sortOptions.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          </div>
+      {/* Products Grid */}
+      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {finalProducts.map((p: any) => (
+            <ProductCard
+              key={p.id}
+              {...p}
+            />
+          ))}
         </div>
-      </div>
-
-      {/* Products carousel */}
-      <div style={{ paddingBottom: "3rem" }}>
-        <ProductCarouselSection
-          title={pageTitle}
-          products={finalProducts.map(p => ({ ...p, badge: newestIds.has(p.id) ? "New" : p.badge }))}
-          loading={loading}
-          backgroundColor="#FAF9F7"
-        />
       </div>
     </div>
   );
