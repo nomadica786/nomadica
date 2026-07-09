@@ -122,6 +122,27 @@ export default function Navbar() {
     return () => window.removeEventListener("cart-updated", handleCartUpdate);
   }, [router]);
 
+  // Wishlist State
+  const [wishlistCount, setWishlistCount] = useState(0);
+
+  const fetchWishlist = async () => {
+    try {
+      const res = await api.wishlist.list();
+      setWishlistCount(res?.wishlist?.length || 0);
+    } catch (err) {
+      console.error("[NAVBAR] Failed to fetch wishlist:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchWishlist();
+    const handleWishlistUpdate = () => {
+      fetchWishlist();
+    };
+    window.addEventListener("wishlist-updated", handleWishlistUpdate);
+    return () => window.removeEventListener("wishlist-updated", handleWishlistUpdate);
+  }, []);
+
   const totalItems = cart?.lines?.edges?.reduce((acc: number, edge: any) => acc + edge.node.quantity, 0) || 0;
   const userInitials = user?.firstName ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ""}`.toUpperCase() : "T";
 
@@ -263,10 +284,34 @@ export default function Navbar() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: "4px"
+                gap: "4px",
+                position: "relative"
               }} 
             >
-              <Heart size={20} />
+              <div style={{ position: "relative" }}>
+                <Heart size={20} />
+                {wishlistCount > 0 && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "-6px",
+                      right: "-8px",
+                      backgroundColor: "#D32F2F",
+                      color: "#FFFFFF",
+                      fontSize: "10px",
+                      fontWeight: 600,
+                      width: "16px",
+                      height: "16px",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {wishlistCount}
+                  </div>
+                )}
+              </div>
               <span className="hidden lg:block" style={{ fontSize: "10px", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif", fontWeight: 500, letterSpacing: "0.05em" }}>
                 wishlist
               </span>

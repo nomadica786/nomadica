@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts } from "@/utils/productGroup";
-import { ProductCarouselSection } from "@/components/shop/ProductCarouselSection";
+import ProductCard from "@/components/shop/ProductCard";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
 
 function Countdown({ targetDate }: { targetDate: Date }) {

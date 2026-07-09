@@ -24,6 +24,9 @@ export default function WishlistPage() {
       }
     };
     fetchWishlist();
+    const handleWishlistUpdate = () => fetchWishlist();
+    window.addEventListener("wishlist-updated", handleWishlistUpdate);
+    return () => window.removeEventListener("wishlist-updated", handleWishlistUpdate);
   }, []);
 
   if (authLoading || !isAuthenticated) {

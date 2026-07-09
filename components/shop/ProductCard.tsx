@@ -73,6 +73,7 @@ export default function ProductCard({
     }
   }, [id, colorVariants]);
 
+  const[bgcolor, setbgcolor] = useState("#FFFFFF");
   const currentId = activeVariant ? activeVariant.id : id;
   const currentName = activeVariant && activeVariant.colorName !== "Original"
     ? `${activeVariant.colorName} ${name}`
@@ -174,11 +175,15 @@ export default function ProductCard({
               }
               try {
                 if (wishlisted) {
+                  setbgcolor("white")
                   await api.wishlist.remove(currentId);
                   setWishlisted(false);
+                  window.dispatchEvent(new CustomEvent("wishlist-updated"));
                 } else {
+                  setbgcolor("red")
                   await api.wishlist.add(currentId);
                   setWishlisted(true);
+                  window.dispatchEvent(new CustomEvent("wishlist-updated"));
                 }
               } catch (err) {
                 console.error("Wishlist toggle failed:", err);
@@ -191,7 +196,7 @@ export default function ProductCard({
               width: "36px",
               height: "36px",
               borderRadius: "50%",
-              backgroundColor: "#FFFFFF",
+              backgroundColor: bgcolor,
               border: "none",
               display: "flex",
               alignItems: "center",
@@ -209,7 +214,7 @@ export default function ProductCard({
             }}
             aria-label="Wishlist"
           >
-            <Heart size={18} fill={wishlisted ? "var(--charcoal)" : "none"} color="var(--charcoal)" />
+            <Heart size={18} fill="white" />
           </button>
         </div>
       </Link>
@@ -252,6 +257,23 @@ export default function ProductCard({
               const isWhite = v.colorHex?.toLowerCase() === "#ffffff" || v.colorHex?.toLowerCase() === "white";
               return (
                 <div key={v.id} className="dest-swatch-wrap" style={{ width: "22px", height: "22px" }}>
+                  <div
+                                        key={v.id}
+                                        className="dest-swatch-wrap"
+                                        style={{
+                                          width: "22px",
+                                          height: "22px",
+                                          borderRadius: "50%",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          border: isSelected
+                                            ? "2px solid rgba(0, 0, 0, 1)"
+                                            : "2px solid #CCCCCC",
+                                          background: "transparent",
+                                          transition: "all 0.15s ease",
+                                        }}
+                                      >
                   <button
                     onMouseEnter={() => {
                       setActiveVariant(v);
@@ -264,13 +286,10 @@ export default function ProductCard({
                       setHasInteracted(true);
                     }}
                     style={{
-                      width: "14px",
-                      height: "14px",
+                      width: "16px",
+                      height: "16px",
                       borderRadius: "50%",
                       backgroundColor: v.colorHex,
-                      border: isSelected
-                        ? "2px solid var(--charcoal)"
-                        : (isWhite ? "1.5px solid rgba(30, 30, 30, 0.4)" : "1px solid rgba(0,0,0,0.15)"),
                       boxShadow: isSelected ? "0 0 0 1.5px #FFFFFF inset" : "none",
                       padding: 0,
                       cursor: "pointer",
@@ -280,6 +299,7 @@ export default function ProductCard({
                     title={v.colorName}
                     aria-label={`Select color ${v.colorName}`}
                   />
+                </div>
                 </div>
               );
             })}

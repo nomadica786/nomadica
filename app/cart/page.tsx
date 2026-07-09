@@ -58,6 +58,7 @@ export default function CartPage() {
     try {
       // Add to wishlist
       await api.wishlist.add(productId);
+      window.dispatchEvent(new CustomEvent("wishlist-updated"));
       // Remove from cart
       await handleUpdateQuantity(lineId, 0, merchandiseId);
       alert("Item moved to Wishlist!");

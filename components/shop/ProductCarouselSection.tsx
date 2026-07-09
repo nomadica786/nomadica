@@ -5,7 +5,9 @@ import { ChevronLeft, ChevronRight, Heart, type LucideIcon } from "lucide-react"
 import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 import { style } from "framer-motion/client";
-
+import { api } from "@/components/api/api";
+import { useAuth } from "@/utils/hooks/useAuth";
+import { useRouter } from "next/navigation";
 export function ProductCarouselSection({
   icon,
   title,
@@ -32,6 +34,52 @@ export function ProductCarouselSection({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const Icon = icon;
+
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+  const [wishlistSet, setWishlistSet] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const res = await api.wishlist.list();
+        const ids = new Set<string>();
+        res?.wishlist?.forEach((item: any) => ids.add(item.id));
+        setWishlistSet(ids);
+      } catch (err) {
+        console.error("Failed to fetch wishlist in carousel:", err);
+      }
+    };
+    fetchWishlist();
+    
+    const handleWishlistUpdate = () => fetchWishlist();
+    window.addEventListener("wishlist-updated", handleWishlistUpdate);
+    return () => window.removeEventListener("wishlist-updated", handleWishlistUpdate);
+  }, []);
+
+  const toggleWishlist = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      router.push("/account/login");
+      return;
+    }
+    const newSet = new Set(wishlistSet);
+    try {
+      if (newSet.has(id)) {
+        newSet.delete(id);
+        setWishlistSet(newSet);
+        await api.wishlist.remove(id);
+      } else {
+        newSet.add(id);
+        setWishlistSet(newSet);
+        await api.wishlist.add(id);
+      }
+      window.dispatchEvent(new CustomEvent("wishlist-updated"));
+    } catch (err) {
+      console.error("Wishlist toggle failed:", err);
+    }
+  };
 
   const handleScrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -297,12 +345,7 @@ export function ProductCarouselSection({
                           />
 
                           <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              const event = new CustomEvent("add-to-wishlist", { detail: { handle: pHandle } });
-                              window.dispatchEvent(event);
-                            }}
+                            onClick={(e) => toggleWishlist(product.id, e)}
                             style={{
                               position: "absolute",
                               top: "12px",
@@ -310,7 +353,7 @@ export function ProductCarouselSection({
                               width: "36px",
                               height: "36px",
                               borderRadius: "50%",
-                              backgroundColor: "#FFFFFF",
+                              backgroundColor: wishlistSet.has(product.id) ? "red" : "#FFFFFF",
                               border: "none",
                               display: "flex",
                               alignItems: "center",
@@ -326,11 +369,9 @@ export function ProductCarouselSection({
                             onMouseLeave={(e) => {
                               (e.currentTarget as HTMLElement).style.transform = "scale(1)";
                             }}
-                            aria-label="Add to wishlist"
+                            aria-label={wishlistSet.has(product.id) ? "Remove from wishlist" : "Add to wishlist"}
                           >
-                            <Heart size={18} color="#1E1E1E" onClick={() => {
-                              backgroundColor: "red"
-                            }} />
+                            <Heart size={18} color={wishlistSet.has(product.id) ? "#FFFFFF" : "#1E1E1E"} fill={wishlistSet.has(product.id) ? "#FFFFFF" : "none"} />
                           </button>
                         </div>
                       </Link>

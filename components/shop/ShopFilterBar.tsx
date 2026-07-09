@@ -35,7 +35,6 @@ export function ShopFilterBar({
   const [openDropdown, setOpenDropdown] = useState<"category" | "size" | "color" | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -55,11 +54,12 @@ export function ShopFilterBar({
     alignItems: "center",
     gap: "0.5rem",
     padding: "0.5rem 1rem",
-    backgroundColor: "#FFFFFF",
-    border: "1px solid rgba(30,30,30,0.1)",
+    backgroundColor: "#FAF9F7",
+    border: "1px solid #0000001f",
     borderRadius: "4px",
     fontFamily: "'Montserrat', sans-serif",
-    fontSize: "0.8125rem",
+    fontSize: "0.875rem",
+    fontWeight: 450,
     color: "#1E1E1E",
     cursor: "pointer",
     transition: "border-color 0.2s ease"
@@ -97,12 +97,11 @@ export function ShopFilterBar({
   return (
     <div
       style={{
-        position: "sticky",
-        top: "64px", // Below navbar
+        top: "64px",
         zIndex: 100,
-        backgroundColor: "#FFFFFF",
-        borderBottom: "1px solid rgba(30,30,30,0.1)",
-        padding: "1rem 1.5rem",
+        backgroundColor: "#FAF9F7",
+        borderBottom: "1px solid #e5e7eb",
+        padding: "2.5rem 1.5rem",
       }}
     >
       <div
@@ -111,16 +110,12 @@ export function ShopFilterBar({
           maxWidth: "1400px",
           margin: "0 auto",
           display: "flex",
-          alignItems: "center",
           justifyContent: "space-between",
           flexWrap: "wrap",
           gap: "1rem"
         }}
       >
-        {/* Left Side: Category, Size, Color */}
         <div style={{ display: "flex", gap: "1rem", position: "relative" }}>
-          
-          {/* Category Dropdown */}
           <div style={{ position: "relative" }}>
             <button onClick={() => toggleDropdown("category")} style={buttonStyle}>
               {selectedCategory === "All" ? "Category" : selectedCategory}
