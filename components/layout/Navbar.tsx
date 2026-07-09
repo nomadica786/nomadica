@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Search, ShoppingBag, User, Heart, Menu, X, ChevronDown,
+  Search, ShoppingBag, User, Heart, Menu, X, ChevronDown, Package, Settings, LogOut
 } from "lucide-react";
 import { useAuth } from "@/utils/hooks/useAuth";
 import { api } from "@/components/api/api";
@@ -346,39 +346,44 @@ export default function Navbar() {
                       position: "absolute",
                       top: "100%",
                       right: 0,
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: "#F8F7F5",
                       border: "1px solid rgba(30,30,30,0.1)",
-                      minWidth: "150px",
+                      minWidth: "180px",
                       padding: "0.5rem 0",
                       boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
                       animation: "fade-up 0.2s ease",
                       zIndex: 1001,
+                      borderRadius: "8px",
                     }}
                   >
-                    <Link
-                      href="/account/profile"
-                      style={dropdownItemStyle}
-                      onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(122, 92, 62, 0.08)"; }}
-                      onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
-                    >
-                      Profile Hub
-                    </Link>
+                    <div style={{ padding: "0.75rem 1rem", borderBottom: "1px solid rgba(30,30,30,0.05)", marginBottom: "0rem" }}>
+                      <p style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600, fontSize: "0.95rem", color: "#1E1E1E", margin: 0 }}>
+                        Hi, {user?.firstName || "user"}
+                      </p>
+                    </div>
+
                     <Link
                       href="/account/orders"
-                      style={dropdownItemStyle}
-                      onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(122, 92, 62, 0.08)"; }}
-                      onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                      style={{ ...dropdownItemStyle, backgroundColor: "#FFFFFF", display: "flex", alignItems: "center", gap: "12px", padding: "0.6rem 1rem" }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(0,0,0,0.03)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                     >
-                      My Orders
+                      <Package size={18} color="rgba(30,30,30,0.8)" />
+                      Orders
                     </Link>
+
                     <Link
-                      href="/account/wishlist"
-                      style={dropdownItemStyle}
-                      onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(122, 92, 62, 0.08)"; }}
-                      onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                      href="/account/profile"
+                      style={{ ...dropdownItemStyle, backgroundColor: "#FFFFFF", display: "flex", alignItems: "center", gap: "12px", padding: "0.6rem 1rem" }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(0,0,0,0.03)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                     >
-                      My Wishlist
+                      <Settings size={18} color="rgba(30,30,30,0.8)" />
+                      Profile
                     </Link>
+
+                    <div style={{ borderTop: "1px solid rgba(30,30,30,0.05)", margin: "0.25rem 0" }} />
+
                     <button
                       onClick={logout}
                       style={{
@@ -387,13 +392,18 @@ export default function Navbar() {
                         border: "none",
                         background: "none",
                         textAlign: "left",
-                        color: "rgba(180,60,60,0.8)",
+                        color: "#1E1E1E",
                         cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "0.6rem 1rem"
                       }}
-                      onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(180, 60, 60, 0.08)"; }}
-                      onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(0,0,0,0.03)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                     >
-                      Log Out
+                      <LogOut size={18} color="rgba(30,30,30,0.8)" />
+                      Logout
                     </button>
                   </div>
                 )}

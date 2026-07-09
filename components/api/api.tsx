@@ -230,6 +230,28 @@ export const api = {
       if (!response.ok) throw new Error('Failed to create address');
       return response.json();
     },
+
+    updateAddress: async (address: unknown) => {
+      const response = await fetch(`${API_BASE_URL}/api/customers/addresses`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(address),
+      });
+      if (response.status === 401) throw new Error('Not authenticated');
+      if (!response.ok) throw new Error('Failed to update address');
+      return response.json();
+    },
+
+    deleteAddress: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/api/customers/addresses`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      if (response.status === 401) throw new Error('Not authenticated');
+      if (!response.ok) throw new Error('Failed to delete address');
+      return response.json();
+    },
   },
 
   /**
