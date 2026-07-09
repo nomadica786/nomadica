@@ -13,6 +13,7 @@ export interface ColorVariant {
   badge?: string;
   category?: string;
   createdAt?: string;
+  allVariants?: any[];
 }
 
 export interface GroupedProduct {
@@ -125,7 +126,8 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
       handle: product.handle,
       badge: product.badge,
       category: product.category,
-      createdAt: product.createdAt
+      createdAt: product.createdAt,
+      allVariants: product.variants?.edges ? [...product.variants.edges] : []
     };
 
     const groupKey = productType.toLowerCase();

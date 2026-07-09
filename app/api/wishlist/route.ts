@@ -23,7 +23,7 @@ export async function GET() {
     try {
       const client = new ShopifyStorefrontClient(env.shopUrl, storefrontToken);
       const query = `
-        query GetProductsByIds($ids: [ID!]!) {
+        query GetNodesByIds($ids: [ID!]!) {
           nodes(ids: $ids) {
             ... on Product {
               id
@@ -31,7 +31,7 @@ export async function GET() {
               description
               handle
               productType
-              images(first: 1) {
+              images(first: 2) {
                 edges {
                   node {
                     url
@@ -39,7 +39,7 @@ export async function GET() {
                   }
                 }
               }
-              variants(first: 1) {
+              variants(first: 50) {
                 edges {
                   node {
                     id
@@ -48,7 +48,69 @@ export async function GET() {
                       amount
                       currencyCode
                     }
+                    compareAtPrice {
+                      amount
+                      currencyCode
+                    }
+                    selectedOptions {
+                      name
+                      value
+                    }
                     available: availableForSale
+                  }
+                }
+              }
+            }
+            ... on ProductVariant {
+              id
+              title
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
+              selectedOptions {
+                name
+                value
+              }
+              image {
+                url
+              }
+              product {
+                id
+                title
+                handle
+                productType
+                images(first: 2) {
+                  edges {
+                    node {
+                      url
+                    }
+                  }
+                }
+                variants(first: 50) {
+                  edges {
+                    node {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                      compareAtPrice {
+                        amount
+                        currencyCode
+                      }
+                      selectedOptions {
+                        name
+                        value
+                      }
+                      available: availableForSale
+                      image { url }
+                    }
                   }
                 }
               }
@@ -59,14 +121,43 @@ export async function GET() {
       const data = await client.request<{ nodes: any[] }>(query, { ids: productIds });
       const wishlistProducts = (data.nodes || [])
         .filter((node: any) => node !== null && node !== undefined)
-        .map((node: any) => ({
-          id: node.id,
-          name: node.title,
-          price: parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0'),
-          image: node.images?.edges?.[0]?.node?.url || '',
-          category: node.productType || node.category || 'Tops',
-          handle: node.handle
-        }));
+        .map((node: any) => {
+          const isVariant = !!node.product;
+          
+          if (isVariant) {
+            // Mapping for ProductVariant node
+            const parent = node.product;
+            const colorOption = node.selectedOptions?.find((o: any) => o.name === 'Color')?.value;
+            const sizeOption = node.selectedOptions?.find((o: any) => o.name === 'Size')?.value;
+            
+            return {
+              id: node.id,
+              productId: parent.id,
+              name: colorOption ? `${colorOption} ${parent.title}` : parent.title,
+              price: parseFloat(node.price?.amount || '0'),
+              originalPrice: parseFloat(node.compareAtPrice?.amount || '0') || undefined,
+              image: node.image?.url || parent.images?.edges?.[0]?.node?.url || '',
+              mockupImage: node.image?.url || parent.images?.edges?.[1]?.node?.url || parent.images?.edges?.[0]?.node?.url || '',
+              category: parent.productType || 'Tops',
+              handle: parent.handle,
+              allVariants: parent.variants?.edges || []
+            };
+          } else {
+            // Mapping for Product node (fallback if they added whole product)
+            return {
+              id: node.id,
+              productId: node.id,
+              name: node.title,
+              price: parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0'),
+              originalPrice: parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') || undefined,
+              image: node.images?.edges?.[0]?.node?.url || '',
+              mockupImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
+              category: node.productType || node.category || 'Tops',
+              handle: node.handle,
+              allVariants: node.variants?.edges || [],
+            };
+          }
+        });
       return NextResponse.json({
         wishlist: wishlistProducts
       });
