@@ -309,3 +309,122 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create address' }, { status: 500 });
   }
 }
+
+export async function PUT(request: NextRequest) {
+  const env = getEnvironment();
+  const cookieStore = await cookies();
+  const customerAccessToken = cookieStore.get('customer_access_token')?.value;
+
+  try {
+    const body = await request.json();
+    const storefrontToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+    const isStorefrontConfigured = !!env.shopUrl && !!storefrontToken && storefrontToken.trim() !== '';
+
+    if (customerAccessToken && isStorefrontConfigured) {
+      const client = new ShopifyStorefrontClient(env.shopUrl!, storefrontToken!);
+      const names = (body.name || 'Arjun Mehta').split(' ');
+      const firstName = names[0] || '';
+      const lastName = names.slice(1).join(' ') || '';
+
+      const updateMutation = `
+        mutation UpdateCustomerAddress($customerAccessToken: String!, $id: ID!, $address: MailingAddressInput!) {
+          customerAddressUpdate(customerAccessToken: $customerAccessToken, id: $id, address: $address) {
+            customerAddress {
+              id
+            }
+            customerUserErrors {
+              message
+            }
+          }
+        }
+      `;
+
+      const data = await client.request(updateMutation, {
+        customerAccessToken,
+        id: body.id,
+        address: {
+          address1: body.address1 || '',
+          address2: body.address2 || '',
+          city: body.city || '',
+          province: body.province || '',
+          country: body.country || 'India',
+          zip: body.zip || '',
+          firstName,
+          lastName
+        }
+      });
+
+      if (data?.customerAddressUpdate?.customerUserErrors?.length > 0) {
+        return NextResponse.json({ error: data.customerAddressUpdate.customerUserErrors[0].message }, { status: 400 });
+      }
+
+      if (body.default) {
+        const defaultMutation = `
+          mutation SetDefaultAddress($customerAccessToken: String!, $addressId: ID!) {
+            customerDefaultAddressUpdate(customerAccessToken: $customerAccessToken, addressId: $addressId) {
+              customer { id }
+            }
+          }
+        `;
+        await client.request(defaultMutation, { customerAccessToken, addressId: body.id });
+      }
+
+      return NextResponse.json({ success: true });
+    }
+
+    // Mock
+    const savedAddressesCookie = cookieStore.get('mock_addresses')?.value;
+    if (savedAddressesCookie) {
+      let addressesList = JSON.parse(savedAddressesCookie);
+      const idx = addressesList.findIndex((a: any) => a.id === body.id);
+      if (idx !== -1) {
+        if (body.default) addressesList.forEach((a: any) => a.default = false);
+        addressesList[idx] = { ...addressesList[idx], ...body };
+        cookieStore.set('mock_addresses', JSON.stringify(addressesList), { path: '/' });
+      }
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to update address' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const env = getEnvironment();
+  const cookieStore = await cookies();
+  const customerAccessToken = cookieStore.get('customer_access_token')?.value;
+
+  try {
+    const body = await request.json();
+    const storefrontToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+    const isStorefrontConfigured = !!env.shopUrl && !!storefrontToken && storefrontToken.trim() !== '';
+
+    if (customerAccessToken && isStorefrontConfigured) {
+      const client = new ShopifyStorefrontClient(env.shopUrl!, storefrontToken!);
+      const deleteMutation = `
+        mutation DeleteCustomerAddress($customerAccessToken: String!, $id: ID!) {
+          customerAddressDelete(customerAccessToken: $customerAccessToken, id: $id) {
+            deletedCustomerAddressId
+            customerUserErrors { message }
+          }
+        }
+      `;
+      const data = await client.request(deleteMutation, { customerAccessToken, id: body.id });
+      if (data?.customerAddressDelete?.customerUserErrors?.length > 0) {
+        return NextResponse.json({ error: data.customerAddressDelete.customerUserErrors[0].message }, { status: 400 });
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    // Mock
+    const savedAddressesCookie = cookieStore.get('mock_addresses')?.value;
+    if (savedAddressesCookie) {
+      let addressesList = JSON.parse(savedAddressesCookie);
+      addressesList = addressesList.filter((a: any) => a.id !== body.id);
+      cookieStore.set('mock_addresses', JSON.stringify(addressesList), { path: '/' });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to delete address' }, { status: 500 });
+  }
+}

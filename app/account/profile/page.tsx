@@ -28,7 +28,8 @@ function ProfileContent() {
 
   // Address Modal States
   const [showAddAddress, setShowAddAddress] = useState(false);
-  const [newAddr, setNewAddr] = useState({
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [newAddr, setNewAddr] = useState<any>({
     name: "",
     address1: "",
     address2: "",
@@ -85,26 +86,65 @@ function ProfileContent() {
   const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.customer.createAddress({
-        ...newAddr,
-        label: newAddr.label || "Home"
-      });
+      if (isEditingAddress) {
+        await api.customer.updateAddress({
+          ...newAddr,
+          label: newAddr.label || "Home"
+        });
+      } else {
+        await api.customer.createAddress({
+          ...newAddr,
+          label: newAddr.label || "Home"
+        });
+      }
       const addressesRes = await api.customer.addresses();
       setAddresses(addressesRes?.addresses || []);
-      setShowAddAddress(false);
-      setNewAddr({
-        name: "",
-        address1: "",
-        address2: "",
-        city: "",
-        province: "",
-        zip: "",
-        phone: "",
-        label: "Home"
-      });
+      closeAddressModal();
     } catch (err) {
-      console.error("Failed to add address:", err);
+      console.error("Failed to add/update address:", err);
     }
+  };
+
+  const closeAddressModal = () => {
+    setShowAddAddress(false);
+    setIsEditingAddress(false);
+    setNewAddr({
+      name: "",
+      address1: "",
+      address2: "",
+      city: "",
+      province: "",
+      zip: "",
+      phone: "",
+      label: "Home"
+    });
+  };
+
+  const handleDeleteAddress = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this address?")) return;
+    try {
+      await api.customer.deleteAddress(id);
+      const addressesRes = await api.customer.addresses();
+      setAddresses(addressesRes?.addresses || []);
+    } catch (err) {
+      console.error("Failed to delete address:", err);
+    }
+  };
+
+  const handleMakeDefault = async (addr: any) => {
+    try {
+      await api.customer.updateAddress({ ...addr, default: true });
+      const addressesRes = await api.customer.addresses();
+      setAddresses(addressesRes?.addresses || []);
+    } catch (err) {
+      console.error("Failed to set default address:", err);
+    }
+  };
+
+  const openEditAddress = (addr: any) => {
+    setNewAddr({ ...addr, label: addr.label || "Home" });
+    setIsEditingAddress(true);
+    setShowAddAddress(true);
   };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -373,7 +413,10 @@ function ProfileContent() {
                   No saved addresses yet
                 </p>
                 <button
-                  onClick={() => setShowAddAddress(true)}
+                  onClick={() => {
+                    setIsEditingAddress(false);
+                    setShowAddAddress(true);
+                  }}
                   style={{
                     backgroundColor: "transparent",
                     border: "none",
@@ -434,6 +477,13 @@ function ProfileContent() {
                     <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8rem", color: "rgba(30,30,30,0.6)", margin: 0 }}>
                       {addr.city}, {addr.province} {addr.zip}
                     </p>
+                    <div style={{ display: "flex", gap: "1rem", marginTop: "1.25rem", paddingTop: "0.75rem", borderTop: "1px solid rgba(0,0,0,0.05)" }}>
+                      <button onClick={() => openEditAddress(addr)} style={{ background: "none", border: "none", color: "#1E1E1E", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, padding: 0, cursor: "pointer" }}>Edit</button>
+                      <button onClick={() => handleDeleteAddress(addr.id)} style={{ background: "none", border: "none", color: "rgba(180,60,60,0.8)", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, padding: 0, cursor: "pointer" }}>Delete</button>
+                      {!addr.default && (
+                        <button onClick={() => handleMakeDefault(addr)} style={{ background: "none", border: "none", color: "#1E1E1E", fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", fontWeight: 600, padding: 0, cursor: "pointer", marginLeft: "auto" }}>Set as Default</button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -649,7 +699,7 @@ function ProfileContent() {
                 <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
                   <button
                     type="button"
-                    onClick={() => setShowAddAddress(false)}
+                    onClick={closeAddressModal}
                     style={{
                       flex: 1,
                       backgroundColor: "#FFFFFF",
@@ -683,7 +733,7 @@ function ProfileContent() {
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#6B4E37"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#C4B5A0"; }}
                   >
-                    SAVE ADDRESS
+                    {isEditingAddress ? "SAVE CHANGES" : "SAVE ADDRESS"}
                   </button>
                 </div>
               </form>
