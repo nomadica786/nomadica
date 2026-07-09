@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Heart, ShoppingCart, Star, ChevronDown } from "lucide-react";
+import { Heart, ShoppingCart, Star, ChevronDown, Radius } from "lucide-react";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import ProductCard from "@/components/shop/ProductCard";
@@ -482,7 +482,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
   const { originalPrice: markupPrice, discount: markupDiscount } = getMarkupPrice(product.id, product.price);
 
   return (
-    <div style={{ paddingTop: "64px", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
+    <div style={{ paddingTop: "0px", backgroundColor: "#FBF9F7", minHeight: "100vh" }}>
       {/* Breadcrumb */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "1.5rem 1.5rem 0" }}>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
@@ -545,8 +545,9 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                     setHoveredColorImage(null);
                   }}
                   style={{
-                    position: "relative",
+                    position: "sticky",
                     width: "100%",
+                    height: "auto",
                     aspectRatio: "3/4",
                     overflow: "hidden",
                     border: product.id === v.id ? "2px solid #1E1E1E" : "1px solid rgba(30, 30, 30, 0.15)",
@@ -587,6 +588,8 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                 overflow: "hidden",
                 backgroundColor: "#FFFFFF",
                 marginBottom: "0.75rem",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.06);",
+                borderRadius: "10px"
               }}
             >
               <Image
@@ -693,26 +696,6 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
           >
             {product.name}
           </h1>
-
-          {/* Rating */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
-            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", fontWeight: 600, color: "#1E1E1E" }}>
-              {product.rating}
-            </span>
-            <div style={{ display: "flex", gap: "2px" }}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  size={14}
-                  fill={star <= Math.floor(product.rating) ? "#FF9800" : "none"}
-                  stroke="#FF9800"
-                />
-              ))}
-            </div>
-            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", color: "rgba(30,30,30,0.5)" }}>
-              ({product.reviews.toLocaleString()})
-            </span>
-          </div>
 
           {/* Price */}
           <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.25rem" }}>

@@ -98,6 +98,15 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      localStorage.clear();
+      window.location.reload();
+    }, 10 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false);
     setOpenDropdown(null);
@@ -366,7 +375,7 @@ export default function Navbar() {
                       href="/account/orders"
                       style={{ ...dropdownItemStyle, backgroundColor: "#FFFFFF", display: "flex", alignItems: "center", gap: "12px", padding: "0.6rem 1rem" }}
                       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(0,0,0,0.03)"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#FFFFFF"; }}
                     >
                       <Package size={18} color="rgba(30,30,30,0.8)" />
                       Orders
@@ -376,7 +385,7 @@ export default function Navbar() {
                       href="/account/profile"
                       style={{ ...dropdownItemStyle, backgroundColor: "#FFFFFF", display: "flex", alignItems: "center", gap: "12px", padding: "0.6rem 1rem" }}
                       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(0,0,0,0.03)"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#FFFFFF"; }}
                     >
                       <Settings size={18} color="rgba(30,30,30,0.8)" />
                       Profile

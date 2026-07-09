@@ -212,103 +212,102 @@ export default function CartPage() {
                         display: "flex",
                         gap: "1.5rem",
                         backgroundColor: "#FFFFFF",
-                        border: "1px solid rgba(0,0,0,0.06)",
+                        border: "1px solid rgba(0,0,0,0.08)",
                         borderRadius: "8px",
-                        padding: "1.5rem",
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.01)",
-                        flexWrap: "wrap"
+                        padding: "1.25rem",
+                        flexWrap: "wrap",
                       }}
                     >
                       {/* Image */}
                       <div 
                         style={{
                           position: "relative",
-                          width: "120px",
+                          width: "110px",
                           aspectRatio: "3/4",
-                          borderRadius: "6px",
+                          borderRadius: "8px",
                           overflow: "hidden",
                           flexShrink: 0,
                           backgroundColor: "#F9F9F9",
-                          border: "1px solid rgba(0,0,0,0.03)"
                         }}
                       >
                         <Image
                           src={getShopifyImageUrl(image, 240)}
                           alt={title}
                           fill
-                          sizes="120px"
+                          sizes="110px"
                           style={{ objectFit: "cover" }}
                         />
                       </div>
 
                       {/* Item Details */}
-                      <div style={{ flex: 1, minWidth: "240px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                        <div>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.25rem" }}>
-                            <h3 
-                              style={{ 
-                                fontFamily: "'Playfair Display', serif", 
-                                fontSize: "1.25rem", 
-                                fontWeight: 600, 
-                                color: "#1E1E1E",
-                                margin: 0 
-                              }}
-                            >
-                              {title}
-                            </h3>
-                            <div style={{ textAlign: "right" }}>
+                      <div style={{ flex: 1, minWidth: "240px", display: "flex", flexDirection: "column" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.25rem" }}>
+                          <h3 
+                            style={{ 
+                              fontFamily: "'Playfair Display', serif", 
+                              fontSize: "1.2rem", 
+                              fontWeight: 700, 
+                              color: "#1E1E1E",
+                              margin: 0 
+                            }}
+                          >
+                            {title}
+                          </h3>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
+                            {originalPrice > price && (
                               <span 
                                 style={{ 
-                                  fontFamily: "'Playfair Display', serif", 
-                                  fontSize: "1.2rem", 
-                                  fontWeight: 600, 
-                                  color: "#1E1E1E" 
+                                  fontFamily: "'Montserrat', sans-serif", 
+                                  fontSize: "0.85rem", 
+                                  color: "rgba(30,30,30,0.3)", 
+                                  textDecoration: "line-through"
                                 }}
                               >
-                                ₹{(price * line.quantity).toLocaleString("en-IN")}
+                                ₹{(originalPrice * line.quantity).toLocaleString("en-IN")}
                               </span>
-                              {originalPrice > price && (
-                                <span 
-                                  style={{ 
-                                    fontFamily: "'Montserrat', sans-serif", 
-                                    fontSize: "0.85rem", 
-                                    color: "rgba(30,30,30,0.35)", 
-                                    textDecoration: "line-through",
-                                    marginLeft: "0.5rem" 
-                                  }}
-                                >
-                                  ₹{(originalPrice * line.quantity).toLocaleString("en-IN")}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", color: "rgba(30,30,30,0.5)", margin: "0 0 1rem" }}>
-                            Size: <span style={{ fontWeight: 500, color: "#1E1E1E" }}>{size}</span> &nbsp;·&nbsp; Color: <span style={{ fontWeight: 500, color: "#1E1E1E" }}>{color}</span>
-                          </p>
-
-                          {/* Quantity Selector */}
-                          <div style={{ display: "flex", alignItems: "center", border: "1px solid rgba(30,30,30,0.15)", borderRadius: "4px", width: "fit-content", marginBottom: "1rem" }}>
-                            <button
-                              onClick={() => handleUpdateQuantity(line.id, Math.max(1, line.quantity - 1), line.merchandise.id)}
-                              style={{ width: "32px", height: "32px", border: "none", background: "none", cursor: "pointer", color: "#1E1E1E", fontWeight: 600 }}
+                            )}
+                            <span 
+                              style={{ 
+                                fontFamily: "'Montserrat', sans-serif", 
+                                fontSize: "1.35rem", 
+                                fontWeight: 700, 
+                                color: "#1E1E1E" 
+                              }}
                             >
-                              −
-                            </button>
-                            <span style={{ width: "36px", textAlign: "center", fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", fontWeight: 600 }}>
-                              {line.quantity}
+                              ₹{(price * line.quantity).toLocaleString("en-IN")}
                             </span>
-                            <button
-                              onClick={() => handleUpdateQuantity(line.id, line.quantity + 1, line.merchandise.id)}
-                              style={{ width: "32px", height: "32px", border: "none", background: "none", cursor: "pointer", color: "#1E1E1E", fontWeight: 600 }}
-                            >
-                              +
-                            </button>
                           </div>
+                        </div>
+                        
+                        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", color: "rgba(30,30,30,0.45)", margin: "0" }}>
+                          Size: <span style={{ color: "rgba(30,30,30,0.65)" }}>{size}</span> &nbsp;&nbsp;&nbsp;Color: <span style={{ color: "rgba(30,30,30,0.65)" }}>{color}</span>
+                        </p>
+
+                        {/* Quantity Selector */}
+                        <div style={{ display: "flex", alignItems: "center", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "8px", width: "fit-content", marginTop: "1rem", overflow: "hidden", height: "36px" }}>
+                          <button
+                            onClick={() => handleUpdateQuantity(line.id, Math.max(1, line.quantity - 1), line.merchandise.id)}
+                            style={{ width: "36px", height: "100%", border: "none", backgroundColor: "#FAFAFA", borderRight: "1px solid rgba(0,0,0,0.08)", cursor: "pointer", color: "rgba(30,30,30,0.6)", fontSize: "1.1rem" }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F0F0F0"}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FAFAFA"}
+                          >
+                            −
+                          </button>
+                          <span style={{ width: "42px", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", fontFamily: "'Montserrat', sans-serif", fontSize: "0.9rem", fontWeight: 600, color: "#1E1E1E" }}>
+                            {line.quantity}
+                          </span>
+                          <button
+                            onClick={() => handleUpdateQuantity(line.id, line.quantity + 1, line.merchandise.id)}
+                            style={{ width: "36px", height: "100%", border: "none", backgroundColor: "#FAFAFA", borderLeft: "1px solid rgba(0,0,0,0.08)", cursor: "pointer", color: "rgba(30,30,30,0.6)", fontSize: "1.1rem" }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F0F0F0"}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FAFAFA"}
+                          >
+                            +
+                          </button>
                         </div>
 
                         {/* Action buttons */}
-                        <div style={{ display: "flex", gap: "1.5rem", borderTop: "1px solid rgba(0,0,0,0.05)", paddingTop: "1rem" }}>
+                        <div style={{ display: "flex", gap: "1.25rem", alignItems: "center", marginTop: "1.5rem" }}>
                           <button
                             onClick={() => handleMoveToWishlist(productId, line.id, line.merchandise.id)}
                             style={{
@@ -316,9 +315,9 @@ export default function CartPage() {
                               border: "none",
                               display: "flex",
                               alignItems: "center",
-                              gap: "0.35rem",
+                              gap: "0.4rem",
                               fontFamily: "'Montserrat', sans-serif",
-                              fontSize: "0.8rem",
+                              fontSize: "0.85rem",
                               fontWeight: 500,
                               color: "rgba(30,30,30,0.5)",
                               cursor: "pointer",
@@ -328,7 +327,7 @@ export default function CartPage() {
                             onMouseEnter={(e) => e.currentTarget.style.color = "#1E1E1E"}
                             onMouseLeave={(e) => e.currentTarget.style.color = "rgba(30,30,30,0.5)"}
                           >
-                            <Heart size={14} />
+                            <Heart size={15} />
                             Move to Wishlist
                           </button>
                           <span style={{ color: "rgba(0,0,0,0.1)" }}>|</span>
@@ -339,9 +338,9 @@ export default function CartPage() {
                               border: "none",
                               display: "flex",
                               alignItems: "center",
-                              gap: "0.35rem",
+                              gap: "0.4rem",
                               fontFamily: "'Montserrat', sans-serif",
-                              fontSize: "0.8rem",
+                              fontSize: "0.85rem",
                               fontWeight: 500,
                               color: "rgba(30,30,30,0.5)",
                               cursor: "pointer",
@@ -351,7 +350,7 @@ export default function CartPage() {
                             onMouseEnter={(e) => e.currentTarget.style.color = "#DC2626"}
                             onMouseLeave={(e) => e.currentTarget.style.color = "rgba(30,30,30,0.5)"}
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={15} />
                             Delete
                           </button>
                         </div>
