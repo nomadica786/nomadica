@@ -5,6 +5,8 @@ import { getEnvironment } from '@/utils/env';
 import { MOCK_PRODUCTS, formatProductGraphQL } from '@/utils/mockData';
 import { NextResponse, NextRequest } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

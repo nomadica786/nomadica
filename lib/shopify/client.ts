@@ -71,12 +71,8 @@ export class ShopifyClient {
     }
     if (options?.next) {
       fetchOptions.next = options.next;
-    } else if (api === 'storefront' && !isMutation && !isCart && !isCustomer) {
-      if (process.env.NODE_ENV === 'development') {
-        fetchOptions.cache = 'no-store';
-      } else {
-        fetchOptions.next = { revalidate: 3600 }; // default 1 hour cache
-      }
+    } else if (!options?.cache) {
+      fetchOptions.cache = 'no-store'; // Always fetch fresh data per user request
     }
 
     try {
