@@ -36,24 +36,15 @@ const testimonials = [
   }
 ];
 
-// Cache helper functions
+// Cache helper functions removed per request to always fetch fresh
 const getCached = (key: string, fallback: any) => {
-  if (typeof window === "undefined") return fallback;
-  if (process.env.NODE_ENV === "development") return fallback;
-  try {
-    const item = localStorage.getItem(`nomadica_home_cache_${key}`);
-    return item ? JSON.parse(item) : fallback;
-  } catch {
-    return fallback;
-  }
+  return fallback;
 };
 
 const setCached = (key: string, data: any) => {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(`nomadica_home_cache_${key}`, JSON.stringify(data));
-  } catch {}
+  // No-op
 };
+
 
 function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);

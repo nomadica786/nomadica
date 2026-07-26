@@ -97,21 +97,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.includes('cache') || key.includes('cached'))) {
-          keysToRemove.push(key);
-        }
-      }
-      keysToRemove.forEach(k => localStorage.removeItem(k));
-      window.location.reload();
-    }, 1 * 60 * 1000);
-    
-    return () => clearInterval(interval);
-  }, []);
+
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
