@@ -19,14 +19,7 @@ export default function SearchPage() {
     const initProducts = async () => {
       setLoadingInitial(true);
       try {
-        if (process.env.NODE_ENV !== "development") {
-          const cached = localStorage.getItem("nomadica_cached_products_grouped");
-          if (cached) {
-            setAllProducts(JSON.parse(cached));
-            setLoadingInitial(false);
-            return;
-          }
-        }
+        // Removed cache per request to always fetch fresh
 
         const [productsRes, mockupsRes] = await Promise.all([
           api.products.list(250),
@@ -57,7 +50,6 @@ export default function SearchPage() {
         const grouped = groupProducts(mappedProducts, mockupLookup);
 
         if (grouped.length > 0) {
-          localStorage.setItem("nomadica_cached_products_grouped", JSON.stringify(grouped));
           setAllProducts(grouped);
         }
       } catch (err) {
