@@ -3,8 +3,8 @@ import { getCanonicalUrl } from '@/lib/seo/canonical';
 import { getStorefrontClient, getBlogArticles, ShopifyArticle } from '@/lib/shopify/journal';
 import { STOREFRONT_QUERIES } from '@/lib/shopify/queries';
 
-// Set dynamic revalidation for sitemap to keep it fresh
-export const revalidate = 86400; // 24 hours
+// Set dynamic to avoid conflicts with our no-store global fetch rules
+export const dynamic = 'force-dynamic';
 
 async function fetchProductHandles(): Promise<string[]> {
   try {
