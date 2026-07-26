@@ -99,7 +99,6 @@ export default function Navbar() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Only clear product caches, leaving cart and auth intact
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -109,7 +108,7 @@ export default function Navbar() {
       }
       keysToRemove.forEach(k => localStorage.removeItem(k));
       window.location.reload();
-    }, 10 * 60 * 1000);
+    }, 1 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, []);
