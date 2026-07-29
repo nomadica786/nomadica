@@ -2,9 +2,28 @@
 import { useState, useEffect } from "react";
 import { api, useApi } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
-import { groupProducts } from "@/utils/productGroup";
+import { groupProducts, GroupedProduct } from "@/utils/productGroup";
 import ProductCard from "@/components/shop/ProductCard";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
+
+type CollectionEdge = { node: { title: string } };
+type ProductOption = { name?: string; value?: string };
+type PriceNode = { amount?: string };
+type ProductVariantEdge = { node?: { title?: string; selectedOptions?: ProductOption[]; price?: PriceNode; compareAtPrice?: PriceNode } };
+type ProductNode = {
+  id: string;
+  title: string;
+  price?: number;
+  originalPrice?: number;
+  variants?: { edges?: ProductVariantEdge[] };
+  images?: { edges?: Array<{ node?: { url?: string } }> };
+  badge?: string;
+  productType?: string;
+  category?: string;
+  createdAt?: string;
+  handle?: string;
+  collections?: { edges?: CollectionEdge[] };
+};
 
 function Countdown({ targetDate }: { targetDate: Date }) {
   const [time, setTime] = useState({ h: 0, m: 0, s: 0 });
@@ -35,7 +54,7 @@ function Countdown({ targetDate }: { targetDate: Date }) {
 }
 
 export default function LimitedDropsPage() {
-  const target = new Date(Date.now() + 48 * 3600 * 1000);
+  const [target] = useState(() => new Date(Date.now() + 48 * 3600 * 1000));
   const { data: pageData, loading } = useApi(async () => {
     const [productsRes, mockupsRes, collectionsRes] = await Promise.all([
       api.products.list(50),
@@ -45,22 +64,22 @@ export default function LimitedDropsPage() {
     return {
       products: productsRes,
       mockups: mockupsRes?.mockups || {},
-      collections: collectionsRes?.collections?.edges?.map((e: any) => e.node.title) || []
+      collections: collectionsRes?.collections?.edges?.map((e: CollectionEdge) => e.node.title) || []
     };
   });
 
   const categories = ["All", ...(pageData?.collections || [])];
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [selectedSize, setSelectedSize] = useState<string>("All");
-  const [selectedColor, setSelectedColor] = useState<string>("All");
+  const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
+  const [selectedSize, setSelectedSize] = useState<string[]>([]);
+  const [selectedColor, setSelectedColor] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("Featured");
 
   if (loading) {
     return <PageLoader />;
   }
 
-  const allProducts = pageData?.products?.products?.edges?.map((edge: any) => {
+  const allProducts = pageData?.products?.products?.edges?.map((edge: { node: ProductNode }) => {
     const node = edge.node;
     const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
     const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
@@ -76,34 +95,36 @@ export default function LimitedDropsPage() {
       productType: node.productType || node.category || 'Tops',
       createdAt: node.createdAt || '',
       handle: node.handle,
-      collections: node.collections?.edges?.map((e: any) => e.node.title) || [],
+      collections: node.collections?.edges?.map((e: CollectionEdge) => e.node.title) || [],
       variants: node.variants
     };
   }) || [];
 
   const groupedProducts = groupProducts(allProducts, pageData?.mockups || {});
-  const drops = groupedProducts.filter((p: any) => p.badge?.toLowerCase() === 'limited');
+  const drops = groupedProducts.filter((p: GroupedProduct) => p.badge?.toLowerCase() === 'limited');
   const baseList = drops.length > 0 ? drops : groupedProducts.slice(0, 3);
 
   // Apply filtering
   const filteredProducts = baseList.filter(product => {
-    if (selectedCategory !== "All") {
-      const expectedCat = selectedCategory.toLowerCase();
-      const matchesCollection = product.collections?.some((c: string) => c.toLowerCase() === expectedCat);
-      const matchesType = (product.productType || product.category || "").toLowerCase() === expectedCat;
+    if (selectedCategory.length > 0) {
+      const expectedCats = selectedCategory.map((cat) => cat.toLowerCase());
+      const matchesCollection = product.collections?.some((c: string) => expectedCats.includes(c.toLowerCase()));
+      const matchesType = expectedCats.includes((product.productType || product.category || "").toLowerCase());
       if (!matchesCollection && !matchesType) return false;
     }
-    if (selectedSize !== "All") {
-      const hasSize = product.allVariants?.some((edge: any) => 
-        edge.node?.title?.toLowerCase().includes(selectedSize.toLowerCase()) || 
-        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "size" && opt.value.toLowerCase() === selectedSize.toLowerCase())
+    if (selectedSize.length > 0) {
+      const expectedSizes = selectedSize.map((size) => size.toLowerCase());
+      const hasSize = product.allVariants?.some((edge: ProductVariantEdge) => 
+        expectedSizes.some((size) => edge.node?.title?.toLowerCase().includes(size)) || 
+        edge.node?.selectedOptions?.some((opt: ProductOption) => opt.name?.toLowerCase() === "size" && expectedSizes.includes(opt.value?.toLowerCase() || ""))
       );
       if (!hasSize) return false;
     }
-    if (selectedColor !== "All") {
-      const hasColor = product.allVariants?.some((edge: any) => 
-        edge.node?.title?.toLowerCase().includes(selectedColor.toLowerCase()) || 
-        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "color" && opt.value.toLowerCase() === selectedColor.toLowerCase())
+    if (selectedColor.length > 0) {
+      const expectedColors = selectedColor.map((color) => color.toLowerCase());
+      const hasColor = product.allVariants?.some((edge: ProductVariantEdge) => 
+        expectedColors.some((color) => edge.node?.title?.toLowerCase().includes(color)) || 
+        edge.node?.selectedOptions?.some((opt: ProductOption) => opt.name?.toLowerCase() === "color" && expectedColors.includes(opt.value?.toLowerCase() || ""))
       );
       if (!hasColor) return false;
     }
@@ -112,7 +133,7 @@ export default function LimitedDropsPage() {
 
   // Apply sorting
   const finalProducts = (() => {
-    let sorted = [...filteredProducts];
+    const sorted = [...filteredProducts];
     if (sortBy === "Price: Low to High") {
       sorted.sort((a, b) => a.price - b.price);
     } else if (sortBy === "Price: High to Low") {
@@ -128,7 +149,7 @@ export default function LimitedDropsPage() {
     return sorted;
   })();
 
-  const newestIds = new Set([...baseList].sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 3).map(p => p.id));
+  const newestIds = new Set([...baseList].sort((a: GroupedProduct, b: GroupedProduct) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 3).map((p: GroupedProduct) => p.id));
 
   return (
     <div style={{ paddingTop: "0px", backgroundColor: "#FAF9F7", minHeight: "100vh" }}>
@@ -189,7 +210,7 @@ export default function LimitedDropsPage() {
       {/* Products Grid */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {finalProducts.map((p: any) => (
+          {finalProducts.map((p: GroupedProduct) => (
             <ProductCard
               key={p.id}
               {...p}
