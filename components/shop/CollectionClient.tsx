@@ -31,12 +31,11 @@ export default function CollectionClient({
   const [productsState, setProductsState] = useState<any[]>(initialProducts || []);
   const [mockups, setMockups] = useState<Record<string, string>>({});
 
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    categoryParam.toLowerCase() === "all" ? "All" : 
-    (categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1))
+  const [selectedCategory, setSelectedCategory] = useState<string[]>(
+    categoryParam.toLowerCase() === "all" ? [] : [(categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1))]
   );
-  const [selectedSize, setSelectedSize] = useState<string>("All");
-  const [selectedColor, setSelectedColor] = useState<string>("All");
+  const [selectedSize, setSelectedSize] = useState<string[]>([]);
+  const [selectedColor, setSelectedColor] = useState<string[]>([]);
 
   // Fetch mockups on mount
   useEffect(() => {
@@ -144,23 +143,25 @@ export default function CollectionClient({
 
   // Apply filtering
   const filteredProducts = groupedProducts.filter(product => {
-    if (selectedCategory !== "All") {
-      const expectedCat = selectedCategory.toLowerCase();
-      const matchesCollection = product.collections?.some((c: string) => c.toLowerCase() === expectedCat);
-      const matchesType = (product.productType || product.category || "").toLowerCase() === expectedCat;
+    if (selectedCategory.length > 0) {
+      const expectedCats = selectedCategory.map((cat) => cat.toLowerCase());
+      const matchesCollection = product.collections?.some((c: string) => expectedCats.includes(c.toLowerCase()));
+      const matchesType = expectedCats.includes((product.productType || product.category || "").toLowerCase());
       if (!matchesCollection && !matchesType) return false;
     }
-    if (selectedSize !== "All") {
+    if (selectedSize.length > 0) {
+      const expectedSizes = selectedSize.map((size) => size.toLowerCase());
       const hasSize = product.allVariants?.some((edge: any) => 
-        edge.node?.title?.toLowerCase().includes(selectedSize.toLowerCase()) || 
-        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "size" && opt.value.toLowerCase() === selectedSize.toLowerCase())
+        expectedSizes.some((size) => edge.node?.title?.toLowerCase().includes(size)) || 
+        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "size" && expectedSizes.includes(opt.value.toLowerCase()))
       );
       if (!hasSize) return false;
     }
-    if (selectedColor !== "All") {
+    if (selectedColor.length > 0) {
+      const expectedColors = selectedColor.map((color) => color.toLowerCase());
       const hasColor = product.allVariants?.some((edge: any) => 
-        edge.node?.title?.toLowerCase().includes(selectedColor.toLowerCase()) || 
-        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "color" && opt.value.toLowerCase() === selectedColor.toLowerCase())
+        expectedColors.some((color) => edge.node?.title?.toLowerCase().includes(color)) || 
+        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "color" && expectedColors.includes(opt.value.toLowerCase()))
       );
       if (!hasColor) return false;
     }
@@ -185,9 +186,8 @@ export default function CollectionClient({
     return sorted;
   })();
 
-  const isAll = selectedCategory === "All";
-  const pageTitle = initialCollectionTitle || (isAll ? "All Collections" : selectedCategory);
-  const pageLabel = isAll ? "Explore" : "Collection";
+  const pageTitle = initialCollectionTitle || (categoryParam.toLowerCase() === "all" ? "All Collections" : `${categoryParam.charAt(0).toUpperCase()}${categoryParam.slice(1)}`);
+  const pageLabel = categoryParam.toLowerCase() === "all" ? "Explore" : "Collection";
 
   return (
     <div style={{ paddingTop: "0px", minHeight: "100vh", backgroundColor: "#FAF9F7" }}>

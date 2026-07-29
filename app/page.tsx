@@ -608,7 +608,7 @@ export default function HomePage() {
 
   const getCategoryLabel = (tags: string[]) => {
     if (!tags || tags.length === 0) return "Travel Tips";
-    const tagList = tags.map(t => t.toLowerCase());
+    const tagList = tags.map(t => t.toLowearCase());
     if (tagList.includes("guides") || tagList.includes("guide")) return "Destination Guides";
     if (tagList.includes("adventure") || tagList.includes("hiking") || tagList.includes("stories")) return "Adventure Stories";
     if (tagList.includes("perspectives") || tagList.includes("tips") || tagList.includes("ideas")) return "Travel Tips";
