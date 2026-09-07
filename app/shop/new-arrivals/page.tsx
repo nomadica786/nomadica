@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { api, useApi } from "@/components/api/api";
+import { useRouter } from "next/navigation";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts, GroupedProduct } from "@/utils/productGroup";
 import ProductCard from "@/components/shop/ProductCard";
@@ -26,6 +27,7 @@ type ProductNode = {
 };
 
 export default function NewArrivalsPage() {
+  const router = useRouter();
   const { data: pageData, loading } = useApi(async () => {
     const [productsRes, mockupsRes, collectionsRes] = await Promise.all([
       api.products.list(50),
@@ -155,6 +157,8 @@ export default function NewArrivalsPage() {
         sortBy={sortBy}
         setSortBy={setSortBy}
         productCount={finalProducts.length}
+        pageFilterLabel={"Latest Collection"}
+        onClearPageFilter={() => router.push('/shop')}
       />
 
       {/* Products Grid */}

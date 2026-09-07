@@ -79,7 +79,7 @@ export default function CollectionClient({
   // Load products client-side if initialProducts is not provided (fallback)
   useEffect(() => {
     if (initialProducts) {
-      setProductsState(initialProducts);
+      // productsState is already initialized from initialProducts via useState
       setLoading(false);
       return;
     }
@@ -96,7 +96,7 @@ export default function CollectionClient({
         }
 
         const edges = res?.collectionByHandle?.products?.edges || res?.products?.edges || [];
-        const mapped = edges.map((edge: any) => {
+          const mapped = edges.map((edge: any) => {
           const node = edge.node;
           const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
           const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
@@ -150,7 +150,7 @@ export default function CollectionClient({
       if (!matchesCollection && !matchesType) return false;
     }
     if (selectedSize.length > 0) {
-      const expectedSizes = selectedSize.map((size) => size.toLowerCase());
+      const expectedSizes = selectedSize.map((s) => s.toLowerCase());
       const hasSize = product.allVariants?.some((edge: any) => 
         expectedSizes.some((size) => edge.node?.title?.toLowerCase().includes(size)) || 
         edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "size" && expectedSizes.includes(opt.value.toLowerCase()))
@@ -158,7 +158,7 @@ export default function CollectionClient({
       if (!hasSize) return false;
     }
     if (selectedColor.length > 0) {
-      const expectedColors = selectedColor.map((color) => color.toLowerCase());
+      const expectedColors = selectedColor.map((c) => c.toLowerCase());
       const hasColor = product.allVariants?.some((edge: any) => 
         expectedColors.some((color) => edge.node?.title?.toLowerCase().includes(color)) || 
         edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "color" && expectedColors.includes(opt.value.toLowerCase()))
@@ -186,8 +186,9 @@ export default function CollectionClient({
     return sorted;
   })();
 
-  const pageTitle = initialCollectionTitle || (categoryParam.toLowerCase() === "all" ? "All Collections" : `${categoryParam.charAt(0).toUpperCase()}${categoryParam.slice(1)}`);
-  const pageLabel = categoryParam.toLowerCase() === "all" ? "Explore" : "Collection";
+  const isAll = (categoryParam.toLowerCase() === "all");
+  const pageTitle = initialCollectionTitle || (selectedCategory.length > 0 ? selectedCategory[0] : (isAll ? "All Collections" : (categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1))));
+  const pageLabel = selectedCategory.length > 0 ? "Collection" : (isAll ? "Explore" : "Collection");
 
   return (
     <div style={{ paddingTop: "0px", minHeight: "100vh", backgroundColor: "#FAF9F7" }}>

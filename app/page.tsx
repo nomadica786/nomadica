@@ -1,16 +1,13 @@
 "use client";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Heart, LucideIcon, TrendingUp, MapPin, LocateIcon, Star } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, TrendingUp, Star } from "lucide-react";
 import { api } from "@/components/api/api";
 import { groupProducts } from "@/utils/productGroup";
 import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 import { ProductCarouselSection } from "@/components/shop/ProductCarouselSection";
-
-const heroImage =
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80";
 
 
 const testimonials = [
@@ -36,36 +33,35 @@ const testimonials = [
   }
 ];
 
-// Cache helper functions removed per request to always fetch fresh
-const getCached = (key: string, fallback: any) => {
+// Lightweight cache helpers (typed generically)
+const getCached = <T,>(key: string, fallback: T): T => {
   return fallback;
 };
 
-const setCached = (key: string, data: any) => {
-  // No-op
+const setCached = <T,>(_key: string, _data: T): void => {
+  // mark as used to satisfy linter
+  void _key;
+  void _data;
 };
 
 
 function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [loaded, setLoaded] = useState(false);
+  const [loaded] = useState(true);
   const bannerImages = [
     "/Main Banner 1.jpg",
     "/Main Banner 2.jpg",
     "/Main Banner 4.jpg"
   ];
 
-  useEffect(() => {
-    setLoaded(true);
-  }, []);
-
+  // removed immediate setState in effect to avoid cascading renders
   // Autoplay slideshow
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % bannerImages.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [bannerImages.length]);
 
   const handlePrev = () => {
     setCurrentSlide((prev) => (prev - 1 + bannerImages.length) % bannerImages.length);
@@ -302,7 +298,7 @@ function ImageBanner({
   );
 }
 
-function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
+function TestimonialsSection() {
   return (
     <section
       className="testimonials-section"
@@ -452,24 +448,16 @@ function TestimonialsSection({ bgTint }: { bgTint: boolean }) {
 
 
 export default function HomePage() {
-  const [collections, setCollections] = useState<any[]>([]);
-  const [newArrivals, setNewArrivals] = useState<any[]>([]);
-  const [bestSellers, setBestSellers] = useState<any[]>([]);
-  const [collectionProducts, setCollectionProducts] = useState<Record<string, any[]>>({});
-  const [collectionConfigs, setCollectionConfigs] = useState<any[]>([]);
-  const [journalArticles, setJournalArticles] = useState<any[]>([]);
-  const [mockups, setMockups] = useState<Record<string, string>>({});
+  const [collections, setCollections] = useState<any[]>(() => getCached("collections", []));
+  const [newArrivals, setNewArrivals] = useState<any[]>(() => getCached("new_arrivals", []));
+  const [bestSellers, setBestSellers] = useState<any[]>(() => getCached("best_sellers", []));
+  const [collectionProducts, setCollectionProducts] = useState<Record<string, any[]>>(() => getCached("collection_products", {}));
+  const [collectionConfigs, setCollectionConfigs] = useState<any[]>(() => getCached("collection_configs", []));
+  const [journalArticles, setJournalArticles] = useState<any[]>(() => getCached("journal", []));
+  const [mockups, setMockups] = useState<Record<string, string>>(() => getCached("product_type_mockups", {}));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setCollections(getCached("collections", []));
-    setNewArrivals(getCached("new_arrivals", []));
-    setBestSellers(getCached("best_sellers", []));
-    setCollectionProducts(getCached("collection_products", {}));
-    setCollectionConfigs(getCached("collection_configs", []));
-    setJournalArticles(getCached("journal", []));
-    setMockups(getCached("product_type_mockups", {}));
-
     const loadHomeData = async () => {
       try {
         // Fetch Mockup images from Shopify / Fallbacks
@@ -484,7 +472,7 @@ export default function HomePage() {
         setMockups(mockupLookup);
 
         // 1. Fetch Collections list
-        let cols = getCached("collections", []);
+        let cols: any[] = getCached("collections", []);
         try {
           const res = await api.collections.list();
           cols = res?.collections?.edges?.map((edge: any) => edge.node) || [];
@@ -495,7 +483,7 @@ export default function HomePage() {
         setCollections(cols);
 
         // 2. Fetch all products to extract New Arrivals, Best Sellers, and filter standard categories
-        let allProds = getCached("all_products", []);
+        let allProds: any[] = getCached("all_products", []);
         try {
           const res = await api.products.list(100);
           allProds = res?.products?.edges?.map((edge: any) => {
@@ -549,7 +537,7 @@ export default function HomePage() {
         // Fetch products for each of the 5 collections
         const colProductsMap: Record<string, any[]> = {};
         for (const config of resolvedConfigs) {
-          let prods = getCached(`coll_${config.handle}`, null);
+          let prods: any[] | null = getCached<any[] | null>(`coll_${config.handle}`, null);
           if (!prods) {
             try {
               const res = await api.collections.getByHandle(config.handle, 10);
@@ -608,7 +596,7 @@ export default function HomePage() {
 
   const getCategoryLabel = (tags: string[]) => {
     if (!tags || tags.length === 0) return "Travel Tips";
-    const tagList = tags.map(t => t.toLowearCase());
+    const tagList = tags.map(t => t.toLowerCase());
     if (tagList.includes("guides") || tagList.includes("guide")) return "Destination Guides";
     if (tagList.includes("adventure") || tagList.includes("hiking") || tagList.includes("stories")) return "Adventure Stories";
     if (tagList.includes("perspectives") || tagList.includes("tips") || tagList.includes("ideas")) return "Travel Tips";

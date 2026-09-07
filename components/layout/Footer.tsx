@@ -43,7 +43,7 @@ export default function Footer() {
   return (
     <footer
       style={{
-        backgroundColor: "#2E2E2E",
+        backgroundColor: "#040001",
         color: "#FFFFFF",
         paddingTop: "4rem",
         paddingBottom: "2rem",

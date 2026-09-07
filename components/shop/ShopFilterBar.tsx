@@ -18,6 +18,8 @@ interface ShopFilterBarProps {
   sortBy: string;
   setSortBy: (sort: string) => void;
   productCount: number;
+  pageFilterLabel?: string;
+  onClearPageFilter?: () => void;
 }
 
 export function ShopFilterBar({
@@ -31,6 +33,7 @@ export function ShopFilterBar({
   sortBy,
   setSortBy,
   productCount
+  , pageFilterLabel, onClearPageFilter
 }: ShopFilterBarProps) {
   const [openDropdown, setOpenDropdown] = useState<"category" | "size" | "color" | "sort" | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -54,8 +57,8 @@ export function ShopFilterBar({
     alignItems: "center",
     gap: "0.5rem",
     padding: "0.5rem 1rem",
-    backgroundColor: "#FAF9F7",
-    border: "1px solid #0000001f",
+    backgroundColor: "#FFFFFF",
+    border: "1px solid rgba(0,0,0,0.1)",
     borderRadius: "4px",
     fontFamily: "'Montserrat', sans-serif",
     fontSize: "0.875rem",
@@ -129,11 +132,7 @@ export function ShopFilterBar({
     };
   };
 
-  const getLabel = (selected: string[], defaultLabel: string) => {
-    if (selected.length === 0) return defaultLabel;
-    if (selected.length === 1) return selected[0];
-    return `${selected.length} Selected`;
-  };
+  
 
   const hasActiveFilters = selectedCategory.length > 0 || selectedSize.length > 0 || selectedColor.length > 0;
   const resetFilters = () => {
@@ -155,7 +154,7 @@ export function ShopFilterBar({
       <div
         ref={dropdownRef}
         style={{
-          maxWidth: "1400px",
+          maxWidth: "1350px",
           margin: "0 auto",
           display: "flex",
           justifyContent: "space-between",
@@ -166,7 +165,7 @@ export function ShopFilterBar({
         <div style={{ display: "flex", gap: "1rem", position: "relative", flexWrap: "wrap" }}>
           <div style={{ position: "relative" }}>
             <button onClick={() => toggleDropdown("category")} style={activeButtonStyle(openDropdown === "category" || selectedCategory.length > 0) }>
-              Category
+              {selectedCategory.length === 0 ? "Category" : selectedCategory.length === 1 ? selectedCategory[0] : `Category (${selectedCategory.length})`}
               <ChevronDown size={14} />
             </button>
             {openDropdown === "category" && (
@@ -195,7 +194,7 @@ export function ShopFilterBar({
           {/* Size Dropdown */}
           <div style={{ position: "relative" }}>
             <button onClick={() => toggleDropdown("size")} style={activeButtonStyle(openDropdown === "size" || selectedSize.length > 0) }>
-              Size
+              {selectedSize.length === 0 ? "Size" : selectedSize.length === 1 ? selectedSize[0] : `Size (${selectedSize.length})`}
               <ChevronDown size={14} />
             </button>
             {openDropdown === "size" && (
@@ -224,7 +223,17 @@ export function ShopFilterBar({
           {/* Color Dropdown */}
           <div style={{ position: "relative" }}>
             <button onClick={() => toggleDropdown("color")} style={activeButtonStyle(openDropdown === "color" || selectedColor.length > 0) }>
-              Color
+              {selectedColor.length === 1 && (
+                <span style={{ 
+                  display: "inline-block",
+                  width: "14px", 
+                  height: "14px", 
+                  borderRadius: "50%", 
+                  backgroundColor: selectedColor[0] === "White" ? "#FFFFFF" : selectedColor[0].toLowerCase(), 
+                  border: selectedColor[0] === "White" ? "1px solid rgba(0,0,0,0.15)" : "none"
+                }} />
+              )}
+              {selectedColor.length === 0 ? "Color" : selectedColor.length === 1 ? selectedColor[0] : `Color (${selectedColor.length})`}
               <ChevronDown size={14} />
             </button>
             {openDropdown === "color" && (
@@ -250,26 +259,41 @@ export function ShopFilterBar({
             )}
           </div>
 
-          {hasActiveFilters && (
-            <button
-              onClick={resetFilters}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "0.5rem 1rem",
-                borderRadius: "4px",
-                border: "1px solid rgba(30,30,30,0.1)",
-                backgroundColor: "transparent",
-                color: "#1E1E1E",
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "0.875rem",
-                cursor: "pointer"
-              }}
-            >
-              Clear All
-            </button>
-          )}
+          {/* Page pill (route) + Selected category pills + Clear All */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            {pageFilterLabel && (
+              <div style={{ display: "inline-flex", alignItems: "center" }}>
+                <span style={{ backgroundColor: "#C4A77D", color: "#FFFFFF", padding: "0.5rem 0.9rem", borderRadius: "999px", fontFamily: "'Montserrat', sans-serif", fontSize: "0.875rem", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                  <span>{pageFilterLabel}</span>
+                  <button onClick={() => onClearPageFilter && onClearPageFilter()} style={{ background: "transparent", border: "none", color: "#FFFFFF", cursor: "pointer", padding: 0, marginLeft: "2px", fontSize: "0.95rem" }} aria-label={`Remove ${pageFilterLabel}`}>
+                    ✕
+                  </button>
+                </span>
+              </div>
+            )}
+            {/* No pills for dropdown options — only show route/page pill above */}
+
+            {hasActiveFilters && (
+              <button
+                onClick={resetFilters}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "4px",
+                  border: "1px solid rgba(30,30,30,0.1)",
+                  backgroundColor: "transparent",
+                  color: "#1E1E1E",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.875rem",
+                  cursor: "pointer"
+                }}
+              >
+                Clear All
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Right Side: Product Count and Sort */}

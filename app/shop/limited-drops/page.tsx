@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { api, useApi } from "@/components/api/api";
+import { useRouter } from "next/navigation";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts, GroupedProduct } from "@/utils/productGroup";
 import ProductCard from "@/components/shop/ProductCard";
@@ -54,6 +55,7 @@ function Countdown({ targetDate }: { targetDate: Date }) {
 }
 
 export default function LimitedDropsPage() {
+  const router = useRouter();
   const [target] = useState(() => new Date(Date.now() + 48 * 3600 * 1000));
   const { data: pageData, loading } = useApi(async () => {
     const [productsRes, mockupsRes, collectionsRes] = await Promise.all([
@@ -205,6 +207,8 @@ export default function LimitedDropsPage() {
         sortBy={sortBy}
         setSortBy={setSortBy}
         productCount={finalProducts.length}
+        pageFilterLabel={"Limited Drops"}
+        onClearPageFilter={() => router.push('/shop')}
       />
 
       {/* Products Grid */}

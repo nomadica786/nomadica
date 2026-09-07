@@ -5,6 +5,7 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts, GroupedProduct } from "@/utils/productGroup";
 import ProductCard from "@/components/shop/ProductCard";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
+import { useRouter } from "next/navigation";
 
 type CollectionEdge = { node: { title: string } };
 type ProductOption = { name?: string; value?: string };
@@ -26,6 +27,7 @@ type ProductNode = {
 };
 
 export default function BestSellersPage() {
+  const router = useRouter();
   const { data: pageData, loading } = useApi(async () => {
     const [productsRes, mockupsRes, collectionsRes] = await Promise.all([
       api.products.list(50),
@@ -157,6 +159,8 @@ export default function BestSellersPage() {
         sortBy={sortBy}
         setSortBy={setSortBy}
         productCount={finalProducts.length}
+        pageFilterLabel={"Best Sellers"}
+        onClearPageFilter={() => router.push('/shop')}
       />
 
       {/* Products Grid */}
