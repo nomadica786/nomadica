@@ -298,7 +298,7 @@ function ImageBanner({
   );
 }
 
-function TestimonialsSection() {
+function TestimonialsSection({ bgTint }: { bgTint?: boolean } = {}) {
   return (
     <section
       className="testimonials-section"
@@ -307,6 +307,7 @@ function TestimonialsSection() {
         width: "100%",
         height: "700px",
         backgroundImage: "url('/testimonials-bg.jpg')",
+        backgroundColor: bgTint ? "#F5F3F0" : "transparent",
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",
