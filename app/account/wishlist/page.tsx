@@ -76,6 +76,8 @@ export default function WishlistPage() {
           const activeColor = group.colorVariants.find((cv: any) => cv.id === targetId);
           return {
             ...wishItem,
+            id: targetId,
+            productId: targetId,
             colorVariants: group.colorVariants,
             mockupImage: group.mockupImage || wishItem.mockupImage,
             name: activeColor && activeColor.colorName !== "Original" ? `${activeColor.colorName} ${group.name}` : group.name,
@@ -223,6 +225,8 @@ export default function WishlistPage() {
                 <ProductCard
                   key={product.id}
                   {...product}
+                  showAddToCart={true}
+                  onAddToCart={() => setQuickViewProduct(product)}
                 />
               ))}
             </div>

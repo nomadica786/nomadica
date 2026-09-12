@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { api } from "@/components/api/api";
 import { useAuth } from "@/utils/hooks/useAuth";
 import Image from "next/image";
@@ -24,6 +24,7 @@ interface ColorVariant {
   originalPrice?: number;
   handle: string;
   badge?: string;
+  allVariants?: any[];
 }
 
 interface ProductCardProps {
@@ -39,6 +40,9 @@ interface ProductCardProps {
   colorVariants?: ColorVariant[];
   handle?: string;
   mockupImage?: string;
+  showAddToCart?: boolean;
+  onAddToCart?: (variant?: any) => void;
+  allVariants?: any[];
 }
 
 export default function ProductCard({
@@ -54,6 +58,9 @@ export default function ProductCard({
   colorVariants,
   handle,
   mockupImage,
+  showAddToCart = false,
+  onAddToCart,
+  allVariants,
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -61,13 +68,23 @@ export default function ProductCard({
   const [wishlisted, setWishlisted] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
 
+  // Strictly deduplicate colorVariants so no duplicate colors or duplicate IDs can ever exist
+  const uniqueVariants = (colorVariants || []).filter(
+    (v, idx, arr) =>
+      arr.findIndex(
+        (other) =>
+          other.id === v.id ||
+          (other.colorHex && v.colorHex && other.colorHex.toLowerCase() === v.colorHex.toLowerCase())
+      ) === idx
+  );
+
   const [activeVariant, setActiveVariant] = useState<ColorVariant | null>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
-    if (colorVariants && colorVariants.length > 0) {
-      const match = colorVariants.find(v => v.id === id);
-      setActiveVariant(match || colorVariants[0]);
+    if (uniqueVariants && uniqueVariants.length > 0) {
+      const match = uniqueVariants.find(v => v.id === id);
+      setActiveVariant(match || uniqueVariants[0]);
     } else {
       setActiveVariant(null);
     }
@@ -251,30 +268,29 @@ export default function ProductCard({
         </div>
 
         {/* Color Swatches */}
-        {colorVariants && colorVariants.length > 1 && (
+        {uniqueVariants && uniqueVariants.length > 1 && (
           <div style={{ display: "flex", justifyContent: "center", gap: "6px", flexWrap: "wrap", minHeight: "22px", marginBottom: "0.5rem" }}>
-            {colorVariants.map((v) => {
+            {uniqueVariants.map((v) => {
               const isSelected = activeVariant ? activeVariant.id === v.id : false;
-              const isWhite = v.colorHex?.toLowerCase() === "#ffffff" || v.colorHex?.toLowerCase() === "white";
+              const isWhite = isWhiteColor(v.colorHex);
               return (
-                <div key={v.id} className="dest-swatch-wrap" style={{ width: "22px", height: "22px" }}>
-                  <div
-                                        key={v.id}
-                                        className="dest-swatch-wrap"
-                                        style={{
-                                          width: "22px",
-                                          height: "22px",
-                                          borderRadius: "50%",
-                                          display: "flex",
-                                          alignItems: "center",
-                                          justifyContent: "center",
-                                          border: isSelected
-                                            ? "2px solid rgba(0, 0, 0, 1)"
-                                            : "2px solid #CCCCCC",
-                                          background: "transparent",
-                                          transition: "all 0.15s ease",
-                                        }}
-                                      >
+                <div
+                  key={v.id}
+                  className="dest-swatch-wrap"
+                  style={{
+                    width: "22px",
+                    height: "22px",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: isSelected
+                      ? "2px solid rgba(0, 0, 0, 1)"
+                      : "2px solid #CCCCCC",
+                    background: "transparent",
+                    transition: "all 0.15s ease",
+                  }}
+                >
                   <button
                     onMouseEnter={() => {
                       setActiveVariant(v);
@@ -291,6 +307,7 @@ export default function ProductCard({
                       height: "16px",
                       borderRadius: "50%",
                       backgroundColor: v.colorHex,
+                      border: isWhite ? "1px solid rgba(30, 30, 30, 0.2)" : "none",
                       boxShadow: isSelected ? "0 0 0 1.5px #FFFFFF inset" : "none",
                       padding: 0,
                       cursor: "pointer",
@@ -301,9 +318,67 @@ export default function ProductCard({
                     aria-label={`Select color ${v.colorName}`}
                   />
                 </div>
-                </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Add to Cart Button */}
+        {showAddToCart && (
+          <div style={{ marginTop: "0.75rem" }}>
+            <button
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onAddToCart) {
+                  onAddToCart(activeVariant || { id: currentId, name: currentName, price: currentPrice, image: currentImage, allVariants });
+                } else {
+                  setAddingToCart(true);
+                  try {
+                    let cartId = localStorage.getItem("nomadica_cart_id");
+                    const variantId = activeVariant?.id || currentId;
+                    if (!cartId) {
+                      const res = await api.cart.create([{ merchandiseId: variantId, quantity: 1 }]);
+                      const newCart = res?.cartCreate?.cart || res?.cart;
+                      if (newCart?.id) localStorage.setItem("nomadica_cart_id", newCart.id);
+                    } else {
+                      await api.cart.update(cartId, { lines: [{ merchandiseId: variantId, quantity: 1 }] });
+                    }
+                    window.dispatchEvent(new CustomEvent("cart-updated", { detail: { openDrawer: true } }));
+                  } catch (err) {
+                    console.error("Failed to add to cart:", err);
+                  } finally {
+                    setAddingToCart(false);
+                  }
+                }
+              }}
+              style={{
+                width: "100%",
+                backgroundColor: "#C6BAA8",
+                color: "#FFFFFF",
+                border: "none",
+                padding: "0.6rem 1rem",
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                borderRadius: "4px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+                transition: "transform 0.2s ease, background-color 0.2s ease",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+                transform: hovered ? "scale(1.02)" : "scale(1)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#b0a390")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#C6BAA8")}
+            >
+              <ShoppingCart size={14} />
+              {addingToCart ? "ADDING..." : "ADD TO CART"}
+            </button>
           </div>
         )}
       </div>

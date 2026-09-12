@@ -63,6 +63,8 @@ interface ProductDetails {
 
 interface ProductDetailClientProps {
   initialProduct?: any;
+  initialAllEdges?: any[];
+  initialMockupLookup?: Record<string, any>;
 }
 
 const ThoughtfulIcon = () => (
@@ -197,7 +199,87 @@ const mapRawProduct = (rawProduct: any): ProductDetails => {
 // Module-level cache for grouped color variations so they are instantly available across navigations in stable order
 const cachedVariationsByGroup: Record<string, any[]> = {};
 
-export function ProductDetailContent({ initialProduct }: ProductDetailClientProps) {
+function getInitialMockup(rawProduct: any, mockupLookup: Record<string, any>) {
+  if (!rawProduct) return undefined;
+  const productType = rawProduct.productType || rawProduct.category || "Tee";
+  let config = mockupLookup[productType];
+  if (!config) {
+    const lowerType = productType.toLowerCase();
+    for (const [key, val] of Object.entries(mockupLookup)) {
+      if (lowerType.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerType)) {
+        config = val;
+        break;
+      }
+    }
+  }
+  if (!config && (productType.toLowerCase().includes("tee") || productType.toLowerCase().includes("t-shirt"))) {
+    config = mockupLookup["Tee"];
+  }
+  return typeof config === "object" ? config.mockupImage : config;
+}
+
+function computeVariations(rawProduct: any, allEdges: any[], mockupLookup: Record<string, any>) {
+  if (!rawProduct || !allEdges?.length) return [];
+  const allMapped = allEdges.map((edge: any) => {
+    const node = edge.node;
+    if (node.id === rawProduct.id) {
+      return {
+        id: rawProduct.id,
+        name: rawProduct.title,
+        handle: rawProduct.handle,
+        price: parseFloat(rawProduct.variants?.edges?.[0]?.node?.price?.amount || "0"),
+        originalPrice: parseFloat(rawProduct.variants?.edges?.[0]?.node?.compareAtPrice?.amount || "0") || undefined,
+        image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
+        category: rawProduct.productType || rawProduct.category || "Tops",
+        productType: rawProduct.productType || rawProduct.category || "Tops",
+        createdAt: rawProduct.createdAt || node.createdAt || ""
+      };
+    }
+    return {
+      id: node.id,
+      name: node.title,
+      handle: node.handle,
+      price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
+      image: node.images?.edges?.[0]?.node?.url || "",
+      category: node.productType || node.category || "Tops",
+      productType: node.productType || node.category || "Tops",
+      createdAt: node.createdAt || ""
+    };
+  });
+  if (!allMapped.some((p: any) => p.id === rawProduct.id)) {
+    allMapped.push({
+      id: rawProduct.id,
+      name: rawProduct.title,
+      handle: rawProduct.handle,
+      price: parseFloat(rawProduct.variants?.edges?.[0]?.node?.price?.amount || "0"),
+      originalPrice: parseFloat(rawProduct.variants?.edges?.[0]?.node?.compareAtPrice?.amount || "0") || undefined,
+      image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
+      category: rawProduct.productType || rawProduct.category || "Tops",
+      productType: rawProduct.productType || rawProduct.category || "Tops",
+      createdAt: rawProduct.createdAt || ""
+    });
+  }
+  const grouped = groupProducts(allMapped, mockupLookup);
+  const currentGroup = grouped.find(g => g.colorVariants.some(v => v.id === rawProduct.id));
+  if (!currentGroup) return [];
+  const vars = currentGroup.colorVariants.map(v => ({
+    id: v.id,
+    handle: v.handle,
+    colorName: v.colorName,
+    colorHex: v.colorHex,
+    image: v.image,
+    createdAt: v.createdAt
+  }));
+  vars.sort((a, b) => {
+    if (a.createdAt && b.createdAt) {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    }
+    return 0;
+  });
+  return vars;
+}
+
+export function ProductDetailContent({ initialProduct, initialAllEdges, initialMockupLookup }: ProductDetailClientProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const searchParams = useSearchParams();
@@ -205,7 +287,14 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
   const queryHandle = searchParams.get("handle");
 
   const [product, setProduct] = useState<ProductDetails | null>(() => {
-    return initialProduct ? mapRawProduct(initialProduct) : null;
+    if (!initialProduct) return null;
+    const mapped = mapRawProduct(initialProduct);
+    const mock = getInitialMockup(initialProduct, initialMockupLookup || {});
+    if (mock) {
+      const filtered = (mapped.images || []).filter(img => img !== mock);
+      mapped.images = [mock, ...filtered];
+    }
+    return mapped;
   });
   const [variants, setVariants] = useState<any[]>(() => {
     return initialProduct?.variants?.edges?.map((edge: any) => edge.node) || [];
@@ -220,6 +309,13 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
   const [cartAdding, setCartAdding] = useState(false);
   const initialGroupKey = (initialProduct?.productType || initialProduct?.category || "Tee").toLowerCase();
   const [colorVariations, setColorVariations] = useState<any[]>(() => {
+    if (initialProduct && initialAllEdges && initialAllEdges.length > 0) {
+      const computed = computeVariations(initialProduct, initialAllEdges, initialMockupLookup || {});
+      if (computed.length > 0) {
+        cachedVariationsByGroup[initialGroupKey] = computed;
+        return computed;
+      }
+    }
     return cachedVariationsByGroup[initialGroupKey] || [];
   });
   const [hoveredColorImage, setHoveredColorImage] = useState<string | null>(null);
@@ -228,7 +324,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
   const [relatedActiveVariants, setRelatedActiveVariants] = useState<Record<string, any>>({});
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxVariantIndex, setLightboxVariantIndex] = useState(0);
-  
+
   const [openAccordion, setOpenAccordion] = useState<Record<string, boolean>>({
     details: false,
     sizeChart: false,

@@ -183,8 +183,11 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
           v.id === variant.id ||
           (v.colorHex &&
             variant.colorHex &&
-            v.colorHex.toLowerCase() === variant.colorHex.toLowerCase() &&
-            v.colorName.toLowerCase() === variant.colorName.toLowerCase())
+            v.colorHex.toLowerCase() === variant.colorHex.toLowerCase()) ||
+          (v.colorName &&
+            variant.colorName &&
+            v.colorName.toLowerCase() === variant.colorName.toLowerCase() &&
+            v.colorName !== "Original")
       );
       if (!isDuplicate) {
         groups[groupKey].colorVariants.push(variant);

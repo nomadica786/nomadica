@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProductByHandle } from "@/lib/shopify/products";
+import { getProductByHandle, getAllStorefrontProducts, getProductTypeMockups } from "@/lib/shopify/products";
 import { constructMetadata } from "@/lib/seo/metadata";
 import { getProductSchema } from "@/lib/schema/product";
 import { getBreadcrumbSchema } from "@/lib/schema/breadcrumb";
@@ -37,13 +37,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 }
 
+const fallbackMockups: Record<string, { mockupImage: string; displayName?: string }> = {
+  "Tee": { mockupImage: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80", displayName: "Tee" },
+  "Shirt": { mockupImage: "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=600&q=80", displayName: "Shirt" },
+  "Trousers": { mockupImage: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600&q=80", displayName: "Trousers" },
+  "Jacket": { mockupImage: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80", displayName: "Jacket" },
+  "Sweater": { mockupImage: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80", displayName: "Sweater" },
+  "Polo": { mockupImage: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=600&q=80", displayName: "Polo" },
+  "Shorts": { mockupImage: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=600&q=80", displayName: "Shorts" }
+};
+
 export default async function ProductPage({ params }: PageProps) {
   const { handle } = await params;
-  const product = await getProductByHandle(handle);
+  const [product, allEdges, mockups] = await Promise.all([
+    getProductByHandle(handle),
+    getAllStorefrontProducts(50),
+    getProductTypeMockups()
+  ]);
 
   if (!product) {
     notFound();
   }
+
+  const mergedMockups = { ...fallbackMockups, ...mockups };
 
   const productSchema = getProductSchema(product);
   const breadcrumbSchema = getBreadcrumbSchema([
@@ -57,7 +73,11 @@ export default async function ProductPage({ params }: PageProps) {
     <>
       <JsonLd schema={productSchema} />
       <JsonLd schema={breadcrumbSchema} />
-      <ProductDetailClient initialProduct={product} />
+      <ProductDetailClient
+        initialProduct={product}
+        initialAllEdges={allEdges}
+        initialMockupLookup={mergedMockups}
+      />
     </>
   );
 }

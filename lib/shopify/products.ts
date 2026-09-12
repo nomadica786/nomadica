@@ -72,3 +72,14 @@ export async function getProductTypeMockups() {
   }
 }
 
+export async function getAllStorefrontProducts(first: number = 50) {
+  try {
+    const client = getStorefrontClient();
+    const data: any = await client.request(STOREFRONT_QUERIES.GET_PRODUCTS, { first });
+    return data?.products?.edges || [];
+  } catch (error) {
+    console.error("Failed to fetch all storefront products:", error);
+    return [];
+  }
+}
+
