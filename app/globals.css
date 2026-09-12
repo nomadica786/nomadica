@@ -786,3 +786,174 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
   flex-grow: 1;
 }
+
+/* =========================================
+   Product Detail Page Sticky Layout
+   ========================================= */
+
+.product-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* -----------------------------------------
+   Left Gallery
+   ----------------------------------------- */
+
+.product-detail-sticky-left {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* -----------------------------------------
+   Tablet / Desktop
+   ----------------------------------------- */
+
+@media (min-width: 768px) {
+  .product-detail-grid {
+    /*
+      LEFT  = 540px
+      GAP   = 60px
+      RIGHT = 550px
+    */
+    grid-template-columns: 540px 550px !important;
+
+    column-gap: 60px !important;
+    row-gap: 0 !important;
+
+    justify-content: center !important;
+
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .product-detail-sticky-left {
+    position: sticky !important;
+    top: 94px !important;
+    align-self: start !important;
+
+    width: 540px !important;
+    max-width: 540px !important;
+  }
+
+  .product-detail-grid > div:nth-child(2) {
+    width: 550px !important;
+    max-width: 550px !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+}
+
+/* -----------------------------------------
+   Large Desktop
+   ----------------------------------------- */
+
+@media (min-width: 1200px) {
+  .product-detail-grid {
+    /*
+      LEFT  = 580px
+      GAP   = 70px
+      RIGHT = 560px
+
+      TOTAL = 1210px
+
+      This makes the overall layout wider,
+      reducing the outer left/right margins.
+    */
+    grid-template-columns: 600px 560px !important;
+
+    column-gap: 70px !important;
+    row-gap: 0 !important;
+
+    justify-content: center !important;
+
+    width: 100%;
+    max-width: 1400px;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    box-sizing: border-box;
+  }
+
+  .product-detail-sticky-left {
+    width: 580px !important;
+    max-width: 580px !important;
+  }
+
+  .product-detail-grid > div:nth-child(2) {
+    width: 560px !important;
+    max-width: 560px !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+}
+
+/* -----------------------------------------
+   Extra Large Desktop
+   ----------------------------------------- */
+
+@media (min-width: 1600px) {
+  .product-detail-grid {
+    /*
+      Keep the layout wide and centered.
+
+      LEFT  = 580px
+      GAP   = 70px
+      RIGHT = 560px
+    */
+    grid-template-columns: 580px 560px !important;
+
+    column-gap: 70px !important;
+    row-gap: 0 !important;
+
+    justify-content: center !important;
+
+    max-width: 1400px;
+  }
+
+  .product-detail-sticky-left {
+    width: 580px !important;
+    max-width: 580px !important;
+  }
+
+  .product-detail-grid > div:nth-child(2) {
+    width: 560px !important;
+    max-width: 560px !important;
+  }
+}
+
+/* -----------------------------------------
+   Mobile
+   ----------------------------------------- */
+
+@media (max-width: 767px) {
+  .product-detail-grid {
+    grid-template-columns: 1fr !important;
+
+    gap: 2rem !important;
+
+    justify-content: stretch !important;
+
+    width: 100%;
+  }
+
+  .product-detail-sticky-left {
+    position: relative !important;
+    top: auto !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .product-detail-grid > div:nth-child(2) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

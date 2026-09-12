@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Heart, ShoppingCart, Star, ChevronDown, Radius } from "lucide-react";
+import { Heart, ShoppingCart, Star, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import ProductCard from "@/components/shop/ProductCard";
@@ -209,7 +209,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
   });
   const [loading, setLoading] = useState(() => !initialProduct);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState("S - 38");
+  const [selectedSize, setSelectedSize] = useState("XS - 36");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [wishlisted, setWishlisted] = useState(false);
@@ -220,6 +220,8 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
   const [hoveredSwatchId, setHoveredSwatchId] = useState<string | null>(null);
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const [relatedActiveVariants, setRelatedActiveVariants] = useState<Record<string, any>>({});
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxVariantIndex, setLightboxVariantIndex] = useState(0);
   
   const [openAccordion, setOpenAccordion] = useState<Record<string, boolean>>({
     details: false,
@@ -339,6 +341,29 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
 
         setColorVariations(variations);
 
+        // Ensure mock image is always the first image
+        const productTypeKey = rawProduct.productType || rawProduct.category || "Tee";
+        const mockupConfig = mockupLookup[productTypeKey] || mockupLookup["Tee"];
+        const mockupImg = currentGroup?.mockupImage || (typeof mockupConfig === "object" ? mockupConfig?.mockupImage : mockupConfig);
+
+        if (mockupImg) {
+          setProduct(prev => {
+            if (!prev) return null;
+            const existingImages = prev.images || [];
+            const filtered = existingImages.filter(img => img !== mockupImg);
+            return {
+              ...prev,
+              images: [mockupImg, ...filtered]
+            };
+          });
+          setSelectedImage(0);
+        }
+
+        const currentVarIdx = variations.findIndex(v => v.id === rawProduct.id);
+        if (currentVarIdx >= 0) {
+          setLightboxVariantIndex(currentVarIdx);
+        }
+
         const listRes = await api.products.list(24);
         const listMapped = listRes?.products?.edges?.map((edge: any) => {
           const node = edge.node;
@@ -394,6 +419,63 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
     };
     checkWishlist();
   }, [product?.id]);
+
+  useEffect(() => {
+    if (colorVariations.length > 0 && product?.id) {
+      const idx = colorVariations.findIndex(v => v.id === product.id);
+      if (idx >= 0) {
+        setLightboxVariantIndex(idx);
+      }
+    }
+  }, [product?.id, colorVariations]);
+
+  const handlePrevLightbox = () => {
+    if (colorVariations.length > 1) {
+      const prevIdx = (lightboxVariantIndex - 1 + colorVariations.length) % colorVariations.length;
+      setLightboxVariantIndex(prevIdx);
+      const target = colorVariations[prevIdx];
+      if (target?.handle && target.handle !== product?.handle) {
+        router.push(`/products/${target.handle}`);
+      }
+    } else if (product?.images && product.images.length > 1) {
+      setSelectedImage((prev) => (prev - 1 + product.images.length) % product.images.length);
+    }
+  };
+
+  const handleNextLightbox = () => {
+    if (colorVariations.length > 1) {
+      const nextIdx = (lightboxVariantIndex + 1) % colorVariations.length;
+      setLightboxVariantIndex(nextIdx);
+      const target = colorVariations[nextIdx];
+      if (target?.handle && target.handle !== product?.handle) {
+        router.push(`/products/${target.handle}`);
+      }
+    } else if (product?.images && product.images.length > 1) {
+      setSelectedImage((prev) => (prev + 1) % product.images.length);
+    }
+  };
+
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsLightboxOpen(false);
+      } else if (e.key === "ArrowLeft") {
+        handlePrevLightbox();
+      } else if (e.key === "ArrowRight") {
+        handleNextLightbox();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isLightboxOpen, colorVariations, lightboxVariantIndex, product?.images]);
 
   const handleWishlistToggle = async () => {
     if (!product) return;
@@ -482,126 +564,227 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
   const { originalPrice: markupPrice, discount: markupDiscount } = getMarkupPrice(product.id, product.price);
 
   return (
-    <div style={{ paddingTop: "0px", backgroundColor: "#FBF9F7", minHeight: "100vh" }}>
-      {/* Breadcrumb */}
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "1.5rem 1.5rem 0" }}>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          {["Home", "Shop", product.name].map((crumb, i, arr) => (
-            <span key={crumb} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <Link
-                href={i === 0 ? "/" : i === 1 ? "/shop" : "#"}
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontSize: "0.8125rem",
-                  color: i === arr.length - 1 ? "#1E1E1E" : "rgba(30,30,30,0.4)",
-                  textDecoration: "none",
-                  fontWeight: i === arr.length - 1 ? 500 : 400,
-                }}
-              >
-                {crumb}
-              </Link>
-              {i < arr.length - 1 && (
-                <span style={{ color: "rgba(30,30,30,0.3)", fontSize: "0.75rem" }}>/</span>
-              )}
-            </span>
-          ))}
-        </div>
-      </div>
+    <div style={{ paddingTop: "0px", backgroundColor: "#FBF9F7", minHeight: "100vh", paddingBottom: "2rem" }}>
+<style>{`
+  .product-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
 
-      {/* Main content */}
+  .product-detail-sticky-left {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Desktop */
+  @media (min-width: 768px) {
+    .product-detail-grid {
+      /*
+        LEFT  = 500px
+        GAP   = 80px
+        RIGHT = 550px
+      */
+      grid-template-columns: 500px 550px !important;
+      column-gap: 80px !important;
+      row-gap: 0 !important;
+
+      /* Center both columns together */
+      justify-content: center !important;
+    }
+
+    .product-detail-sticky-left {
+      position: sticky !important;
+      top: 94px !important;
+      align-self: start !important;
+
+      width: 500px !important;
+      max-width: 500px !important;
+    }
+
+    .product-detail-grid > div:nth-child(2) {
+      width: 550px !important;
+      max-width: 550px !important;
+      min-width: 0 !important;
+    }
+  }
+
+  /* Large Desktop */
+  @media (min-width: 1200px) {
+    .product-detail-grid {
+      /*
+        LEFT  = 540px
+        GAP   = 120px
+        RIGHT = 550px
+
+        TOTAL = 1210px
+      */
+      grid-template-columns: 540px 550px !important;
+      column-gap: 120px !important;
+      row-gap: 0 !important;
+
+      justify-content: center !important;
+    }
+
+    .product-detail-sticky-left {
+      width: 540px !important;
+      max-width: 540px !important;
+    }
+
+    .product-detail-grid > div:nth-child(2) {
+      width: 550px !important;
+      max-width: 550px !important;
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .product-detail-grid {
+      grid-template-columns: 1fr !important;
+      gap: 2rem !important;
+      justify-content: stretch !important;
+    }
+
+    .product-detail-sticky-left {
+      position: relative !important;
+      top: auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .product-detail-grid > div:nth-child(2) {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+  }
+`}</style>
+
+      {/* Main content grid */}
       <div
+        className="product-detail-grid"
         style={{
           maxWidth: "1400px",
           margin: "0 auto",
-          padding: "2rem 1.5rem",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "4rem",
-          alignItems: "start",
+          padding: "2.5rem 2rem",
         }}
       >
-        {/* Images */}
-        <div style={{ display: "flex", gap: "1.5rem", alignItems: "start" }}>
-          {/* Color Variations Stack (Vertical, on the left) */}
-          {colorVariations.length > 0 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "80px", flexShrink: 0 }}>
-              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.6875rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "rgba(30,30,30,0.5)", margin: 0, textAlign: "center" }}>
-                Variants
-              </p>
-              {colorVariations.map((v) => (
-                <button
-                  key={v.id}
-                  onClick={() => {
-                    if (v.handle) {
-                      router.push(`/products/${v.handle}`);
-                    } else {
-                      router.push(`/shop/product-details?id=${v.id}`);
-                    }
-                  }}
-                  onMouseEnter={() => {
-                    setHoveredColorImage(v.image);
-                  }}
-                  onMouseLeave={() => {
-                    setHoveredColorImage(null);
-                  }}
-                  style={{
-                    position: "sticky",
-                    width: "100%",
-                    height: "auto",
-                    aspectRatio: "3/4",
-                    overflow: "hidden",
-                    border: product.id === v.id ? "2px solid #1E1E1E" : "1px solid rgba(30, 30, 30, 0.15)",
-                    cursor: "pointer",
-                    padding: 0,
-                    background: "none",
-                    transition: "all 0.2s ease",
-                  }}
-                  title={v.colorName}
-                >
-                  <Image src={getShopifyImageUrl(v.image, 160)} alt={v.colorName} fill sizes="80px" style={{ objectFit: "cover" }} />
-                  {/* Small Color Dot Indicator in bottom-right corner of thumbnail */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "4px",
-                      right: "4px",
-                      width: "12px",
-                      height: "12px",
-                      borderRadius: "50%",
-                      backgroundColor: v.colorHex,
-                      border: isWhiteColor(v.colorHex) ? "1px solid #1E1E1E" : "1px solid rgba(255, 255, 255,0.8)",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+        {/* Left Side: Sticky Gallery Container */}
+        <div
+          className="product-detail-sticky-left"
+          style={{
+            display: "flex",
+            gap: "1.25rem",
+            alignItems: "flex-start",
+            width: "100%",
+            maxWidth: "520px",
+          }}
+        >
+          {/* Vertical Thumbnail Strip */}
+          {product.images && product.images.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.75rem",
+                width: "64px",
+                flexShrink: 0,
+              }}
+            >
+              {product.images.map((img, i) => {
+                const isSelected = selectedImage === i && !hoveredColorImage;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setSelectedImage(i);
+                      setHoveredColorImage(null);
                     }}
-                  />
-                </button>
-              ))}
+                    style={{
+                      width: "64px",
+                      height: "auto",
+                      aspectRatio: "3/4",
+                      overflow: "hidden",
+                      borderRadius: "6px",
+                      border: isSelected ? "2px solid #C1A886" : "1px solid rgba(30, 30, 30, 0.2)",
+                      cursor: "pointer",
+                      padding: 0,
+                      background: "#FFFFFF",
+                      position: "relative",
+                      transition: "border-color 0.2s ease, transform 0.2s ease",
+                    }}
+                    title={`View photo ${i + 1}`}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) (e.currentTarget as HTMLElement).style.borderColor = "#1E1E1E";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) (e.currentTarget as HTMLElement).style.borderColor = "rgba(30, 30, 30, 0.2)";
+                    }}
+                  >
+                    <Image
+                      src={getShopifyImageUrl(img, 160)}
+                      alt=""
+                      fill
+                      sizes="64px"
+                      style={{ objectFit: "cover" }}
+                    />
+                  </button>
+                );
+              })}
             </div>
           )}
 
-          {/* Main Image + Standard Thumbnails */}
-          <div style={{ flexGrow: 1, minWidth: 0 }}>
-            {/* Main image */}
+          {/* Main Image */}
+          <div style={{ flexGrow: 1, minWidth: 0, maxWidth: "440px" }}>
             <div
+              onClick={() => {
+                const currentIdx = colorVariations.findIndex(v => v.id === product.id);
+                setLightboxVariantIndex(currentIdx >= 0 ? currentIdx : 0);
+                setIsLightboxOpen(true);
+              }}
               style={{
                 position: "relative",
                 aspectRatio: "3/4",
+                maxHeight: "calc(100vh - 130px)",
                 overflow: "hidden",
                 backgroundColor: "#FFFFFF",
-                marginBottom: "0.75rem",
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.06);",
-                borderRadius: "10px"
+                borderRadius: "10px",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.06)",
+                cursor: "zoom-in",
               }}
+              title="Click to expand"
             >
               <Image
-                src={getShopifyImageUrl(hoveredColorImage || product.images[selectedImage], 800)}
+                src={getShopifyImageUrl(hoveredColorImage || product.images[selectedImage] || product.images[0], 1000)}
                 alt={product.name}
                 fill
                 priority
-                sizes="(max-width: 768px) 100vw, 600px"
+                sizes="(max-width: 1024px) 100vw, 700px"
                 style={{ objectFit: "cover", transition: "opacity 0.3s ease" }}
               />
 
-              {/* Floating Heart Button */}
+              {/* Floating Bestseller Badge */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "16px",
+                  left: "16px",
+                  backgroundColor: "#1E1E1E",
+                  color: "#FFFFFF",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.6875rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  padding: "0.35rem 0.75rem",
+                  borderRadius: "4px",
+                  zIndex: 5,
+                }}
+              >
+                {product.badge || "BESTSELLER"}
+              </div>
+
+              {/* Floating Wishlist Heart Button */}
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -633,60 +816,48 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                 }}
                 aria-label="Toggle wishlist"
               >
-                <Heart size={20} fill={wishlisted ? "#1E1E1E" : "none"} color="#1E1E1E" />
+                <Heart
+                  size={20}
+                  fill={wishlisted ? "#E53935" : "none"}
+                  color={wishlisted ? "#E53935" : "#1E1E1E"}
+                />
               </button>
-            </div>
-
-            {/* Thumbnails (for standard photos of current color product) */}
-            <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto" }}>
-              {product.images.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedImage(i)}
-                  style={{
-                    flexShrink: 0,
-                    width: "80px",
-                    aspectRatio: "1",
-                    overflow: "hidden",
-                    border: selectedImage === i ? "2px solid #1E1E1E" : "2px solid transparent",
-                    cursor: "pointer",
-                    padding: 0,
-                    background: "none",
-                    position: "relative",
-                  }}
-                >
-                  <Image src={getShopifyImageUrl(img, 160)} alt="" fill sizes="80px" style={{ objectFit: "cover" }} />
-                </button>
-              ))}
             </div>
           </div>
         </div>
 
-        {/* Details Content (Right Side) */}
-        <div style={{ paddingTop: "0.5rem" }}>
-          {product.badge && (
-            <span
-              style={{
-                display: "inline-block",
-                padding: "0.25rem 0.75rem",
-                backgroundColor: "#4F6B5A",
-                color: "#FFFFFF",
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "0.6875rem",
-                fontWeight: 600,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                marginBottom: "1rem",
-              }}
-            >
-              {product.badge}
-            </span>
-          )}
+        {/* Right Side: Details Content */}
+        <div style={{ paddingTop: "0.25rem" }}>
+          {/* Breadcrumb */}
+          <div style={{ marginBottom: "1.25rem" }}>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+              {["Home", "Shop", product.name].map((crumb, i, arr) => (
+                <span key={crumb} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <Link
+                    href={i === 0 ? "/" : i === 1 ? "/shop" : "#"}
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.8125rem",
+                      color: i === arr.length - 1 ? "#1E1E1E" : "rgba(30,30,30,0.5)",
+                      textDecoration: "none",
+                      fontWeight: i === arr.length - 1 ? 500 : 400,
+                    }}
+                  >
+                    {crumb}
+                  </Link>
+                  {i < arr.length - 1 && (
+                    <span style={{ color: "rgba(30,30,30,0.3)", fontSize: "0.75rem" }}>/</span>
+                  )}
+                </span>
+              ))}
+            </div>
+          </div>
 
+          {/* Product Title */}
           <h1
             style={{
               fontFamily: "'Playfair Display', sans-serif",
-              fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
+              fontSize: "clamp(2rem, 3.2vw, 2.75rem)",
               fontWeight: 600,
               color: "#1E1E1E",
               letterSpacing: "-0.01em",
@@ -697,12 +868,46 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
             {product.name}
           </h1>
 
+          {/* Rating */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
+            <span
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.9375rem",
+                fontWeight: 700,
+                color: "#1E1E1E",
+              }}
+            >
+              {product.rating}
+            </span>
+            <div style={{ display: "flex", gap: "2px" }}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  size={16}
+                  fill={star <= Math.floor(product.rating) ? "#FF9800" : star - 0.5 <= product.rating ? "#FF9800" : "none"}
+                  stroke="#FF9800"
+                />
+              ))}
+            </div>
+            <span
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.8125rem",
+                color: "#3B82F6",
+                fontWeight: 500,
+              }}
+            >
+              ({product.reviews.toLocaleString()})
+            </span>
+          </div>
+
           {/* Price */}
           <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.25rem" }}>
             <span
               style={{
                 fontFamily: "'Montserrat', sans-serif",
-                fontSize: "1.5rem",
+                fontSize: "1.75rem",
                 fontWeight: 700,
                 color: "#1E1E1E",
               }}
@@ -721,25 +926,25 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
             </span>
             <span
               style={{
-                backgroundColor: "#1E3A2F",
+                backgroundColor: "#1C3F30",
                 color: "#FFFFFF",
                 padding: "0.25rem 0.625rem",
                 fontFamily: "'Montserrat', sans-serif",
                 fontSize: "0.75rem",
-                fontWeight: 600,
-                borderRadius: "2px",
+                fontWeight: 700,
+                borderRadius: "3px",
               }}
             >
               {markupDiscount}% OFF
             </span>
           </div>
-          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.4)", margin: "0 0 2rem 0" }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.75rem", color: "rgba(30,30,30,0.45)", margin: "0 0 2.25rem 0" }}>
             Taxes Included
           </p>
 
           {/* Size */}
-          <div style={{ marginBottom: "2rem" }}>
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 600, color: "#1E1E1E", textTransform: "uppercase", marginBottom: "0.75rem", letterSpacing: "0.05em" }}>
+          <div style={{ marginBottom: "2.25rem" }}>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 700, color: "#1E1E1E", textTransform: "uppercase", marginBottom: "0.875rem", letterSpacing: "0.05em" }}>
               SIZE
             </p>
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
@@ -752,7 +957,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                     style={{
                       height: "44px",
                       padding: "0 1.25rem",
-                      border: isSelected ? "1.5px solid #C1A886" : "1px solid rgba(30, 30, 30, 0.15)",
+                      border: isSelected ? "1.5px solid #C1A886" : "1px solid rgba(30, 30, 30, 0.4)",
                       backgroundColor: isSelected ? "#C1A886" : "#FFFFFF",
                       color: isSelected ? "#FFFFFF" : "#1E1E1E",
                       fontFamily: "'Montserrat', sans-serif",
@@ -771,11 +976,11 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
           </div>
 
           {/* Color */}
-          <div style={{ marginBottom: "2rem" }}>
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 600, color: "#1E1E1E", textTransform: "uppercase", marginBottom: "0.75rem", letterSpacing: "0.05em" }}>
+          <div style={{ marginBottom: "2.25rem" }}>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 700, color: "#1E1E1E", textTransform: "uppercase", marginBottom: "0.875rem", letterSpacing: "0.05em" }}>
               COLOR: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>{colorVariations.find(v => v.id === product.id)?.colorName || parseProduct({ name: product.rawName }).colorName}</span>
             </p>
-            <div style={{ display: "flex", gap: "0.625rem" }}>
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
               {colorVariations.map((v) => {
                 const isCurrent = product.id === v.id;
                 const isHovered = hoveredSwatchId === v.id;
@@ -790,19 +995,18 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                       }
                     }}
                     style={{
-                      width: "44px",
-                      height: "44px",
+                      width: "40px",
+                      height: "40px",
                       borderRadius: "50%",
                       backgroundColor: v.colorHex,
-                      border: (isCurrent || isHovered)
-                        ? "2px solid #1E1E1E"
-                        : (isWhiteColor(v.colorHex) ? "1px solid #1E1E1E" : "1px solid rgba(0,0,0,0.1)"),
-                      outline: isCurrent ? "1px solid #1E1E1E" : "none",
-                      outlineOffset: "2px",
+                      border: isWhiteColor(v.colorHex) ? "1px solid rgba(30,30,30,0.2)" : "1px solid rgba(0,0,0,0.08)",
+                      outline: isCurrent ? "2px solid #1E1E1E" : (isHovered ? "2px solid rgba(30,30,30,0.4)" : "none"),
+                      outlineOffset: "3px",
                       cursor: "pointer",
                       padding: 0,
-                      transform: isCurrent ? "scale(1.1)" : (isHovered ? "scale(1.15)" : "scale(1)"),
-                      transition: "transform 0.2s ease, border-color 0.2s ease",
+                      transform: isCurrent ? "scale(1.05)" : (isHovered ? "scale(1.1)" : "scale(1)"),
+                      transition: "transform 0.2s ease, outline 0.2s ease",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
                     }}
                     title={v.colorName}
                     onMouseEnter={() => {
@@ -819,26 +1023,20 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
             </div>
           </div>
 
-          {/* Qty + Add to cart */}
+          {/* Quantity + Add to Cart */}
           <div style={{ marginBottom: "1rem" }}>
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 600, color: "#1E1E1E", textTransform: "uppercase", marginBottom: "0.75rem", letterSpacing: "0.05em" }}>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 700, color: "#1E1E1E", textTransform: "uppercase", marginBottom: "0.875rem", letterSpacing: "0.05em" }}>
               QUANTITY
             </p>
             <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem"
-                }}
-              >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   style={{
-                    width: "44px",
-                    height: "44px",
-                    border: "1px solid rgba(30, 30, 30, 0.15)",
-                    backgroundColor: "transparent",
+                    width: "46px",
+                    height: "46px",
+                    border: "1px solid rgba(30, 30, 30, 0.2)",
+                    backgroundColor: "#FFFFFF",
                     cursor: "pointer",
                     fontSize: "1.25rem",
                     color: "#1E1E1E",
@@ -846,10 +1044,10 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                     alignItems: "center",
                     justifyContent: "center",
                     borderRadius: "4px",
-                    transition: "border-color 0.2s"
+                    transition: "border-color 0.2s",
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.borderColor = "#1E1E1E"}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = "rgba(30, 30, 30, 0.15)"}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = "rgba(30, 30, 30, 0.2)"}
                 >
                   −
                 </button>
@@ -868,10 +1066,10 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                 <button
                   onClick={() => setQuantity(quantity + 1)}
                   style={{
-                    width: "44px",
-                    height: "44px",
-                    border: "1px solid rgba(30, 30, 30, 0.15)",
-                    backgroundColor: "transparent",
+                    width: "46px",
+                    height: "46px",
+                    border: "1px solid rgba(30, 30, 30, 0.2)",
+                    backgroundColor: "#FFFFFF",
                     cursor: "pointer",
                     fontSize: "1.25rem",
                     color: "#1E1E1E",
@@ -879,10 +1077,10 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                     alignItems: "center",
                     justifyContent: "center",
                     borderRadius: "4px",
-                    transition: "border-color 0.2s"
+                    transition: "border-color 0.2s",
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.borderColor = "#1E1E1E"}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = "rgba(30, 30, 30, 0.15)"}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = "rgba(30, 30, 30, 0.2)"}
                 >
                   +
                 </button>
@@ -893,7 +1091,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                 disabled={cartAdding}
                 style={{
                   flex: 1,
-                  height: "44px",
+                  height: "46px",
                   backgroundColor: "#C1A886",
                   color: "#FFFFFF",
                   border: "none",
@@ -909,7 +1107,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                   textTransform: "uppercase",
                   cursor: "pointer",
                   opacity: cartAdding ? 0.7 : 1,
-                  transition: "background-color 0.2s ease"
+                  transition: "background-color 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
                   if (!cartAdding) (e.currentTarget as HTMLElement).style.backgroundColor = "#A88E6D";
@@ -932,7 +1130,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
             }}
             style={{
               width: "100%",
-              height: "48px",
+              height: "50px",
               backgroundColor: "#1E1E1E",
               color: "#FFFFFF",
               border: "none",
@@ -946,8 +1144,8 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
               letterSpacing: "0.05em",
               textTransform: "uppercase",
               cursor: "pointer",
-              marginBottom: "2rem",
-              transition: "background-color 0.2s ease"
+              marginBottom: "2.5rem",
+              transition: "background-color 0.2s ease",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.backgroundColor = "#000000";
@@ -959,47 +1157,26 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
             BUY NOW
           </button>
 
-          {/* Trust Badges */}
+          {/* Features Image Section (instead of the trust badges section) */}
           <div
             style={{
-              backgroundColor: "#FFFFFF",
-              border: "1px solid rgba(30, 30, 30, 0.05)",
-              borderRadius: "8px",
-              boxShadow: "0 2px 12px rgba(0, 0, 0, 0.03)",
-              display: "grid",
-              gridTemplateColumns: "repeat(5, 1fr)",
-              gap: "0.25rem",
-              padding: "1.25rem 0.5rem",
-              marginBottom: "2rem",
-              alignItems: "start"
+              marginBottom: "2.5rem",
+              width: "100%",
+              overflow: "hidden",
+              borderRadius: "6px",
+              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.04)",
             }}
           >
-            {[
-              { icon: ThoughtfulIcon, label: "Thoughtful Designs" },
-              { icon: QualityIcon, label: "Quality Assured" },
-              { icon: SecureIcon, label: "Secure Payments" },
-              { icon: IndiaIcon, label: "Made in India" },
-              { icon: FreeShippingIcon, label: "Free Shipping" },
-            ].map(({ icon: Icon, label }) => (
-              <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-                <div style={{ marginBottom: "0.5rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                  <Icon />
-                </div>
-                <p
-                  style={{
-                    fontFamily: "'Montserrat', sans-serif",
-                    fontSize: "0.625rem",
-                    fontWeight: 700,
-                    color: "#1C3F30",
-                    lineHeight: "1.3",
-                    margin: 0,
-                    padding: "0 2px"
-                  }}
-                >
-                  {label}
-                </p>
-              </div>
-            ))}
+            <img
+              src="/features.jpg"
+              alt="Nomadica Features"
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                borderRadius: "6px",
+              }}
+            />
           </div>
 
           {/* Accordion List */}
@@ -1059,6 +1236,204 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
           </div>
         </div>
       </div>
+
+      {/* Full-Screen Lightbox Modal */}
+      {isLightboxOpen && (
+        <div
+          onClick={() => setIsLightboxOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "2rem",
+          }}
+        >
+          {/* Close (Cross) Icon in Top Right */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsLightboxOpen(false);
+            }}
+            aria-label="Close image popup"
+            style={{
+              position: "absolute",
+              top: "24px",
+              right: "24px",
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.12)",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: "#FFFFFF",
+              zIndex: 10001,
+              transition: "background-color 0.2s ease, transform 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255, 255, 255, 0.25)";
+              (e.currentTarget as HTMLElement).style.transform = "scale(1.08)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255, 255, 255, 0.12)";
+              (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+            }}
+          >
+            <X size={28} color="#FFFFFF" strokeWidth={2.5} />
+          </button>
+
+          {/* Chevron Previous Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrevLightbox();
+            }}
+            aria-label="Previous color variant"
+            style={{
+              position: "absolute",
+              left: "24px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "52px",
+              height: "52px",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: "#FFFFFF",
+              zIndex: 10001,
+              backdropFilter: "blur(8px)",
+              transition: "background-color 0.2s ease, transform 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255, 255, 255, 0.3)";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1.08)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255, 255, 255, 0.15)";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
+            }}
+          >
+            <ChevronLeft size={34} color="#FFFFFF" strokeWidth={2.5} />
+          </button>
+
+          {/* Chevron Next Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNextLightbox();
+            }}
+            aria-label="Next color variant"
+            style={{
+              position: "absolute",
+              right: "24px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "52px",
+              height: "52px",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: "#FFFFFF",
+              zIndex: 10001,
+              backdropFilter: "blur(8px)",
+              transition: "background-color 0.2s ease, transform 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255, 255, 255, 0.3)";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1.08)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255, 255, 255, 0.15)";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
+            }}
+          >
+            <ChevronRight size={34} color="#FFFFFF" strokeWidth={2.5} />
+          </button>
+
+          {/* Center Image Container */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "relative",
+              maxWidth: "85vw",
+              maxHeight: "85vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img
+              src={getShopifyImageUrl(
+                (colorVariations.length > 0 && colorVariations[lightboxVariantIndex]?.image) ||
+                product.images[selectedImage] ||
+                product.images[0],
+                1400
+              )}
+              alt={product.name}
+              style={{
+                maxWidth: "85vw",
+                maxHeight: "80vh",
+                objectFit: "contain",
+                borderRadius: "8px",
+                boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
+                display: "block",
+              }}
+            />
+            {/* Active Color Variant Name / Indicator */}
+            {colorVariations.length > 0 && (
+              <div
+                style={{
+                  marginTop: "1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  backgroundColor: "rgba(0, 0, 0, 0.65)",
+                  padding: "0.5rem 1.25rem",
+                  borderRadius: "20px",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                }}
+              >
+                <div
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    borderRadius: "50%",
+                    backgroundColor: colorVariations[lightboxVariantIndex]?.colorHex || "#FFFFFF",
+                    border: "1px solid rgba(255, 255, 255, 0.8)",
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: "0.875rem",
+                    color: "#FFFFFF",
+                    fontWeight: 500,
+                    letterSpacing: "0.03em",
+                  }}
+                >
+                  {colorVariations[lightboxVariantIndex]?.colorName || product.name} ({lightboxVariantIndex + 1} of {colorVariations.length})
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Related products */}
       {relatedProducts.length > 0 && (
