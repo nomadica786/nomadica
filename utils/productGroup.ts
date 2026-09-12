@@ -41,16 +41,21 @@ export const COLOR_HEX_MAP: Record<string, string> = {
   "Black": "#1E1E1E",
   "Brown": "#8B5A2B",
   "Denim Wash": "#5C768D",
+  "Black Washed": "#383838",
+  "Washed Black": "#383838",
   "Red": "#D32F2F",
   "Blue": "#1976D2",
   "Green": "#388E3C",
   "Navy Blue": "#1A237E",
   "Maroon": "#800000",
+  "Pink": "#E89BA8",
+  "Grey": "#808080",
+  "Coffee": "#6F4E37",
   "Original": "#D4C5B0",
 };
 
 // Known multi-word colors in the shop
-const MULTI_WORD_COLORS = ["navy blue", "denim wash"];
+const MULTI_WORD_COLORS = ["navy blue", "denim wash", "black washed", "washed black"];
 
 export function parseProduct(product: any) {
   const name = product.name || product.title || "";
@@ -60,10 +65,11 @@ export function parseProduct(product: any) {
   for (const mc of MULTI_WORD_COLORS) {
     if (lowerName.startsWith(mc + " ")) {
       const colorName = name.slice(0, mc.length);
+      const matchedKey = Object.keys(COLOR_HEX_MAP).find(k => k.toLowerCase() === colorName.toLowerCase()) || colorName;
       const baseName = name.slice(mc.length + 1).trim();
       return {
-        colorName,
-        colorHex: COLOR_HEX_MAP[colorName] || "#FFFFFF",
+        colorName: matchedKey,
+        colorHex: COLOR_HEX_MAP[matchedKey] || "#FFFFFF",
         baseName,
         isClothVariation: true
       };
@@ -78,13 +84,13 @@ export function parseProduct(product: any) {
     
     // Check if the first word matches a known color or if we want to treat it general
     const knownColors = Object.keys(COLOR_HEX_MAP);
-    const isKnownColor = knownColors.some(c => c.toLowerCase() === colorName.toLowerCase());
+    const matchedKey = knownColors.find(c => c.toLowerCase() === colorName.toLowerCase());
     
     // If it's a known color, we treat it as a cloth variation
-    if (isKnownColor) {
+    if (matchedKey) {
       return {
-        colorName,
-        colorHex: COLOR_HEX_MAP[colorName] || "#FFFFFF",
+        colorName: matchedKey,
+        colorHex: COLOR_HEX_MAP[matchedKey] || "#FFFFFF",
         baseName,
         isClothVariation: true
       };
@@ -131,7 +137,23 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
     };
 
     const groupKey = productType.toLowerCase();
-    const config = mockupLookup[productType];
+    
+    // Smart mockup resolution with fallback
+    let config = mockupLookup[productType];
+    if (!config) {
+      const lowerType = productType.toLowerCase();
+      for (const [key, val] of Object.entries(mockupLookup)) {
+        const lowerKey = key.toLowerCase();
+        if (lowerType.includes(lowerKey) || lowerKey.includes(lowerType)) {
+          config = val;
+          break;
+        }
+      }
+    }
+    if (!config && (productType.toLowerCase().includes("tee") || productType.toLowerCase().includes("t-shirt"))) {
+      config = mockupLookup["Tee"];
+    }
+
     const mockupImage = typeof config === "object" ? config.mockupImage : config;
     const displayName = (typeof config === "object" && config.displayName) ? config.displayName : productType;
 
@@ -155,8 +177,18 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
         allVariants: product.variants?.edges ? [...product.variants.edges] : [],
       };
     } else {
-      // Add variant
-      groups[groupKey].colorVariants.push(variant);
+      // Add variant only if not already present by ID or by same color (prevents two colors being selected simultaneously)
+      const isDuplicate = groups[groupKey].colorVariants.some(
+        (v) =>
+          v.id === variant.id ||
+          (v.colorHex &&
+            variant.colorHex &&
+            v.colorHex.toLowerCase() === variant.colorHex.toLowerCase() &&
+            v.colorName.toLowerCase() === variant.colorName.toLowerCase())
+      );
+      if (!isDuplicate) {
+        groups[groupKey].colorVariants.push(variant);
+      }
       
       if (product.variants?.edges) {
         groups[groupKey].allVariants?.push(...product.variants.edges);
@@ -174,6 +206,16 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
         }
       }
     }
+  }
+
+  // Ensure every group's colorVariants is sorted consistently by createdAt ascending for stable indexing
+  for (const group of Object.values(groups)) {
+    group.colorVariants.sort((a, b) => {
+      if (a.createdAt && b.createdAt) {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+      return 0;
+    });
   }
 
   return Object.values(groups);

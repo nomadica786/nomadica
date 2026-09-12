@@ -460,20 +460,6 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
     }
   }, [product?.id, colorVariations]);
 
-  // On the variants section, one photo of available colors is to be shown alongside the mockup image
-  const displayThumbnails = (() => {
-    if (!product?.images || product.images.length === 0) return [];
-    const mockImg = product.images[0];
-    const currentColorVariant = colorVariations.find((v) => v.id === product.id) || colorVariations[0];
-    const colorImg = product.images[1] || currentColorVariant?.image || "";
-
-    const items = [{ url: mockImg, type: "mockup", title: "Lifestyle photo" }];
-    if (colorImg && colorImg !== mockImg) {
-      items.push({ url: colorImg, type: "variant", title: "Available colors" });
-    }
-    return items;
-  })();
-
   const handleCloseLightbox = (syncVariant: boolean = false) => {
     setIsLightboxOpen(false);
     if (syncVariant) {
@@ -631,70 +617,118 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
             width: "100%",
           }}
         >
-          {/* Vertical Thumbnail Strip: 1 Mockup photo + 1 Photo of available colors */}
-          {displayThumbnails.length > 0 && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-                width: "64px",
-                flexShrink: 0,
-              }}
-            >
-              {displayThumbnails.map((item, i) => {
-                const isSelected = i === 0
-                  ? selectedImage === 0 && !hoveredColorImage
-                  : (selectedImage !== 0 || !!hoveredColorImage);
+          {/* Vertical Thumbnail Strip: Mockup photo first, then all available color variants */}
+          <div
+            className="hide-scrollbar"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.625rem",
+              width: "64px",
+              flexShrink: 0,
+              maxHeight: "calc(100vh - 130px)",
+              overflowY: "auto",
+            }}
+          >
+            {/* Mockup photo is ALWAYS the first thumbnail */}
+            {product.images && product.images[0] && (
+              <button
+                onClick={() => {
+                  setSelectedImage(0);
+                  setHoveredColorImage(null);
+                  setHoveredSwatchId(null);
+                }}
+                style={{
+                  width: "64px",
+                  height: "auto",
+                  aspectRatio: "3/4",
+                  overflow: "hidden",
+                  borderRadius: "6px",
+                  border: (selectedImage === 0 && !hoveredColorImage) ? "2px solid #C1A886" : "1px solid rgba(30, 30, 30, 0.2)",
+                  cursor: "pointer",
+                  padding: 0,
+                  background: "#FFFFFF",
+                  position: "relative",
+                  transition: "border-color 0.2s ease, transform 0.2s ease",
+                  flexShrink: 0,
+                }}
+                title="Lifestyle mockup photo"
+                onMouseEnter={(e) => {
+                  if (selectedImage !== 0 || !!hoveredColorImage) (e.currentTarget as HTMLElement).style.borderColor = "#1E1E1E";
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedImage !== 0 || !!hoveredColorImage) (e.currentTarget as HTMLElement).style.borderColor = "rgba(30, 30, 30, 0.2)";
+                }}
+              >
+                <Image
+                  src={getShopifyImageUrl(product.images[0], 160)}
+                  alt="Lifestyle mockup"
+                  fill
+                  sizes="64px"
+                  style={{ objectFit: "cover" }}
+                />
+              </button>
+            )}
 
-                return (
-                  <button
-                    key={item.type || i}
-                    onClick={() => {
-                      if (i === 0) {
-                        setSelectedImage(0);
-                        setHoveredColorImage(null);
+            {/* All available color variants */}
+            {colorVariations.map((v, idx) => {
+              const isCurrentProduct = product.id === v.id;
+              const isSelected = (isCurrentProduct && selectedImage !== 0 && !hoveredColorImage) || hoveredSwatchId === v.id;
+
+              return (
+                <button
+                  key={v.id || idx}
+                  onClick={() => {
+                    if (isCurrentProduct) {
+                      setSelectedImage(1);
+                      setHoveredColorImage(null);
+                      setHoveredSwatchId(null);
+                    } else {
+                      setHoveredColorImage(null);
+                      setHoveredSwatchId(null);
+                      setLightboxVariantIndex(idx);
+                      if (v.handle) {
+                        router.push(`/products/${v.handle}`);
                       } else {
-                        setSelectedImage(1);
-                        setHoveredColorImage(null);
-                        const currentIdx = colorVariations.findIndex((v) => v.id === product.id);
-                        setLightboxVariantIndex(currentIdx >= 0 ? currentIdx : 0);
-                        setIsLightboxOpen(true);
+                        router.push(`/shop/product-details?id=${v.id}`);
                       }
-                    }}
-                    style={{
-                      width: "64px",
-                      height: "auto",
-                      aspectRatio: "3/4",
-                      overflow: "hidden",
-                      borderRadius: "6px",
-                      border: isSelected ? "2px solid #C1A886" : "1px solid rgba(30, 30, 30, 0.2)",
-                      cursor: "pointer",
-                      padding: 0,
-                      background: "#FFFFFF",
-                      position: "relative",
-                      transition: "border-color 0.2s ease, transform 0.2s ease",
-                    }}
-                    title={i === 0 ? "View lifestyle photo" : "Click to view all color variants in big"}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) (e.currentTarget as HTMLElement).style.borderColor = "#1E1E1E";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) (e.currentTarget as HTMLElement).style.borderColor = "rgba(30, 30, 30, 0.2)";
-                    }}
-                  >
-                    <Image
-                      src={getShopifyImageUrl(item.url, 160)}
-                      alt={item.title}
-                      fill
-                      sizes="64px"
-                      style={{ objectFit: "cover" }}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                    }
+                  }}
+                  onMouseEnter={() => {
+                    setHoveredColorImage(v.image);
+                    setHoveredSwatchId(v.id);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredColorImage(null);
+                    setHoveredSwatchId(null);
+                  }}
+                  style={{
+                    width: "64px",
+                    height: "auto",
+                    aspectRatio: "3/4",
+                    overflow: "hidden",
+                    borderRadius: "6px",
+                    border: isSelected ? "2px solid #C1A886" : "1px solid rgba(30, 30, 30, 0.2)",
+                    cursor: "pointer",
+                    padding: 0,
+                    background: "#FFFFFF",
+                    position: "relative",
+                    transition: "border-color 0.2s ease, transform 0.2s ease",
+                    flexShrink: 0,
+                  }}
+                  title={v.colorName}
+                >
+                  <Image
+                    src={getShopifyImageUrl(v.image, 160)}
+                    alt={v.colorName}
+                    fill
+                    sizes="64px"
+                    style={{ objectFit: "cover" }}
+                  />
+                </button>
+              );
+            })}
+          </div>
 
           {/* Main Image */}
           <div style={{ flexGrow: 1, minWidth: 0 }}>
