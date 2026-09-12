@@ -260,7 +260,10 @@ function computeVariations(rawProduct: any, allEdges: any[], mockupLookup: Recor
     });
   }
   const grouped = groupProducts(allMapped, mockupLookup);
-  const currentGroup = grouped.find(g => g.colorVariants.some(v => v.id === rawProduct.id));
+  const currentGroup = grouped.find(g => 
+    g.colorVariants.some(v => v.id === rawProduct.id) ||
+    g.productType?.toLowerCase() === (rawProduct.productType || rawProduct.category || "").toLowerCase()
+  );
   if (!currentGroup) return [];
   const vars = currentGroup.colorVariants.map(v => ({
     id: v.id,
@@ -270,6 +273,23 @@ function computeVariations(rawProduct: any, allEdges: any[], mockupLookup: Recor
     image: v.image,
     createdAt: v.createdAt
   }));
+  if (!vars.some(v => v.id === rawProduct.id)) {
+    const parsed = parseProduct({ name: rawProduct.title, colors: rawProduct.colors });
+    const matchIdx = vars.findIndex(v => v.colorHex.toLowerCase() === (parsed.colorHex || "").toLowerCase());
+    const rep = {
+      id: rawProduct.id,
+      handle: rawProduct.handle,
+      colorName: parsed.colorName || "Original",
+      colorHex: parsed.colorHex || "#FFFFFF",
+      image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
+      createdAt: rawProduct.createdAt || ""
+    };
+    if (matchIdx !== -1) {
+      vars[matchIdx] = rep;
+    } else {
+      vars.push(rep);
+    }
+  }
   vars.sort((a, b) => {
     if (a.createdAt && b.createdAt) {
       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -324,6 +344,20 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
   const [relatedActiveVariants, setRelatedActiveVariants] = useState<Record<string, any>>({});
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxVariantIndex, setLightboxVariantIndex] = useState(0);
+
+  // Unique color variations strictly deduplicated by id and colorHex
+  const uniqueColorVariations = colorVariations.filter(
+    (v, idx, arr) =>
+      arr.findIndex(
+        (other) =>
+          other.id === v.id ||
+          (other.colorHex && v.colorHex && other.colorHex.toLowerCase() === v.colorHex.toLowerCase())
+      ) === idx
+  );
+
+  const currentVariantId = uniqueColorVariations.some(v => v.id === product?.id)
+    ? product?.id
+    : (uniqueColorVariations[0]?.id || product?.id);
 
   const [openAccordion, setOpenAccordion] = useState<Record<string, boolean>>({
     details: false,
@@ -426,7 +460,10 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
 
         const groupedCombined = groupProducts(allMappedForGroup, mockupLookup);
 
-        const currentGroup = groupedCombined.find(g => g.colorVariants.some(v => v.id === rawProduct.id));
+        const currentGroup = groupedCombined.find(g => 
+          g.colorVariants.some(v => v.id === rawProduct.id) ||
+          g.productType?.toLowerCase() === (rawProduct.productType || rawProduct.category || "").toLowerCase()
+        );
         const baseName = currentGroup ? currentGroup.name : mappedProduct.name;
 
         if (baseName) {
@@ -443,6 +480,24 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
               createdAt: v.createdAt
             }))
           : [];
+
+        if (!variations.some(v => v.id === rawProduct.id)) {
+          const parsed = parseProduct({ name: rawProduct.title, colors: rawProduct.colors });
+          const matchIdx = variations.findIndex(v => v.colorHex.toLowerCase() === (parsed.colorHex || "").toLowerCase());
+          const rep = {
+            id: rawProduct.id,
+            handle: rawProduct.handle,
+            colorName: parsed.colorName || "Original",
+            colorHex: parsed.colorHex || "#FFFFFF",
+            image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
+            createdAt: rawProduct.createdAt || ""
+          };
+          if (matchIdx !== -1) {
+            variations[matchIdx] = rep;
+          } else {
+            variations.push(rep);
+          }
+        }
 
         // Stable sort by createdAt ascending so the index of each variant NEVER changes on click
         variations.sort((a, b) => {
@@ -767,8 +822,8 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
             )}
 
             {/* All available color variants */}
-            {colorVariations.map((v, idx) => {
-              const isCurrentProduct = product.id === v.id;
+            {uniqueColorVariations.map((v, idx) => {
+              const isCurrentProduct = v.id === currentVariantId;
               const isSelected = (isCurrentProduct && selectedImage !== 0 && !hoveredColorImage) || hoveredSwatchId === v.id;
 
               return (
@@ -1072,13 +1127,13 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
             <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 700, color: "#1E1E1E", textTransform: "uppercase", marginBottom: "0.875rem", letterSpacing: "0.05em" }}>
               COLOR: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>
                 {hoveredSwatchId
-                  ? colorVariations.find((v) => v.id === hoveredSwatchId)?.colorName
-                  : (colorVariations.find((v) => v.id === product.id)?.colorName || parseProduct({ name: product.rawName }).colorName)}
+                  ? uniqueColorVariations.find((v) => v.id === hoveredSwatchId)?.colorName
+                  : (uniqueColorVariations.find((v) => v.id === currentVariantId)?.colorName || parseProduct({ name: product.rawName }).colorName)}
               </span>
             </p>
             <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
-              {colorVariations.map((v, idx) => {
-                const isCurrent = product.id === v.id;
+              {uniqueColorVariations.map((v, idx) => {
+                const isCurrent = v.id === currentVariantId;
                 const isHovered = hoveredSwatchId === v.id;
                 return (
                   <button
@@ -1597,7 +1652,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
                     maxWidth: "90vw",
                   }}
                 >
-                  {colorVariations.map((v, idx) => {
+                  {uniqueColorVariations.map((v, idx) => {
                     const isActive = idx === lightboxVariantIndex;
                     return (
                       <button
@@ -1650,10 +1705,10 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
   );
 }
 
-export default function ProductDetailClient({ initialProduct }: ProductDetailClientProps) {
+export default function ProductDetailClient(props: ProductDetailClientProps) {
   return (
     <Suspense fallback={<PageLoader />}>
-      <ProductDetailContent initialProduct={initialProduct} />
+      <ProductDetailContent {...props} />
     </Suspense>
   );
 }

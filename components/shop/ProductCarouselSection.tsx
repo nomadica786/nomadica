@@ -407,59 +407,72 @@ export function ProductCarouselSection({
                         </div>
 
                         {/* Swatches */}
-                        {product.colorVariants && product.colorVariants.length > 1 && (
-                          <div style={{ display: "flex", justifyContent: "center", gap: "6px", flexWrap: "wrap", minHeight: "22px" }}>
-                            {product.colorVariants.map((v: any) => {
-                              const isSelected = activeVar ? activeVar.id === v.id : false;
-                              const isWhite = v.colorHex?.toLowerCase() === "#ffffff" || v.colorHex?.toLowerCase() === "white";
-                              return (
-                                      <div
-                                        key={v.id}
-                                        className="dest-swatch-wrap"
-                                        style={{
-                                          width: "22px",
-                                          height: "22px",
-                                          borderRadius: "50%",
-                                          display: "flex",
-                                          alignItems: "center",
-                                          justifyContent: "center",
-                                          border: isSelected
-                                            ? "1px solid rgba(0, 0, 0, 1)"
-                                            : "1px solid #CCCCCC",
-                                          background: "transparent",
-                                          transition: "all 0.15s ease",
-                                        }}
-                                      >
-                                        <button
-                                          onMouseEnter={() => {
-                                            setActiveVariants(prev => ({ ...prev, [product.id]: v }));
-                                            setInteractedCards(prev => ({ ...prev, [product.id]: true }));
-                                          }}
-                                          onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            setActiveVariants(prev => ({ ...prev, [product.id]: v }));
-                                            setInteractedCards(prev => ({ ...prev, [product.id]: true }));
-                                          }}
-                                          style={{
-                                            width: "16px",
-                                            height: "16px",
-                                            borderRadius: "50%",
-                                            backgroundColor: v.colorHex,
-                                            border: isWhite
-                                              ? "1px solid rgba(30,30,30,0.25)"
-                                              : "none",
-                                            padding: 0,
-                                            cursor: "pointer",
-                                          }}
-                                          aria-label={`Select color ${v.colorName}`}
-                                          title={v.colorName}
-                                        />
-                                      </div>
-                                    );
-                            })}
-                          </div>
-                        )}
+                        {(() => {
+                          const uniqueVars = (product.colorVariants || []).filter(
+                            (v: any, idx: number, arr: any[]) =>
+                              arr.findIndex(
+                                (other: any) =>
+                                  other.id === v.id ||
+                                  (other.colorHex && v.colorHex && other.colorHex.toLowerCase() === v.colorHex.toLowerCase())
+                              ) === idx
+                          );
+                          if (uniqueVars.length <= 1) return null;
+                          return (
+                            <div style={{ display: "flex", justifyContent: "center", gap: "6px", flexWrap: "wrap", minHeight: "22px" }}>
+                              {uniqueVars.map((v: any) => {
+                                const isSelected = activeVar ? activeVar.id === v.id : false;
+                                const isWhite = v.colorHex?.toLowerCase() === "#ffffff" || v.colorHex?.toLowerCase() === "white";
+                                return (
+                                  <div
+                                    key={v.id}
+                                    className="dest-swatch-wrap"
+                                    style={{
+                                      width: "22px",
+                                      height: "22px",
+                                      borderRadius: "50%",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      border: isSelected
+                                        ? "2px solid rgba(0, 0, 0, 1)"
+                                        : "2px solid #CCCCCC",
+                                      background: "transparent",
+                                      transition: "all 0.15s ease",
+                                    }}
+                                  >
+                                    <button
+                                      onMouseEnter={() => {
+                                        setActiveVariants(prev => ({ ...prev, [product.id]: v }));
+                                        setInteractedCards(prev => ({ ...prev, [product.id]: true }));
+                                      }}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setActiveVariants(prev => ({ ...prev, [product.id]: v }));
+                                        setInteractedCards(prev => ({ ...prev, [product.id]: true }));
+                                      }}
+                                      style={{
+                                        width: "16px",
+                                        height: "16px",
+                                        borderRadius: "50%",
+                                        backgroundColor: v.colorHex,
+                                        border: isWhite
+                                          ? "1px solid rgba(30,30,30,0.25)"
+                                          : "none",
+                                        padding: 0,
+                                        cursor: "pointer",
+                                        boxShadow: isSelected ? "0 0 0 1.5px #FFFFFF inset" : "none",
+                                        transform: isSelected ? "scale(1.25)" : "scale(1)",
+                                        transition: "all 0.15s ease",
+                                      }}
+                                      aria-label={`Select color ${v.colorName}`}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()}
                       </div>
 
                     </div>

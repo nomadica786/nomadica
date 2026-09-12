@@ -6,7 +6,16 @@ import { api } from "@/components/api/api";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 
 export default function QuickViewModal({ product, onClose }: { product: any, onClose: () => void }) {
-  const colorVariants = product.colorVariants || [];
+  // Strictly deduplicate colorVariants
+  const uniqueColorVariants = (product.colorVariants || []).filter(
+    (v: any, idx: number, arr: any[]) =>
+      arr.findIndex(
+        (other: any) =>
+          other.id === v.id ||
+          (other.colorHex && v.colorHex && other.colorHex.toLowerCase() === v.colorHex.toLowerCase())
+      ) === idx
+  );
+  const colorVariants = uniqueColorVariants;
   
   // Set default selected color to the current product's mapped colorName
   const [selectedColor, setSelectedColor] = useState(
