@@ -194,6 +194,9 @@ const mapRawProduct = (rawProduct: any): ProductDetails => {
   };
 };
 
+// Module-level cache for grouped color variations so they are instantly available across navigations in stable order
+const cachedVariationsByGroup: Record<string, any[]> = {};
+
 export function ProductDetailContent({ initialProduct }: ProductDetailClientProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -215,7 +218,10 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
   const [wishlisted, setWishlisted] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [cartAdding, setCartAdding] = useState(false);
-  const [colorVariations, setColorVariations] = useState<any[]>([]);
+  const initialGroupKey = (initialProduct?.productType || initialProduct?.category || "Tee").toLowerCase();
+  const [colorVariations, setColorVariations] = useState<any[]>(() => {
+    return cachedVariationsByGroup[initialGroupKey] || [];
+  });
   const [hoveredColorImage, setHoveredColorImage] = useState<string | null>(null);
   const [hoveredSwatchId, setHoveredSwatchId] = useState<string | null>(null);
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
@@ -280,36 +286,49 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
         const mockupLookup = mockupsRes?.mockups || {};
         const allEdges = allRes?.products?.edges || [];
         
-        const rawMappedForGroup = {
-          id: rawProduct.id,
-          name: rawProduct.title,
-          handle: rawProduct.handle,
-          price: mappedProduct.price,
-          originalPrice: mappedProduct.originalPrice,
-          image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
-          category: rawProduct.productType || rawProduct.category || "Tops",
-          productType: rawProduct.productType || rawProduct.category || "Tops",
-          createdAt: rawProduct.createdAt || ""
-        };
-
-        const otherMappedForGroup = allEdges
-          .filter((edge: any) => edge.node.id !== rawProduct.id)
-          .map((edge: any) => {
-            const node = edge.node;
+        // Map all products preserving their natural, stable catalog order from allEdges
+        const allMappedForGroup = allEdges.map((edge: any) => {
+          const node = edge.node;
+          if (node.id === rawProduct.id) {
             return {
-              id: node.id,
-              name: node.title,
-              handle: node.handle,
-              price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
-              image: node.images?.edges?.[0]?.node?.url || "",
-              category: node.productType || node.category || "Tops",
-              productType: node.productType || node.category || "Tops",
-              createdAt: node.createdAt || ""
+              id: rawProduct.id,
+              name: rawProduct.title,
+              handle: rawProduct.handle,
+              price: mappedProduct.price,
+              originalPrice: mappedProduct.originalPrice,
+              image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
+              category: rawProduct.productType || rawProduct.category || "Tops",
+              productType: rawProduct.productType || rawProduct.category || "Tops",
+              createdAt: rawProduct.createdAt || node.createdAt || ""
             };
-          });
+          }
+          return {
+            id: node.id,
+            name: node.title,
+            handle: node.handle,
+            price: node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || "0"),
+            image: node.images?.edges?.[0]?.node?.url || "",
+            category: node.productType || node.category || "Tops",
+            productType: node.productType || node.category || "Tops",
+            createdAt: node.createdAt || ""
+          };
+        });
 
-        const combinedProducts = [rawMappedForGroup, ...otherMappedForGroup];
-        const groupedCombined = groupProducts(combinedProducts, mockupLookup);
+        if (!allMappedForGroup.some((p: any) => p.id === rawProduct.id)) {
+          allMappedForGroup.push({
+            id: rawProduct.id,
+            name: rawProduct.title,
+            handle: rawProduct.handle,
+            price: mappedProduct.price,
+            originalPrice: mappedProduct.originalPrice,
+            image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
+            category: rawProduct.productType || rawProduct.category || "Tops",
+            productType: rawProduct.productType || rawProduct.category || "Tops",
+            createdAt: rawProduct.createdAt || ""
+          });
+        }
+
+        const groupedCombined = groupProducts(allMappedForGroup, mockupLookup);
 
         const currentGroup = groupedCombined.find(g => g.colorVariants.some(v => v.id === rawProduct.id));
         const baseName = currentGroup ? currentGroup.name : mappedProduct.name;
@@ -318,15 +337,24 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
           setProduct(prev => prev ? { ...prev, name: baseName } : null);
         }
 
-        const variations = currentGroup
+        let variations = currentGroup
           ? currentGroup.colorVariants.map(v => ({
               id: v.id,
               handle: v.handle,
               colorName: v.colorName,
               colorHex: v.colorHex,
-              image: v.image
+              image: v.image,
+              createdAt: v.createdAt
             }))
           : [];
+
+        // Stable sort by createdAt ascending so the index of each variant NEVER changes on click
+        variations.sort((a, b) => {
+          if (a.createdAt && b.createdAt) {
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          }
+          return 0;
+        });
 
         if (variations.length === 0) {
           const parsed = parseProduct({ name: rawProduct.title, colors: rawProduct.colors });
@@ -335,10 +363,13 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
             handle: rawProduct.handle,
             colorName: parsed.colorName || "Original",
             colorHex: parsed.colorHex || "#FFFFFF",
-            image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || ""
+            image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
+            createdAt: rawProduct.createdAt || ""
           });
         }
 
+        const groupKey = (rawProduct.productType || rawProduct.category || "Tee").toLowerCase();
+        cachedVariationsByGroup[groupKey] = variations;
         setColorVariations(variations);
 
         // Ensure mock image is always the first image
@@ -429,14 +460,34 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
     }
   }, [product?.id, colorVariations]);
 
+  // On the variants section, one photo of available colors is to be shown alongside the mockup image
+  const displayThumbnails = (() => {
+    if (!product?.images || product.images.length === 0) return [];
+    const mockImg = product.images[0];
+    const currentColorVariant = colorVariations.find((v) => v.id === product.id) || colorVariations[0];
+    const colorImg = product.images[1] || currentColorVariant?.image || "";
+
+    const items = [{ url: mockImg, type: "mockup", title: "Lifestyle photo" }];
+    if (colorImg && colorImg !== mockImg) {
+      items.push({ url: colorImg, type: "variant", title: "Available colors" });
+    }
+    return items;
+  })();
+
+  const handleCloseLightbox = (syncVariant: boolean = false) => {
+    setIsLightboxOpen(false);
+    if (syncVariant) {
+      const target = colorVariations[lightboxVariantIndex];
+      if (target?.handle && target.handle !== product?.handle) {
+        router.push(`/products/${target.handle}`);
+      }
+    }
+  };
+
   const handlePrevLightbox = () => {
     if (colorVariations.length > 1) {
       const prevIdx = (lightboxVariantIndex - 1 + colorVariations.length) % colorVariations.length;
       setLightboxVariantIndex(prevIdx);
-      const target = colorVariations[prevIdx];
-      if (target?.handle && target.handle !== product?.handle) {
-        router.push(`/products/${target.handle}`);
-      }
     } else if (product?.images && product.images.length > 1) {
       setSelectedImage((prev) => (prev - 1 + product.images.length) % product.images.length);
     }
@@ -446,10 +497,6 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
     if (colorVariations.length > 1) {
       const nextIdx = (lightboxVariantIndex + 1) % colorVariations.length;
       setLightboxVariantIndex(nextIdx);
-      const target = colorVariations[nextIdx];
-      if (target?.handle && target.handle !== product?.handle) {
-        router.push(`/products/${target.handle}`);
-      }
     } else if (product?.images && product.images.length > 1) {
       setSelectedImage((prev) => (prev + 1) % product.images.length);
     }
@@ -462,7 +509,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setIsLightboxOpen(false);
+        handleCloseLightbox();
       } else if (e.key === "ArrowLeft") {
         handlePrevLightbox();
       } else if (e.key === "ArrowRight") {
@@ -565,101 +612,6 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
 
   return (
     <div style={{ paddingTop: "0px", backgroundColor: "#FBF9F7", minHeight: "100vh", paddingBottom: "2rem" }}>
-<style>{`
-  .product-detail-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    align-items: start;
-  }
-
-  .product-detail-sticky-left {
-    position: relative;
-    width: 100%;
-  }
-
-  /* Desktop */
-  @media (min-width: 768px) {
-    .product-detail-grid {
-      /*
-        LEFT  = 500px
-        GAP   = 80px
-        RIGHT = 550px
-      */
-      grid-template-columns: 500px 550px !important;
-      column-gap: 80px !important;
-      row-gap: 0 !important;
-
-      /* Center both columns together */
-      justify-content: center !important;
-    }
-
-    .product-detail-sticky-left {
-      position: sticky !important;
-      top: 94px !important;
-      align-self: start !important;
-
-      width: 500px !important;
-      max-width: 500px !important;
-    }
-
-    .product-detail-grid > div:nth-child(2) {
-      width: 550px !important;
-      max-width: 550px !important;
-      min-width: 0 !important;
-    }
-  }
-
-  /* Large Desktop */
-  @media (min-width: 1200px) {
-    .product-detail-grid {
-      /*
-        LEFT  = 540px
-        GAP   = 120px
-        RIGHT = 550px
-
-        TOTAL = 1210px
-      */
-      grid-template-columns: 540px 550px !important;
-      column-gap: 120px !important;
-      row-gap: 0 !important;
-
-      justify-content: center !important;
-    }
-
-    .product-detail-sticky-left {
-      width: 540px !important;
-      max-width: 540px !important;
-    }
-
-    .product-detail-grid > div:nth-child(2) {
-      width: 550px !important;
-      max-width: 550px !important;
-    }
-  }
-
-  /* Mobile */
-  @media (max-width: 767px) {
-    .product-detail-grid {
-      grid-template-columns: 1fr !important;
-      gap: 2rem !important;
-      justify-content: stretch !important;
-    }
-
-    .product-detail-sticky-left {
-      position: relative !important;
-      top: auto !important;
-      width: 100% !important;
-      max-width: 100% !important;
-    }
-
-    .product-detail-grid > div:nth-child(2) {
-      width: 100% !important;
-      max-width: 100% !important;
-    }
-  }
-`}</style>
-
       {/* Main content grid */}
       <div
         className="product-detail-grid"
@@ -677,11 +629,10 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
             gap: "1.25rem",
             alignItems: "flex-start",
             width: "100%",
-            maxWidth: "520px",
           }}
         >
-          {/* Vertical Thumbnail Strip */}
-          {product.images && product.images.length > 0 && (
+          {/* Vertical Thumbnail Strip: 1 Mockup photo + 1 Photo of available colors */}
+          {displayThumbnails.length > 0 && (
             <div
               style={{
                 display: "flex",
@@ -691,14 +642,25 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                 flexShrink: 0,
               }}
             >
-              {product.images.map((img, i) => {
-                const isSelected = selectedImage === i && !hoveredColorImage;
+              {displayThumbnails.map((item, i) => {
+                const isSelected = i === 0
+                  ? selectedImage === 0 && !hoveredColorImage
+                  : (selectedImage !== 0 || !!hoveredColorImage);
+
                 return (
                   <button
-                    key={i}
+                    key={item.type || i}
                     onClick={() => {
-                      setSelectedImage(i);
-                      setHoveredColorImage(null);
+                      if (i === 0) {
+                        setSelectedImage(0);
+                        setHoveredColorImage(null);
+                      } else {
+                        setSelectedImage(1);
+                        setHoveredColorImage(null);
+                        const currentIdx = colorVariations.findIndex((v) => v.id === product.id);
+                        setLightboxVariantIndex(currentIdx >= 0 ? currentIdx : 0);
+                        setIsLightboxOpen(true);
+                      }
                     }}
                     style={{
                       width: "64px",
@@ -713,7 +675,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                       position: "relative",
                       transition: "border-color 0.2s ease, transform 0.2s ease",
                     }}
-                    title={`View photo ${i + 1}`}
+                    title={i === 0 ? "View lifestyle photo" : "Click to view all color variants in big"}
                     onMouseEnter={(e) => {
                       if (!isSelected) (e.currentTarget as HTMLElement).style.borderColor = "#1E1E1E";
                     }}
@@ -722,8 +684,8 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
                     }}
                   >
                     <Image
-                      src={getShopifyImageUrl(img, 160)}
-                      alt=""
+                      src={getShopifyImageUrl(item.url, 160)}
+                      alt={item.title}
                       fill
                       sizes="64px"
                       style={{ objectFit: "cover" }}
@@ -735,7 +697,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
           )}
 
           {/* Main Image */}
-          <div style={{ flexGrow: 1, minWidth: 0, maxWidth: "440px" }}>
+          <div style={{ flexGrow: 1, minWidth: 0 }}>
             <div
               onClick={() => {
                 const currentIdx = colorVariations.findIndex(v => v.id === product.id);
@@ -978,16 +940,24 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
           {/* Color */}
           <div style={{ marginBottom: "2.25rem" }}>
             <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.8125rem", fontWeight: 700, color: "#1E1E1E", textTransform: "uppercase", marginBottom: "0.875rem", letterSpacing: "0.05em" }}>
-              COLOR: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>{colorVariations.find(v => v.id === product.id)?.colorName || parseProduct({ name: product.rawName }).colorName}</span>
+              COLOR: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>
+                {hoveredSwatchId
+                  ? colorVariations.find((v) => v.id === hoveredSwatchId)?.colorName
+                  : (colorVariations.find((v) => v.id === product.id)?.colorName || parseProduct({ name: product.rawName }).colorName)}
+              </span>
             </p>
             <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
-              {colorVariations.map((v) => {
+              {colorVariations.map((v, idx) => {
                 const isCurrent = product.id === v.id;
                 const isHovered = hoveredSwatchId === v.id;
                 return (
                   <button
-                    key={v.id}
+                    key={v.id || idx}
                     onClick={() => {
+                      if (v.id === product.id) return;
+                      setHoveredColorImage(null);
+                      setHoveredSwatchId(null);
+                      setLightboxVariantIndex(idx);
                       if (v.handle) {
                         router.push(`/products/${v.handle}`);
                       } else {
@@ -1240,24 +1210,24 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
       {/* Full-Screen Lightbox Modal */}
       {isLightboxOpen && (
         <div
-          onClick={() => setIsLightboxOpen(false)}
+          onClick={() => handleCloseLightbox(false)}
           style={{
             position: "fixed",
             inset: 0,
             zIndex: 9999,
             backgroundColor: "rgba(0, 0, 0, 0.8)",
-            backdropFilter: "blur(4px)",
+            backdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "2rem",
+            padding: "1.5rem",
           }}
         >
           {/* Close (Cross) Icon in Top Right */}
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setIsLightboxOpen(false);
+              handleCloseLightbox(false);
             }}
             aria-label="Close image popup"
             style={{
@@ -1324,7 +1294,7 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
               (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
             }}
           >
-            <ChevronLeft size={34} color="#FFFFFF" strokeWidth={2.5} />
+            <ChevronLeft size={36} color="#FFFFFF" strokeWidth={2.5} />
           </button>
 
           {/* Chevron Next Button */}
@@ -1362,73 +1332,175 @@ export function ProductDetailContent({ initialProduct }: ProductDetailClientProp
               (e.currentTarget as HTMLElement).style.transform = "translateY(-50%) scale(1)";
             }}
           >
-            <ChevronRight size={34} color="#FFFFFF" strokeWidth={2.5} />
+            <ChevronRight size={36} color="#FFFFFF" strokeWidth={2.5} />
           </button>
 
-          {/* Center Image Container */}
+          {/* Center Content Container */}
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
               position: "relative",
               maxWidth: "85vw",
-              maxHeight: "85vh",
+              maxHeight: "88vh",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
+              userSelect: "none",
             }}
           >
-            <img
-              src={getShopifyImageUrl(
-                (colorVariations.length > 0 && colorVariations[lightboxVariantIndex]?.image) ||
-                product.images[selectedImage] ||
-                product.images[0],
-                1400
-              )}
-              alt={product.name}
+            <div
               style={{
-                maxWidth: "85vw",
-                maxHeight: "80vh",
-                objectFit: "contain",
-                borderRadius: "8px",
-                boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
-                display: "block",
+                position: "relative",
+                maxHeight: "68vh",
+                maxWidth: "80vw",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
-            {/* Active Color Variant Name / Indicator */}
+            >
+              <img
+                key={colorVariations[lightboxVariantIndex]?.id || lightboxVariantIndex}
+                src={getShopifyImageUrl(
+                  (colorVariations.length > 0 && colorVariations[lightboxVariantIndex]?.image) ||
+                  product.images[selectedImage] ||
+                  product.images[0],
+                  1400
+                )}
+                alt={colorVariations[lightboxVariantIndex]?.colorName || product.name}
+                style={{
+                  maxHeight: "66vh",
+                  maxWidth: "75vw",
+                  objectFit: "contain",
+                  borderRadius: "8px",
+                  boxShadow: "0 20px 50px rgba(0, 0, 0, 0.6)",
+                  display: "block",
+                }}
+              />
+            </div>
+
+            {/* Active Color Variant Name / Indicator & Mini Swatch Strip */}
             {colorVariations.length > 0 && (
               <div
                 style={{
-                  marginTop: "1rem",
+                  marginTop: "0.875rem",
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
-                  gap: "0.75rem",
-                  backgroundColor: "rgba(0, 0, 0, 0.65)",
-                  padding: "0.5rem 1.25rem",
-                  borderRadius: "20px",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  gap: "0.625rem",
                 }}
               >
+                {/* Info pill with color dot + name + counter + quick select */}
                 <div
                   style={{
-                    width: "14px",
-                    height: "14px",
-                    borderRadius: "50%",
-                    backgroundColor: colorVariations[lightboxVariantIndex]?.colorHex || "#FFFFFF",
-                    border: "1px solid rgba(255, 255, 255, 0.8)",
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: "'Montserrat', sans-serif",
-                    fontSize: "0.875rem",
-                    color: "#FFFFFF",
-                    fontWeight: 500,
-                    letterSpacing: "0.03em",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    backgroundColor: "rgba(0, 0, 0, 0.75)",
+                    padding: "0.45rem 1.15rem",
+                    borderRadius: "24px",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    backdropFilter: "blur(8px)",
                   }}
                 >
-                  {colorVariations[lightboxVariantIndex]?.colorName || product.name} ({lightboxVariantIndex + 1} of {colorVariations.length})
-                </span>
+                  <div
+                    style={{
+                      width: "14px",
+                      height: "14px",
+                      borderRadius: "50%",
+                      backgroundColor: colorVariations[lightboxVariantIndex]?.colorHex || "#FFFFFF",
+                      border: "1.5px solid rgba(255, 255, 255, 0.9)",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.875rem",
+                      color: "#FFFFFF",
+                      fontWeight: 600,
+                      letterSpacing: "0.03em",
+                    }}
+                  >
+                    {colorVariations[lightboxVariantIndex]?.colorName} ({lightboxVariantIndex + 1} of {colorVariations.length})
+                  </span>
+
+                  {colorVariations[lightboxVariantIndex]?.handle &&
+                    colorVariations[lightboxVariantIndex].handle !== product.handle && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCloseLightbox(true);
+                      }}
+                      style={{
+                        marginLeft: "0.25rem",
+                        backgroundColor: "#C1A886",
+                        color: "#FFFFFF",
+                        border: "none",
+                        borderRadius: "14px",
+                        padding: "0.25rem 0.75rem",
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        fontFamily: "'Montserrat', sans-serif",
+                        transition: "background-color 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = "#A88E6E";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = "#C1A886";
+                      }}
+                    >
+                      Select Color
+                    </button>
+                  )}
+                </div>
+
+                {/* Mini Swatches Strip */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexWrap: "wrap",
+                    maxWidth: "90vw",
+                  }}
+                >
+                  {colorVariations.map((v, idx) => {
+                    const isActive = idx === lightboxVariantIndex;
+                    return (
+                      <button
+                        key={v.id || idx}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLightboxVariantIndex(idx);
+                        }}
+                        style={{
+                          width: "36px",
+                          height: "46px",
+                          borderRadius: "4px",
+                          overflow: "hidden",
+                          border: isActive ? "2px solid #C1A886" : "1px solid rgba(255, 255, 255, 0.3)",
+                          outline: isActive ? "2px solid #FFFFFF" : "none",
+                          padding: 0,
+                          backgroundColor: "#FFFFFF",
+                          cursor: "pointer",
+                          transform: isActive ? "scale(1.1)" : "scale(1)",
+                          transition: "all 0.15s ease",
+                          position: "relative",
+                        }}
+                        title={v.colorName}
+                      >
+                        <img
+                          src={getShopifyImageUrl(v.image, 100)}
+                          alt={v.colorName}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
