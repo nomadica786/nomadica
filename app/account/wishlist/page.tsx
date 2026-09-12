@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { PageLoader } from "@/components/ui/PageLoader";
-import WishlistCard from "@/components/shop/WishlistCard";
+import ProductCard from "@/components/shop/ProductCard";
 import QuickViewModal from "@/components/shop/QuickViewModal";
 import { api } from "@/components/api/api";
 import { useAuth } from "@/utils/hooks/useAuth";
@@ -204,7 +204,7 @@ export default function WishlistPage() {
         </div>
 
         {/* Content Section */}
-        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
+        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
           
           <div className="wishlist-actions-bar">
             <button className="clear-all-btn" onClick={handleClearAll} disabled={wishlistItems.length === 0 || loading}>
@@ -218,13 +218,11 @@ export default function WishlistPage() {
               <PageLoader />
             </div>
           ) : wishlistItems.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {wishlistItems.map((product) => (
-                <WishlistCard
+                <ProductCard
                   key={product.id}
-                  product={product}
-                  onQuickView={setQuickViewProduct}
-                  onRemove={handleRemoveItem}
+                  {...product}
                 />
               ))}
             </div>

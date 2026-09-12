@@ -353,7 +353,7 @@ export function ProductCarouselSection({
                               width: "36px",
                               height: "36px",
                               borderRadius: "50%",
-                              backgroundColor: wishlistSet.has(product.id) ? "red" : "#FFFFFF",
+                              backgroundColor: "#FFFFFF",
                               border: "none",
                               display: "flex",
                               alignItems: "center",
@@ -371,7 +371,7 @@ export function ProductCarouselSection({
                             }}
                             aria-label={wishlistSet.has(product.id) ? "Remove from wishlist" : "Add to wishlist"}
                           >
-                            <Heart size={18} color={wishlistSet.has(product.id) ? "#FFFFFF" : "#1E1E1E"} fill={wishlistSet.has(product.id) ? "#FFFFFF" : "none"} />
+                            <Heart size={18} color={wishlistSet.has(product.id) ? "#E53935" : "#1E1E1E"} fill={wishlistSet.has(product.id) ? "#E53935" : "none"} />
                           </button>
                         </div>
                       </Link>

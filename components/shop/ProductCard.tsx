@@ -73,9 +73,8 @@ export default function ProductCard({
     }
   }, [id, colorVariants]);
 
-  const[bgcolor, setbgcolor] = useState("#FFFFFF");
   const currentId = activeVariant ? activeVariant.id : id;
-  const currentName = activeVariant && activeVariant.colorName !== "Original"
+  const currentName = activeVariant && activeVariant.colorName !== "Original" && !name.toLowerCase().includes(activeVariant.colorName.toLowerCase())
     ? `${activeVariant.colorName} ${name}`
     : name;
   const currentPrice = activeVariant ? activeVariant.price : price;
@@ -175,12 +174,10 @@ export default function ProductCard({
               }
               try {
                 if (wishlisted) {
-                  setbgcolor("white")
                   await api.wishlist.remove(currentId);
                   setWishlisted(false);
                   window.dispatchEvent(new CustomEvent("wishlist-updated"));
                 } else {
-                  setbgcolor("red")
                   await api.wishlist.add(currentId);
                   setWishlisted(true);
                   window.dispatchEvent(new CustomEvent("wishlist-updated"));
@@ -196,7 +193,7 @@ export default function ProductCard({
               width: "36px",
               height: "36px",
               borderRadius: "50%",
-              backgroundColor: bgcolor,
+              backgroundColor: "#FFFFFF",
               border: "none",
               display: "flex",
               alignItems: "center",
@@ -204,7 +201,7 @@ export default function ProductCard({
               cursor: "pointer",
               boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
               zIndex: 5,
-              transition: "transform 0.2s ease"
+              transition: "transform 0.2s ease",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
@@ -214,7 +211,11 @@ export default function ProductCard({
             }}
             aria-label="Wishlist"
           >
-            <Heart size={18} fill="white" />
+            <Heart
+              size={18}
+              fill={wishlisted ? "#E53935" : "none"}
+              color={wishlisted ? "#E53935" : "#1E1E1E"}
+            />
           </button>
         </div>
       </Link>
