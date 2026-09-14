@@ -16,6 +16,7 @@ const isWhiteColor = (colorHex: string) => {
 
 interface ColorVariant {
   id: string;
+  name?: string;
   colorName: string;
   colorHex: string;
   image: string;
@@ -24,6 +25,8 @@ interface ColorVariant {
   originalPrice?: number;
   handle: string;
   badge?: string;
+  category?: string;
+  createdAt?: string;
   allVariants?: any[];
 }
 
