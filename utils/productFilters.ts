@@ -3,8 +3,18 @@
 const COLLECTION_RULES: Record<string, { tags: string[]; handles: string[]; titles: string[]; keywords: string[] }> = {
   "adventure and trekking collection": {
     tags: ["trekking", "adventure-trekking"],
-    handles: ["adventure-and-trekking-collection", "adventure-and-trekking", "trekking"],
-    titles: ["adventure and trekking collection", "adventure and trekking"],
+    handles: [
+      "adventure-and-trekking-collection",
+      "adventure-and-trekking-collections",
+      "adventure-and-trekking",
+      "trekking"
+    ],
+    titles: [
+      "adventure and trekking collection",
+      "adventure & trekking collection",
+      "adventure and trekking",
+      "adventure & trekking"
+    ],
     keywords: ["trekking"]
   },
   "beach vibes collection": {
@@ -28,10 +38,178 @@ const COLLECTION_RULES: Record<string, { tags: string[]; handles: string[]; titl
   "wildlife and safari collection": {
     tags: ["safari", "wildlife"],
     handles: ["wildlife-and-safari-collection", "wildlife-and-safari", "safari", "wildlife"],
-    titles: ["wildlife and safari collection", "wildlife and safari"],
+    titles: [
+      "wildlife and safari collection",
+      "wildlife & safari collection",
+      "wildlife and safari",
+      "wildlife & safari"
+    ],
     keywords: ["safari", "wildlife", "tiger"]
   }
 };
+
+export function normalizeCollectionKey(str: string): string {
+  if (!str) return "";
+  return str
+    .toLowerCase()
+    .replace(/[-_]+/g, " ")
+    .replace(/&/g, "and")
+    .replace(/\bcollections?\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export const CANONICAL_COLLECTION_TITLES: Record<string, string> = {
+  "adventure and trekking": "Adventure and Trekking Collection",
+  "beach vibes": "Beach Vibes Collection",
+  "destination": "Destination Collection",
+  "travel quotes": "Travel Quotes Collection",
+  "wildlife and safari": "Wildlife and Safari Collection",
+};
+
+export const DEFAULT_COLLECTION_OPTIONS = [
+  "Destination Collection",
+  "Wildlife and Safari Collection",
+  "Adventure and Trekking Collection",
+  "Travel Quotes Collection",
+  "Beach Vibes Collection"
+];
+
+export function extractCollectionOptions(
+  collectionsList?: any[],
+  collectionEdges?: any[],
+  products?: any[],
+  configurations?: any[]
+): string[] {
+  const rawSet = new Set<string>();
+
+  // 1. From fetched collections list
+  if (collectionsList && Array.isArray(collectionsList)) {
+    for (const item of collectionsList) {
+      if (typeof item === "string" && item.trim()) {
+        rawSet.add(item.trim());
+      } else if (item && typeof item === "object") {
+        if (item.title) rawSet.add(String(item.title).trim());
+        else if (item.name) rawSet.add(String(item.name).trim());
+      }
+    }
+  }
+
+  // 2. From collectionEdges
+  if (collectionEdges && Array.isArray(collectionEdges)) {
+    for (const edge of collectionEdges) {
+      const node = edge.node || edge;
+      if (node?.title) {
+        rawSet.add(String(node.title).trim());
+      }
+    }
+  }
+
+  // 3. From products' attached collections
+  if (products && Array.isArray(products)) {
+    for (const p of products) {
+      if (p.collections && Array.isArray(p.collections)) {
+        for (const col of p.collections) {
+          if (typeof col === "string" && col.trim()) {
+            rawSet.add(col.trim());
+          }
+        }
+      }
+    }
+  }
+
+  // Explicitly exclude metaobjects and generic category names
+  const metaNames = new Set(
+    (configurations || []).flatMap((c: any) => [
+      (c.displayName || "").toLowerCase().trim(),
+      (c.entryName || "").toLowerCase().trim(),
+    ]).filter(Boolean)
+  );
+
+  const genericExclude = new Set([
+    "tops",
+    "bottoms",
+    "outerwear",
+    "knits",
+    "all",
+    "default",
+    "t-shirts",
+    "tshirts",
+    "tees"
+  ]);
+
+  const titleMap = new Map<string, string>();
+
+  for (const rawItem of rawSet) {
+    const trimmed = rawItem.trim();
+    const lower = trimmed.toLowerCase();
+    if (!lower || lower === "all") continue;
+    if (genericExclude.has(lower)) continue;
+    if (metaNames.has(lower)) continue;
+
+    const normKey = normalizeCollectionKey(trimmed);
+    if (!normKey) continue;
+    if (genericExclude.has(normKey)) continue;
+
+    // Determine the canonical display title for this collection
+    let displayTitle = CANONICAL_COLLECTION_TITLES[normKey];
+
+    if (!displayTitle) {
+      if (!trimmed.includes("-") && !trimmed.includes("_")) {
+        displayTitle = trimmed
+          .split(" ")
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(" ");
+      } else {
+        const cleanWords = trimmed.replace(/[-_]+/g, " ").trim();
+        displayTitle = cleanWords
+          .split(" ")
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(" ");
+        if (!displayTitle.toLowerCase().endsWith("collection")) {
+          displayTitle = `${displayTitle} Collection`;
+        }
+      }
+    }
+
+    // Always prefer a canonical title or clean title (without hyphens/underscores)
+    if (!titleMap.has(normKey)) {
+      titleMap.set(normKey, displayTitle);
+    } else {
+      const existing = titleMap.get(normKey)!;
+      if (
+        CANONICAL_COLLECTION_TITLES[normKey] === displayTitle ||
+        (!displayTitle.includes("-") && existing.includes("-"))
+      ) {
+        titleMap.set(normKey, displayTitle);
+      }
+    }
+  }
+
+  let result = Array.from(titleMap.values());
+
+  if (result.length === 0) {
+    result = [...DEFAULT_COLLECTION_OPTIONS];
+  } else {
+    // Sort according to preferred store presentation order
+    const desiredOrder = [
+      "destination",
+      "wildlife and safari",
+      "adventure and trekking",
+      "travel quotes",
+      "beach vibes"
+    ];
+    result.sort((a, b) => {
+      const keyA = normalizeCollectionKey(a);
+      const keyB = normalizeCollectionKey(b);
+      const idxA = desiredOrder.indexOf(keyA);
+      const idxB = desiredOrder.indexOf(keyB);
+      return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+    });
+  }
+
+  return result;
+}
 
 export function matchesCategoryFilter(product: any, selectedCategory: string[]): boolean {
   if (!selectedCategory || selectedCategory.length === 0) return true;
@@ -42,29 +220,32 @@ export function matchesCategoryFilter(product: any, selectedCategory: string[]):
     const target = catName.trim().toLowerCase();
     if (!target) return true;
 
-    // 0. Match Product Type Configuration Display Name or entry name or metaobjectId
-    const pDisplayName = (product.displayName || "").trim().toLowerCase();
-    const pMetaName = (product.metaobjectName || "").trim().toLowerCase();
-    const pMetaId = (product.metaobjectId || "").trim().toLowerCase();
-    const pGroupKey = (product.groupKey || "").trim().toLowerCase();
+    const normTarget = normalizeCollectionKey(target);
 
-    if (
-      (pDisplayName && (pDisplayName === target || pDisplayName.includes(target) || target.includes(pDisplayName))) ||
-      (pMetaName && (pMetaName === target || pMetaName.includes(target) || target.includes(pMetaName))) ||
-      (pMetaId && pMetaId === target) ||
-      (pGroupKey && pGroupKey === target)
-    ) {
-      return true;
+    // Check child products if this is a grouped product
+    if (product.products && Array.isArray(product.products)) {
+      if (product.products.some((child: any) => matchesCategoryFilter(child, [catName]))) {
+        return true;
+      }
     }
 
     // 1. Check if target is one of the known Shopify collections
-    const rule = COLLECTION_RULES[target];
+    const ruleKey = Object.keys(COLLECTION_RULES).find(
+      (k) => k === target || normalizeCollectionKey(k) === normTarget
+    );
+    const rule = ruleKey ? COLLECTION_RULES[ruleKey] : null;
+
     if (rule) {
-      // Check collection titles & handles
+      // Check collection titles, handles, and normalized keys
       if (product.collections && Array.isArray(product.collections)) {
         if (product.collections.some((c: string) => {
           const col = String(c).trim().toLowerCase();
-          return rule.titles.includes(col) || rule.handles.includes(col);
+          const normCol = normalizeCollectionKey(col);
+          return (
+            rule.titles.includes(col) ||
+            rule.handles.includes(col) ||
+            (normCol && normTarget && normCol === normTarget)
+          );
         })) return true;
       }
       // Check product tags
@@ -84,33 +265,17 @@ export function matchesCategoryFilter(product: any, selectedCategory: string[]):
       return false;
     }
 
-    // 2. Semantic category mappings
-    const pType = (product.productType || "").trim().toLowerCase();
-    const pCat = (product.category || "").trim().toLowerCase();
-    const pName = (product.name || product.title || "").trim().toLowerCase();
-
-    if (target === "tops") {
-      if (pCat.includes("top") || pType.includes("tee") || pType.includes("shirt") || pType.includes("polo") || pType.includes("top") || pName.includes("shirt") || pName.includes("tee") || pName.includes("polo") || pName.includes("top")) return true;
-      return false;
-    }
-    if (target === "bottoms") {
-      if (pCat.includes("bottom") || pType.includes("trouser") || pType.includes("pant") || pType.includes("short") || pType.includes("bottom") || pName.includes("trouser") || pName.includes("short") || pName.includes("pant")) return true;
-      return false;
-    }
-    if (target === "outerwear") {
-      if (pCat.includes("outerwear") || pType.includes("jacket") || pType.includes("coat") || pType.includes("hoodie") || pName.includes("jacket") || pName.includes("coat") || pName.includes("hoodie")) return true;
-      return false;
-    }
-    if (target === "knits") {
-      if (pCat.includes("knit") || pType.includes("sweater") || pType.includes("knit") || pName.includes("sweater") || pName.includes("knit")) return true;
-      return false;
-    }
-
-    // 3. Fallback generic match for any other collection
+    // 2. Direct collection matching on product.collections (including normalized comparison)
     if (product.collections && Array.isArray(product.collections)) {
       if (product.collections.some((c: string) => {
         const col = String(c).trim().toLowerCase();
-        return col === target || col.includes(target) || target.includes(col);
+        const normCol = normalizeCollectionKey(col);
+        return (
+          col === target ||
+          col.includes(target) ||
+          target.includes(col) ||
+          (normCol && normTarget && normCol === normTarget)
+        );
       })) return true;
     }
 
@@ -125,6 +290,25 @@ export function matchesCategoryFilter(product: any, selectedCategory: string[]):
         return false;
       })) return true;
     }
+
+    // 4. Fallback check on Product Type Configuration Display Name or entry name or metaobjectId if passed
+    const pDisplayName = (product.displayName || "").trim().toLowerCase();
+    const pMetaName = (product.metaobjectName || "").trim().toLowerCase();
+    const pMetaId = (product.metaobjectId || "").trim().toLowerCase();
+    const pGroupKey = (product.groupKey || "").trim().toLowerCase();
+
+    if (
+      (pDisplayName && (pDisplayName === target || pDisplayName.includes(target) || target.includes(pDisplayName))) ||
+      (pMetaName && (pMetaName === target || pMetaName.includes(target) || target.includes(pMetaName))) ||
+      (pMetaId && pMetaId === target) ||
+      (pGroupKey && pGroupKey === target)
+    ) {
+      return true;
+    }
+
+    const pType = (product.productType || "").trim().toLowerCase();
+    const pCat = (product.category || "").trim().toLowerCase();
+    const pName = (product.name || product.title || "").trim().toLowerCase();
 
     if (pType === target || pCat === target) return true;
     if (pName.includes(target)) return true;

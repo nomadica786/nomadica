@@ -6,7 +6,7 @@ import { groupProducts, GroupedProduct } from "@/utils/productGroup";
 import ProductCard from "@/components/shop/ProductCard";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
 import { useRouter } from "next/navigation";
-import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts } from "@/utils/productFilters";
+import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts, extractCollectionOptions } from "@/utils/productFilters";
 
 type CollectionEdge = { node: { title: string } };
 type ProductOption = { name?: string; value?: string };
@@ -89,25 +89,26 @@ export default function BestSellersPage() {
     }) || [];
   }, [pageData?.products]);
 
-  const groupedProducts = useMemo(() => {
-    return groupProducts(allProducts, pageData?.mockups || {});
-  }, [allProducts, pageData?.mockups]);
+  // 1. Filter raw products by collection first if selected
+  const collectionFiltered = useMemo(() => {
+    if (!selectedCategory || selectedCategory.length === 0) return allProducts;
+    return allProducts.filter((p: any) => matchesCategoryFilter(p, selectedCategory));
+  }, [allProducts, selectedCategory]);
 
-  const categoryOptions = useMemo(() => {
-    const list = new Set<string>();
-    if (pageData?.configurations && Array.isArray(pageData.configurations)) {
-      for (const config of pageData.configurations) {
-        if (config.displayName) list.add(config.displayName);
-        else if (config.entryName) list.add(config.entryName);
-      }
-    }
-    for (const gp of groupedProducts) {
-      if (gp.displayName) list.add(gp.displayName);
-      else if (gp.name) list.add(gp.name);
-    }
-    const generic = ["tops", "bottoms", "outerwear", "knits", "all"];
-    return Array.from(list).filter(item => !generic.includes(item.toLowerCase()));
-  }, [pageData?.configurations, groupedProducts]);
+  // 2. Group products by Product Type Configuration metaobject
+  const groupedProducts = useMemo(() => {
+    return groupProducts(collectionFiltered, pageData?.mockups || {});
+  }, [collectionFiltered, pageData?.mockups]);
+
+  // Derive dynamic Collection options strictly from fetched Shopify collections
+  const collectionOptions = useMemo(() => {
+    return extractCollectionOptions(
+      pageData?.collections,
+      undefined,
+      allProducts,
+      pageData?.configurations
+    );
+  }, [pageData?.collections, allProducts, pageData?.configurations]);
 
   if (loading) {
     return <PageLoader />;
@@ -116,9 +117,8 @@ export default function BestSellersPage() {
   const bestSellers = groupedProducts.filter((p: GroupedProduct) => p.badge?.toLowerCase() === 'best seller');
   const baseList = bestSellers.length > 0 ? bestSellers : groupedProducts.slice(0, 8);
 
-  // Apply filtering
+  // 3. Apply color and size filtering on grouped products
   const filteredProducts = baseList.filter(product => {
-    if (!matchesCategoryFilter(product, selectedCategory)) return false;
     if (!matchesColorFilter(product, selectedColor)) return false;
     if (!matchesSizeFilter(product, selectedSize)) return false;
     return true;
@@ -154,7 +154,7 @@ export default function BestSellersPage() {
       </div>
 
       <ShopFilterBar 
-        categories={categoryOptions}
+        categories={collectionOptions}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         selectedSize={selectedSize}
@@ -164,6 +164,7 @@ export default function BestSellersPage() {
         sortBy={sortBy}
         setSortBy={setSortBy}
         productCount={finalProducts.length}
+        categoryLabel="Collection"
         pageFilterLabel={"Best Sellers"}
         onClearPageFilter={() => router.push('/shop')}
       />

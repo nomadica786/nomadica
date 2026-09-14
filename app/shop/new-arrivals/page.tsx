@@ -6,7 +6,7 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts, GroupedProduct } from "@/utils/productGroup";
 import ProductCard from "@/components/shop/ProductCard";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
-import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts } from "@/utils/productFilters";
+import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts, extractCollectionOptions } from "@/utils/productFilters";
 
 type CollectionEdge = { node: { title: string } };
 type ProductOption = { name?: string; value?: string };
@@ -89,33 +89,33 @@ export default function NewArrivalsPage() {
     }) || [];
   }, [pageData?.products]);
 
-  const groupedProducts = useMemo(() => {
-    return groupProducts(allProducts, pageData?.mockups || {});
-  }, [allProducts, pageData?.mockups]);
+  // 1. Filter raw products by collection first if selected
+  const collectionFiltered = useMemo(() => {
+    if (!selectedCategory || selectedCategory.length === 0) return allProducts;
+    return allProducts.filter((p: any) => matchesCategoryFilter(p, selectedCategory));
+  }, [allProducts, selectedCategory]);
 
-  const categoryOptions = useMemo(() => {
-    const list = new Set<string>();
-    if (pageData?.configurations && Array.isArray(pageData.configurations)) {
-      for (const config of pageData.configurations) {
-        if (config.displayName) list.add(config.displayName);
-        else if (config.entryName) list.add(config.entryName);
-      }
-    }
-    for (const gp of groupedProducts) {
-      if (gp.displayName) list.add(gp.displayName);
-      else if (gp.name) list.add(gp.name);
-    }
-    const generic = ["tops", "bottoms", "outerwear", "knits", "all"];
-    return Array.from(list).filter(item => !generic.includes(item.toLowerCase()));
-  }, [pageData?.configurations, groupedProducts]);
+  // 2. Group products by Product Type Configuration metaobject
+  const groupedProducts = useMemo(() => {
+    return groupProducts(collectionFiltered, pageData?.mockups || {});
+  }, [collectionFiltered, pageData?.mockups]);
+
+  // Derive dynamic Collection options strictly from fetched Shopify collections
+  const collectionOptions = useMemo(() => {
+    return extractCollectionOptions(
+      pageData?.collections,
+      undefined,
+      allProducts,
+      pageData?.configurations
+    );
+  }, [pageData?.collections, allProducts, pageData?.configurations]);
 
   if (loading) {
     return <PageLoader />;
   }
   
-  // Apply filtering
+  // 3. Apply color and size filtering on grouped products
   const filteredProducts = groupedProducts.filter(product => {
-    if (!matchesCategoryFilter(product, selectedCategory)) return false;
     if (!matchesColorFilter(product, selectedColor)) return false;
     if (!matchesSizeFilter(product, selectedSize)) return false;
     return true;
@@ -150,7 +150,7 @@ export default function NewArrivalsPage() {
         </div>
       </div>
       <ShopFilterBar 
-        categories={categoryOptions}
+        categories={collectionOptions}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         selectedSize={selectedSize}
@@ -160,6 +160,7 @@ export default function NewArrivalsPage() {
         sortBy={sortBy}
         setSortBy={setSortBy}
         productCount={finalProducts.length}
+        categoryLabel="Collection"
         pageFilterLabel={"Latest Collection"}
         onClearPageFilter={() => router.push('/shop')}
       />

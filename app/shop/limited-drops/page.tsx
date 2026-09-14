@@ -6,7 +6,7 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts, GroupedProduct } from "@/utils/productGroup";
 import ProductCard from "@/components/shop/ProductCard";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
-import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts } from "@/utils/productFilters";
+import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts, extractCollectionOptions } from "@/utils/productFilters";
 
 type CollectionEdge = { node: { title: string } };
 type ProductOption = { name?: string; value?: string };
@@ -116,23 +116,21 @@ export default function LimitedDropsPage() {
     };
   }) || [];
 
-  const groupedProducts = groupProducts(allProducts, pageData?.mockups || {});
+  // 1. Filter raw products by collection first if selected
+  const collectionFiltered = (!selectedCategory || selectedCategory.length === 0)
+    ? allProducts
+    : allProducts.filter((p: any) => matchesCategoryFilter(p, selectedCategory));
 
-  const categoryOptions = (() => {
-    const list = new Set<string>();
-    if (pageData?.configurations && Array.isArray(pageData.configurations)) {
-      for (const config of pageData.configurations) {
-        if (config.displayName) list.add(config.displayName);
-        else if (config.entryName) list.add(config.entryName);
-      }
-    }
-    for (const gp of groupedProducts) {
-      if (gp.displayName) list.add(gp.displayName);
-      else if (gp.name) list.add(gp.name);
-    }
-    const generic = ["tops", "bottoms", "outerwear", "knits", "all"];
-    return Array.from(list).filter(item => !generic.includes(item.toLowerCase()));
-  })();
+  // 2. Group products by Product Type Configuration metaobject
+  const groupedProducts = groupProducts(collectionFiltered, pageData?.mockups || {});
+
+  // Derive dynamic Collection options strictly from fetched Shopify collections
+  const collectionOptions = extractCollectionOptions(
+    pageData?.collections,
+    undefined,
+    allProducts,
+    pageData?.configurations
+  );
 
   if (loading) {
     return <PageLoader />;
@@ -141,9 +139,8 @@ export default function LimitedDropsPage() {
   const drops = groupedProducts.filter((p: GroupedProduct) => p.badge?.toLowerCase() === 'limited');
   const baseList = drops.length > 0 ? drops : groupedProducts.slice(0, 3);
 
-  // Apply filtering
+  // 3. Apply color and size filtering on grouped products
   const filteredProducts = baseList.filter(product => {
-    if (!matchesCategoryFilter(product, selectedCategory)) return false;
     if (!matchesColorFilter(product, selectedColor)) return false;
     if (!matchesSizeFilter(product, selectedSize)) return false;
     return true;
@@ -161,7 +158,7 @@ export default function LimitedDropsPage() {
         style={{
           minHeight: "45vh",
           borderBottom: "1px solid rgba(30,30,30,0.1)",
-          padding: "3rem 1.5rem 2.5rem",
+          padding: "3rem 1.5rem 2rem",
           backgroundImage: "url('/shop-header.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -198,7 +195,7 @@ export default function LimitedDropsPage() {
       </div>
 
       <ShopFilterBar 
-        categories={categoryOptions}
+        categories={collectionOptions}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         selectedSize={selectedSize}
@@ -208,6 +205,7 @@ export default function LimitedDropsPage() {
         sortBy={sortBy}
         setSortBy={setSortBy}
         productCount={finalProducts.length}
+        categoryLabel="Collection"
         pageFilterLabel={"Limited Drops"}
         onClearPageFilter={() => router.push('/shop')}
       />

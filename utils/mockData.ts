@@ -274,31 +274,38 @@ export interface MockCollection {
 export const MOCK_COLLECTIONS: MockCollection[] = [
   {
     id: "c1",
-    title: "Tops",
-    handle: "tops",
-    description: "Lightweight shirts, tees, and knits designed for comfort in motion.",
+    title: "Adventure and Trekking Collection",
+    handle: "adventure-and-trekking-collection",
+    description: "Built for elevation, rugged terrain, and the spirit of exploration.",
     image: "https://images.unsplash.com/photo-1594938298603-c8148c4b4266?w=800&q=80",
   },
   {
     id: "c2",
-    title: "Bottoms",
-    handle: "bottoms",
-    description: "Versatile trousers, cargo pants, and linen shorts built for exploration.",
+    title: "Beach Vibes Collection",
+    handle: "beach-vibes-collection",
+    description: "Sun-drenched coastal ease, relaxed fits, and breathable fabrics.",
     image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80",
   },
   {
     id: "c3",
-    title: "Outerwear",
-    handle: "outerwear",
-    description: "Rugged wax jackets and packs-small hoodies for layering across climates.",
+    title: "Destination Collection",
+    handle: "destination-collection",
+    description: "Iconic destinations translated into wearable keepsakes.",
     image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80",
   },
   {
     id: "c4",
-    title: "Knits",
-    handle: "knits",
-    description: "Merino wool sweaters and hoodies crafted for natural performance.",
+    title: "Travel Quotes Collection",
+    handle: "travel-quotes-collection",
+    description: "Words for the wanderer, statements for the curious traveler.",
     image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&q=80",
+  },
+  {
+    id: "c5",
+    title: "Wildlife and Safari Collection",
+    handle: "wildlife-and-safari-collection",
+    description: "Inspired by untamed wilderness and safari expeditions.",
+    image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80",
   }
 ];
 

@@ -12,7 +12,7 @@ export async function GET() {
 
     if (env.shopUrl && storefrontToken) {
       const client = new ShopifyStorefrontClient(env.shopUrl, storefrontToken);
-      const data = await client.request(STOREFRONT_QUERIES.GET_COLLECTIONS, { first: 10 });
+      const data = await client.request(STOREFRONT_QUERIES.GET_COLLECTIONS, { first: 50 });
       return NextResponse.json(data);
     }
   } catch (error) {

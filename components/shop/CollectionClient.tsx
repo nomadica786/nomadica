@@ -6,7 +6,7 @@ import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts } from "@/utils/productGroup";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
-import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts } from "@/utils/productFilters";
+import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts, extractCollectionOptions } from "@/utils/productFilters";
 
 const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
 
@@ -196,63 +196,40 @@ const enrichedProducts = useMemo(() => {
 
 /*
  * Keep this calculation before the loading return.
- * Hooks must execute in the same order on every render.
- */
+ * Hooks must execute in the same order on every render. */
+// 1. First apply the collection filter to raw products if any collection filter is active
+const collectionFilteredProducts = useMemo(() => {
+  if (!selectedCategory || selectedCategory.length === 0) return enrichedProducts;
+  return enrichedProducts.filter((product) => matchesCategoryFilter(product, selectedCategory));
+}, [enrichedProducts, selectedCategory]);
+
+// 2. Then group the resulting products by Product Type Configuration metaobject
 const groupedProducts = useMemo(() => {
-  return groupProducts(enrichedProducts, mockups);
-}, [enrichedProducts, mockups]);
+  return groupProducts(collectionFilteredProducts, mockups);
+}, [collectionFilteredProducts, mockups]);
 
-// Derive dynamic Category options strictly from Product Type Configuration metaobjects
-const categoryFilterOptions = useMemo(() => {
-  const list = new Set<string>();
-
-  // 1. Add from metaobject configurations
-  if (configurations && Array.isArray(configurations)) {
-    for (const config of configurations) {
-      if (config.displayName) {
-        list.add(config.displayName);
-      } else if (config.entryName) {
-        list.add(config.entryName);
-      }
-    }
-  }
-
-  // 2. Add from grouped products
-  for (const gp of groupedProducts) {
-    if (gp.displayName) {
-      list.add(gp.displayName);
-    } else if (gp.name) {
-      list.add(gp.name);
-    }
-  }
-
-  // Never show generic product types
-  const generic = [
-    "tops",
-    "bottoms",
-    "outerwear",
-    "knits",
-    "all",
-  ];
-
-  return Array.from(list).filter(
-    (item) => !generic.includes(item.toLowerCase())
+// Derive dynamic Collection options strictly from dynamically fetched Shopify collections
+const collectionFilterOptions = useMemo(() => {
+  return extractCollectionOptions(
+    categories,
+    collectionEdges,
+    enrichedProducts,
+    configurations
   );
-}, [configurations, groupedProducts]);
+}, [categories, collectionEdges, enrichedProducts, configurations]);
 
 if (loading) {
   return <PageLoader />;
 }
 
-  // Apply filtering
+  // 3. Apply color and size filtering on grouped products
   const filteredProducts = groupedProducts.filter((product) => {
-    if (!matchesCategoryFilter(product, selectedCategory)) return false;
     if (!matchesColorFilter(product, selectedColor)) return false;
     if (!matchesSizeFilter(product, selectedSize)) return false;
     return true;
   });
 
-  // Apply sorting (Featured defaults to highest color count first; Newest sorts by date/ID)
+  // 4. Apply sorting (Featured defaults to highest color count first; Newest sorts by date/ID)
   const finalProducts = sortProducts(filteredProducts, sortBy);
 
   const isAll = (categoryParam.toLowerCase() === "all");
@@ -290,7 +267,7 @@ if (loading) {
       </div>
 
       <ShopFilterBar 
-        categories={categoryFilterOptions}
+        categories={collectionFilterOptions}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         selectedSize={selectedSize}
@@ -300,6 +277,7 @@ if (loading) {
         sortBy={sortBy}
         setSortBy={setSortBy}
         productCount={finalProducts.length}
+        categoryLabel="Collection"
       />
 
       {/* Products Grid */}

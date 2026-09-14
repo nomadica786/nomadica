@@ -20,6 +20,7 @@ interface ShopFilterBarProps {
   productCount: number;
   pageFilterLabel?: string;
   onClearPageFilter?: () => void;
+  categoryLabel?: string;
 }
 
 export function ShopFilterBar({
@@ -32,8 +33,10 @@ export function ShopFilterBar({
   setSelectedColor,
   sortBy,
   setSortBy,
-  productCount
-  , pageFilterLabel, onClearPageFilter
+  productCount,
+  pageFilterLabel,
+  onClearPageFilter,
+  categoryLabel = "Collection"
 }: ShopFilterBarProps) {
   const [openDropdown, setOpenDropdown] = useState<"category" | "size" | "color" | "sort" | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -182,7 +185,7 @@ export function ShopFilterBar({
         <div style={{ display: "flex", gap: "1rem", position: "relative", flexWrap: "wrap" }}>
           <div style={{ position: "relative" }}>
             <button onClick={() => toggleDropdown("category")} style={activeButtonStyle(openDropdown === "category" || selectedCategory.length > 0) }>
-              {selectedCategory.length === 0 ? "Category" : selectedCategory.length === 1 ? selectedCategory[0] : `Category (${selectedCategory.length})`}
+              {selectedCategory.length === 0 ? categoryLabel : selectedCategory.length === 1 ? selectedCategory[0] : `${categoryLabel} (${selectedCategory.length})`}
               <ChevronDown size={14} />
             </button>
             {openDropdown === "category" && (
