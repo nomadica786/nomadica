@@ -6,7 +6,7 @@ import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts } from "@/utils/productGroup";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
-import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter } from "@/utils/productFilters";
+import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts } from "@/utils/productFilters";
 
 const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
 
@@ -187,23 +187,8 @@ useEffect(() => {
     return true;
   });
 
-  // Apply sorting
-  const finalProducts = (() => {
-    let sorted = [...filteredProducts];
-    if (sortBy === "Price: Low to High") {
-      sorted.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "Price: High to Low") {
-      sorted.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "Newest") {
-      sorted.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-    } else {
-      const newestPart = [...sorted].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 3);
-      const otherPart = sorted.filter(p => !newestPart.find(n => n.id === p.id));
-      otherPart.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      return [...newestPart, ...otherPart];
-    }
-    return sorted;
-  })();
+  // Apply sorting (Featured defaults to highest color count first; Newest sorts by date/ID)
+  const finalProducts = sortProducts(filteredProducts, sortBy);
 
   const isAll = (categoryParam.toLowerCase() === "all");
   const pageTitle = initialCollectionTitle || (

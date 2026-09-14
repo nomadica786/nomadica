@@ -258,3 +258,75 @@ export function matchesSizeFilter(product: any, selectedSize: string[]): boolean
     return false;
   });
 }
+
+export function sortProducts(products: any[], sortBy: string): any[] {
+  const sorted = [...products];
+
+  const getColorCount = (p: any): number => {
+    const variantCount = Array.isArray(p.colorVariants) ? p.colorVariants.length : 0;
+    const colorsCount = Array.isArray(p.colors) ? p.colors.length : 0;
+    return Math.max(variantCount, colorsCount, 1);
+  };
+
+  const getProductTime = (p: any): number => {
+    if (p.createdAt) {
+      const t = new Date(p.createdAt).getTime();
+      if (!isNaN(t) && t > 0) return t;
+    }
+    if (p.colorVariants && Array.isArray(p.colorVariants)) {
+      for (const v of p.colorVariants) {
+        if (v.createdAt) {
+          const t = new Date(v.createdAt).getTime();
+          if (!isNaN(t) && t > 0) return t;
+        }
+      }
+    }
+    return 0;
+  };
+
+  const getIdNum = (id?: string): number => {
+    if (!id) return 0;
+    const matches = String(id).match(/\d+/g);
+    return matches ? parseInt(matches[matches.length - 1], 10) : 0;
+  };
+
+  if (sortBy === "Price: Low to High") {
+    return sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+  }
+
+  if (sortBy === "Price: High to Low") {
+    return sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
+  }
+
+  if (sortBy === "Newest") {
+    return sorted.sort((a, b) => {
+      // Prioritize explicit "New" badge
+      const isNewA = a.badge?.toLowerCase() === "new" ? 1 : 0;
+      const isNewB = b.badge?.toLowerCase() === "new" ? 1 : 0;
+      if (isNewB !== isNewA) return isNewB - isNewA;
+
+      const timeA = getProductTime(a);
+      const timeB = getProductTime(b);
+      if (timeB !== timeA) return timeB - timeA;
+
+      // Tie-break with ID descending (higher Shopify product ID = created later)
+      return getIdNum(b.id) - getIdNum(a.id);
+    });
+  }
+
+  // Default: "Featured"
+  // User requirement: "the products with highest colors should be shown first as default"
+  return sorted.sort((a, b) => {
+    const countA = getColorCount(a);
+    const countB = getColorCount(b);
+    if (countB !== countA) {
+      return countB - countA; // Highest number of color variations first!
+    }
+
+    const timeA = getProductTime(a);
+    const timeB = getProductTime(b);
+    if (timeB !== timeA) return timeB - timeA;
+
+    return getIdNum(b.id) - getIdNum(a.id);
+  });
+}

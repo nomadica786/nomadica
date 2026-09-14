@@ -6,7 +6,7 @@ import { groupProducts, GroupedProduct } from "@/utils/productGroup";
 import ProductCard from "@/components/shop/ProductCard";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
 import { useRouter } from "next/navigation";
-import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter } from "@/utils/productFilters";
+import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts } from "@/utils/productFilters";
 
 type CollectionEdge = { node: { title: string } };
 type ProductOption = { name?: string; value?: string };
@@ -98,23 +98,8 @@ export default function BestSellersPage() {
     return true;
   });
 
-  // Apply sorting
-  const finalProducts = (() => {
-    const sorted = [...filteredProducts];
-    if (sortBy === "Price: Low to High") {
-      sorted.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "Price: High to Low") {
-      sorted.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "Newest") {
-      sorted.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-    } else {
-      const newestPart = [...sorted].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 3);
-      const otherPart = sorted.filter(p => !newestPart.find(n => n.id === p.id));
-      otherPart.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      return [...newestPart, ...otherPart];
-    }
-    return sorted;
-  })();
+  // Apply sorting (Featured defaults to highest color count first; Newest sorts by date/ID)
+  const finalProducts = sortProducts(filteredProducts, sortBy);
 
   const newestIds = new Set([...baseList].sort((a: GroupedProduct, b: GroupedProduct) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 3).map((p: GroupedProduct) => p.id));
 

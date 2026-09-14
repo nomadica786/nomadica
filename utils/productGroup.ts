@@ -328,10 +328,9 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
 
       // Bubble up latest createdAt date
       if (product.createdAt) {
-        if (
-          !groups[groupKey].createdAt ||
-          new Date(product.createdAt).getTime() > new Date(groups[groupKey].createdAt || 0).getTime()
-        ) {
+        const prodTime = new Date(product.createdAt).getTime();
+        const curTime = groups[groupKey].createdAt ? new Date(groups[groupKey].createdAt!).getTime() : 0;
+        if (!isNaN(prodTime) && (isNaN(curTime) || prodTime > curTime)) {
           groups[groupKey].createdAt = product.createdAt;
         }
       }
