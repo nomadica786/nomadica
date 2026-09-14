@@ -22,6 +22,9 @@ type ProductNode = {
   badge?: string;
   productType?: string;
   category?: string;
+  productTypeConfig?: any;
+  metafieldProductType?: any;
+  productTypeConfiguration?: any;
   createdAt?: string;
   handle?: string;
   collections?: { edges?: CollectionEdge[] };
@@ -71,20 +74,15 @@ export default function LimitedDropsPage() {
     return {
       products: productsRes,
       mockups: mockupsRes?.mockups || {},
+      configurations: mockupsRes?.configurations || [],
       collections: collectionsRes?.collections?.edges?.map((e: CollectionEdge) => e.node.title) || []
     };
   });
-
-  const categories = ["All", ...(pageData?.collections || [])];
 
   const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
   const [selectedSize, setSelectedSize] = useState<string[]>([]);
   const [selectedColor, setSelectedColor] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("Featured");
-
-  if (loading) {
-    return <PageLoader />;
-  }
 
   const allProducts = pageData?.products?.products?.edges?.map((edge: { node: ProductNode }) => {
     const node = edge.node;
@@ -100,6 +98,9 @@ export default function LimitedDropsPage() {
       badge: node.badge,
       category: node.productType || node.category || 'Tops',
       productType: node.productType || node.category || 'Tops',
+      productTypeConfig: node.productTypeConfig,
+      metafieldProductType: node.metafieldProductType,
+      productTypeConfiguration: node.productTypeConfiguration,
       createdAt: node.createdAt || '',
       handle: node.handle,
       collections: [
@@ -116,6 +117,27 @@ export default function LimitedDropsPage() {
   }) || [];
 
   const groupedProducts = groupProducts(allProducts, pageData?.mockups || {});
+
+  const categoryOptions = (() => {
+    const list = new Set<string>();
+    if (pageData?.configurations && Array.isArray(pageData.configurations)) {
+      for (const config of pageData.configurations) {
+        if (config.displayName) list.add(config.displayName);
+        else if (config.entryName) list.add(config.entryName);
+      }
+    }
+    for (const gp of groupedProducts) {
+      if (gp.displayName) list.add(gp.displayName);
+      else if (gp.name) list.add(gp.name);
+    }
+    const generic = ["tops", "bottoms", "outerwear", "knits", "all"];
+    return Array.from(list).filter(item => !generic.includes(item.toLowerCase()));
+  })();
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
   const drops = groupedProducts.filter((p: GroupedProduct) => p.badge?.toLowerCase() === 'limited');
   const baseList = drops.length > 0 ? drops : groupedProducts.slice(0, 3);
 
@@ -176,7 +198,7 @@ export default function LimitedDropsPage() {
       </div>
 
       <ShopFilterBar 
-        categories={categories}
+        categories={categoryOptions}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         selectedSize={selectedSize}
@@ -195,7 +217,7 @@ export default function LimitedDropsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {finalProducts.map((p: GroupedProduct) => (
             <ProductCard
-              key={p.id}
+              key={p.groupKey || p.id}
               {...p}
               badge={newestIds.has(p.id) ? "New" : p.badge}
               selectedColors={selectedColor}

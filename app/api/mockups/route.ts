@@ -27,6 +27,7 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    mockups: merged
+    mockups: merged,
+    configurations: mockups._configurations || []
   });
 }

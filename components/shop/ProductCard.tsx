@@ -33,6 +33,10 @@ interface ColorVariant {
 interface ProductCardProps {
   id?: string;
   name: string;
+  displayName?: string;
+  groupKey?: string;
+  metaobjectId?: string;
+  metaobjectName?: string;
   price: number;
   originalPrice?: number;
   image: string;
@@ -47,11 +51,17 @@ interface ProductCardProps {
   onAddToCart?: (variant?: any) => void;
   allVariants?: any[];
   selectedColors?: string[];
+  products?: any[];
+  representativeProduct?: any;
 }
 
 export default function ProductCard({
   id = "1",
   name,
+  displayName,
+  groupKey,
+  metaobjectId,
+  metaobjectName,
   price,
   originalPrice,
   image,
@@ -66,6 +76,8 @@ export default function ProductCard({
   onAddToCart,
   allVariants,
   selectedColors,
+  products,
+  representativeProduct,
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -125,17 +137,20 @@ export default function ProductCard({
     }
   }, [id, colorVariants, selectedColors]);
 
-  const currentId = activeVariant ? activeVariant.id : id;
-  const currentName = activeVariant && activeVariant.colorName !== "Original" && !name.toLowerCase().includes(activeVariant.colorName.toLowerCase())
-    ? `${activeVariant.colorName} ${name}`
-    : (activeVariant?.name || name);
+  const baseDisplayName = displayName || name;
+  const representativeId = representativeProduct?.id || id;
+  const representativeHandle = representativeProduct?.handle || handle;
+  const currentId = activeVariant ? activeVariant.id : representativeId;
+  const currentName = activeVariant && hasInteracted && activeVariant.colorName !== "Original" && !baseDisplayName.toLowerCase().includes(activeVariant.colorName.toLowerCase())
+    ? `${activeVariant.colorName} ${baseDisplayName}`
+    : baseDisplayName;
   const currentPrice = activeVariant ? activeVariant.price : price;
   const currentOriginalPrice = activeVariant ? activeVariant.originalPrice : originalPrice;
   const currentImage = (mockupImage && !hasInteracted)
     ? mockupImage
     : (activeVariant ? activeVariant.image : image);
   const currentBadge = activeVariant ? (activeVariant.badge || badge) : badge;
-  const currentHandle = activeVariant ? activeVariant.handle : handle;
+  const currentHandle = activeVariant ? activeVariant.handle : representativeHandle;
 
   const productHref = href || (currentHandle ? `/products/${currentHandle}` : `/shop/product-details?id=${currentId}`);
 

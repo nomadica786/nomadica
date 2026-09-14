@@ -8,7 +8,81 @@ interface VerifiedVideo {
 }
 
 const VERIFIED_YOUTUBE_VIDEOS: VerifiedVideo[] = [
-  
+  {
+    id: "8G61a19Kk5U",
+    title: "4K Landscapes of Iceland - Nature Relax Video with Nature Sounds - 10bit color",
+    author: "4K Relaxation Channel",
+  },
+  {
+    id: "qAYkbkUE1Og",
+    title: "Amazing Nature Scenery of the Mountain Lake - 4K Nature Relax Video with Calm Water Sounds",
+    author: "4K Relaxation Channel",
+  },
+  {
+    id: "nHLQAdclFF4",
+    title: "Relax with Nature 4K | The World's Most Beautiful Landscapes with Calm Music & Real Sounds",
+    author: "4K Relaxation Channel",
+  },
+  {
+    id: "6TYpt1RgnMQ",
+    title: "Norway 4K • Calm Nature Relaxation Film with Peaceful Meditation Music",
+    author: "Relaxation Film",
+  },
+  {
+    id: "jLqmwvyRhsw",
+    title: "FLYING OVER PATAGONIA [4K] Nature Relaxation Film + Calming Music",
+    author: "Nature Relaxation Films",
+  },
+  {
+    id: "8sgaz00ni_M",
+    title: "Snowy Mistaya Falls Winter Ambience | Banff National Park Waterfall | Canadian Rockies",
+    author: "Naturescapes",
+  },
+  {
+    id: "Dqr4kATMQ10",
+    title: "North Umpqua River Forest Ambience | Gentle Stream & Birdsong 4K Nature Sounds",
+    author: "Naturescapes",
+  },
+  {
+    id: "DZLyixlrMW8",
+    title: "Switzerland from the Sky – Alps, Lakes & Iconic Landscapes | 4K Cinematic",
+    author: "Sherlock After Midnight",
+  },
+  {
+    id: "aK2pS-Chr-k",
+    title: "Switzerland 4K • Peaceful Nature Relaxation Film with Deep Relaxing Music",
+    author: "Relaxation Film",
+  },
+  {
+    id: "ViDsz3wK5Hs",
+    title: "Switzerland 4K Drone Footage | Crystal Blue Lakes, Alpine Lakes & Mountain Views",
+    author: "Velvet Deep",
+  },
+  {
+    id: "HaAhS69lZOM",
+    title: "Switzerland Alps 4K Drone Footage | Alpine Paradise",
+    author: "Velvet Deep",
+  },
+  {
+    id: "9OociA7H-bQ",
+    title: "Switzerland: The Most Beautiful Places in Europe | 4K Travel Video",
+    author: "WorldExplorerTV PT",
+  },
+  {
+    id: "FWZRrR77ncI",
+    title: "Switzerland 4K | Beautiful Landscapes, Mountains & Picturesque Swiss Villages",
+    author: "4K Scenic Relaxation Film",
+  },
+  {
+    id: "b06ThXzoqRI",
+    title: "Hallstatt Austria 4K – A Lakeside Fairytale | Nature Relaxation Film",
+    author: "Relaxation Film",
+  },
+  {
+    id: "ELVID9_URrQ",
+    title: "BULGARIA 4K UHD | Scenic Relaxation Film with Inspiring Cinematic Music",
+    author: "4K Scenic Relaxation Film",
+  },
 ];
 
 const POSITIVE_KEYWORDS = [

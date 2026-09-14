@@ -41,6 +41,9 @@ export default function SearchPage() {
             badge: node.badge,
             category: node.productType || node.category || 'Tops',
             productType: node.productType || node.category || 'Tops',
+            productTypeConfig: node.productTypeConfig,
+            metafieldProductType: node.metafieldProductType,
+            productTypeConfiguration: node.productTypeConfiguration,
             description: node.description || '',
             createdAt: node.createdAt || '',
             handle: node.handle,
@@ -67,10 +70,18 @@ export default function SearchPage() {
     if (val.length > 1) {
       const queryLower = val.toLowerCase();
       const filtered = allProducts.filter((p) => 
-        p.name.toLowerCase().includes(queryLower) ||
-        p.category.toLowerCase().includes(queryLower) ||
-        p.description.toLowerCase().includes(queryLower) ||
-        p.colorVariants?.some((v: any) => v.colorName.toLowerCase().includes(queryLower))
+        (p.displayName && p.displayName.toLowerCase().includes(queryLower)) ||
+        (p.name && p.name.toLowerCase().includes(queryLower)) ||
+        (p.metaobjectName && p.metaobjectName.toLowerCase().includes(queryLower)) ||
+        (p.category && p.category.toLowerCase().includes(queryLower)) ||
+        (p.description && p.description.toLowerCase().includes(queryLower)) ||
+        p.colorVariants?.some((v: any) => 
+          v.colorName.toLowerCase().includes(queryLower) ||
+          (v.name && v.name.toLowerCase().includes(queryLower))
+        ) ||
+        p.products?.some((prod: any) => 
+          (prod.name || prod.title || "").toLowerCase().includes(queryLower)
+        )
       );
       setResults(filtered);
     } else {

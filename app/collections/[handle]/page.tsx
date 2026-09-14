@@ -60,6 +60,9 @@ export default async function CollectionPage({ params }: PageProps) {
       badge: node.badge,
       category: node.productType || node.category || 'Tops',
       productType: node.productType || node.category || 'Tops',
+      productTypeConfig: node.productTypeConfig,
+      metafieldProductType: node.metafieldProductType,
+      productTypeConfiguration: node.productTypeConfiguration,
       createdAt: node.createdAt || '',
       collections: [
         collection.title,

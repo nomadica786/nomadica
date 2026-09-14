@@ -499,6 +499,11 @@ export default function HomePage() {
               badge: node.badge,
               category: node.productType || node.category || 'Tops',
               productType: node.productType || node.category || 'Tops',
+              productTypeConfig: node.productTypeConfig,
+              metafieldProductType: node.metafieldProductType,
+              productTypeConfiguration: node.productTypeConfiguration,
+              variants: node.variants,
+              images: node.images,
               handle: node.handle,
               createdAt: node.createdAt || '',
             };
@@ -556,6 +561,11 @@ export default function HomePage() {
                     badge: node.badge,
                     category: node.productType || node.category || 'Tops',
                     productType: node.productType || node.category || 'Tops',
+                    productTypeConfig: node.productTypeConfig,
+                    metafieldProductType: node.metafieldProductType,
+                    productTypeConfiguration: node.productTypeConfiguration,
+                    variants: node.variants,
+                    images: node.images,
                     handle: node.handle,
                     createdAt: node.createdAt || '',
                   };

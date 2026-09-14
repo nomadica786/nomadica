@@ -232,6 +232,10 @@ function computeVariations(rawProduct: any, allEdges: any[], mockupLookup: Recor
         image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
         category: rawProduct.productType || rawProduct.category || "Tops",
         productType: rawProduct.productType || rawProduct.category || "Tops",
+        productTypeConfig: rawProduct.productTypeConfig,
+        metafieldProductType: rawProduct.metafieldProductType,
+        productTypeConfiguration: rawProduct.productTypeConfiguration,
+        variants: rawProduct.variants,
         createdAt: rawProduct.createdAt || node.createdAt || ""
       };
     }
@@ -243,6 +247,10 @@ function computeVariations(rawProduct: any, allEdges: any[], mockupLookup: Recor
       image: node.images?.edges?.[0]?.node?.url || "",
       category: node.productType || node.category || "Tops",
       productType: node.productType || node.category || "Tops",
+      productTypeConfig: node.productTypeConfig,
+      metafieldProductType: node.metafieldProductType,
+      productTypeConfiguration: node.productTypeConfiguration,
+      variants: node.variants,
       createdAt: node.createdAt || ""
     };
   });
@@ -256,6 +264,10 @@ function computeVariations(rawProduct: any, allEdges: any[], mockupLookup: Recor
       image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
       category: rawProduct.productType || rawProduct.category || "Tops",
       productType: rawProduct.productType || rawProduct.category || "Tops",
+      productTypeConfig: rawProduct.productTypeConfig,
+      metafieldProductType: rawProduct.metafieldProductType,
+      productTypeConfiguration: rawProduct.productTypeConfiguration,
+      variants: rawProduct.variants,
       createdAt: rawProduct.createdAt || ""
     });
   }
@@ -263,6 +275,8 @@ function computeVariations(rawProduct: any, allEdges: any[], mockupLookup: Recor
   const parsedCurrent = parseProduct({ name: rawProduct.title, colors: rawProduct.colors });
   const currentGroup = grouped.find(g => 
     g.colorVariants.some(v => v.id === rawProduct.id || (v.handle && rawProduct.handle && v.handle === rawProduct.handle)) ||
+    (g.products && g.products.some((p: any) => p.id === rawProduct.id || (p.handle && rawProduct.handle && p.handle === rawProduct.handle))) ||
+    (g.displayName && rawProduct.title && g.displayName.toLowerCase() === rawProduct.title.toLowerCase()) ||
     (parsedCurrent.baseName && g.name.toLowerCase() === parsedCurrent.baseName.toLowerCase())
   );
   if (!currentGroup) return [];
@@ -449,6 +463,10 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
               image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
               category: rawProduct.productType || rawProduct.category || "Tops",
               productType: rawProduct.productType || rawProduct.category || "Tops",
+              productTypeConfig: rawProduct.productTypeConfig,
+              metafieldProductType: rawProduct.metafieldProductType,
+              productTypeConfiguration: rawProduct.productTypeConfiguration,
+              variants: rawProduct.variants,
               createdAt: rawProduct.createdAt || node.createdAt || ""
             };
           }
@@ -460,6 +478,10 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
             image: node.images?.edges?.[0]?.node?.url || "",
             category: node.productType || node.category || "Tops",
             productType: node.productType || node.category || "Tops",
+            productTypeConfig: node.productTypeConfig,
+            metafieldProductType: node.metafieldProductType,
+            productTypeConfiguration: node.productTypeConfiguration,
+            variants: node.variants,
             createdAt: node.createdAt || ""
           };
         });
@@ -474,6 +496,10 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
             image: rawProduct.images?.edges?.[0]?.node?.url || rawProduct.image || "",
             category: rawProduct.productType || rawProduct.category || "Tops",
             productType: rawProduct.productType || rawProduct.category || "Tops",
+            productTypeConfig: rawProduct.productTypeConfig,
+            metafieldProductType: rawProduct.metafieldProductType,
+            productTypeConfiguration: rawProduct.productTypeConfiguration,
+            variants: rawProduct.variants,
             createdAt: rawProduct.createdAt || ""
           });
         }
@@ -481,7 +507,9 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
         const groupedCombined = groupProducts(allMappedForGroup, mockupLookup);
 
         const currentGroup = groupedCombined.find(g => 
-          g.colorVariants.some(v => v.id === rawProduct.id) ||
+          g.colorVariants.some(v => v.id === rawProduct.id || (v.handle && rawProduct.handle && v.handle === rawProduct.handle)) ||
+          (g.products && g.products.some((p: any) => p.id === rawProduct.id || (p.handle && rawProduct.handle && p.handle === rawProduct.handle))) ||
+          (g.displayName && rawProduct.title && g.displayName.toLowerCase() === rawProduct.title.toLowerCase()) ||
           g.productType?.toLowerCase() === (rawProduct.productType || rawProduct.category || "").toLowerCase()
         );
         const baseName = currentGroup ? currentGroup.name : mappedProduct.name;
@@ -581,6 +609,10 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
             image: node.images?.edges?.[0]?.node?.url || "",
             category: node.productType || node.category || "Tops",
             productType: node.productType || node.category || "Tops",
+            productTypeConfig: node.productTypeConfig,
+            metafieldProductType: node.metafieldProductType,
+            productTypeConfiguration: node.productTypeConfiguration,
+            variants: node.variants,
           };
         }) || [];
         

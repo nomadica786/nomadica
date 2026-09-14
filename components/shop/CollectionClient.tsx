@@ -35,6 +35,7 @@ export default function CollectionClient({
   const [loading, setLoading] = useState(!initialProducts);
   const [productsState, setProductsState] = useState<any[]>(initialProducts || []);
   const [mockups, setMockups] = useState<Record<string, string>>({});
+  const [configurations, setConfigurations] = useState<any[]>([]);
 
   const [selectedCategory, setSelectedCategory] = useState<string[]>(() => {
     if (categoryParam.toLowerCase() !== "all") {
@@ -61,6 +62,9 @@ export default function CollectionClient({
       try {
         const mRes = await api.mockups.get();
         setMockups(mRes?.mockups || {});
+        if (mRes?.configurations && Array.isArray(mRes.configurations)) {
+          setConfigurations(mRes.configurations);
+        }
       } catch (err) {
         console.error("Failed to load mockups in CollectionClient:", err);
       }
@@ -84,7 +88,6 @@ useEffect(() => {
         handle: edge.node.handle,
       }));
 
-      // Only show actual collections in the category dropdown
       setCategories(list);
     } catch (err) {
       console.error("Failed to fetch collections list:", err);
@@ -130,6 +133,9 @@ useEffect(() => {
             badge: node.badge,
             category: node.productType || node.category || 'Tops',
             productType: node.productType || node.category || 'Tops',
+            productTypeConfig: node.productTypeConfig,
+            metafieldProductType: node.metafieldProductType,
+            productTypeConfiguration: node.productTypeConfiguration,
             createdAt: node.createdAt || '',
             collections: [
               ...(node.collections?.edges?.flatMap((e: any) => [e.node.title, e.node.handle]) || []),
@@ -154,30 +160,89 @@ useEffect(() => {
     loadProducts();
   }, [categoryParam, initialProducts]);
 
-  const enrichedProducts = useMemo(() => {
-    if (!productsState || productsState.length === 0) return [];
-    if (!collectionEdges || collectionEdges.length === 0) return productsState;
-    return productsState.map((p) => {
-      const extraCollections = [...(p.collections || [])];
-      for (const cEdge of collectionEdges) {
-        const colNode = cEdge.node;
-        const hasProd = colNode.products?.edges?.some(
-          (pe: any) => pe.node?.id === p.id || pe.node?.handle === p.handle
-        );
-        if (hasProd) {
-          if (!extraCollections.includes(colNode.title)) extraCollections.push(colNode.title);
-          if (!extraCollections.includes(colNode.handle)) extraCollections.push(colNode.handle);
+const enrichedProducts = useMemo(() => {
+  if (!productsState || productsState.length === 0) return [];
+  if (!collectionEdges || collectionEdges.length === 0) return productsState;
+
+  return productsState.map((p) => {
+    const extraCollections = [...(p.collections || [])];
+
+    for (const cEdge of collectionEdges) {
+      const colNode = cEdge.node;
+
+      const hasProd = colNode.products?.edges?.some(
+        (pe: any) =>
+          pe.node?.id === p.id ||
+          pe.node?.handle === p.handle
+      );
+
+      if (hasProd) {
+        if (!extraCollections.includes(colNode.title)) {
+          extraCollections.push(colNode.title);
+        }
+
+        if (!extraCollections.includes(colNode.handle)) {
+          extraCollections.push(colNode.handle);
         }
       }
-      return { ...p, collections: extraCollections };
-    });
-  }, [productsState, collectionEdges]);
+    }
 
-  if (loading) {
-    return <PageLoader />;
+    return {
+      ...p,
+      collections: extraCollections,
+    };
+  });
+}, [productsState, collectionEdges]);
+
+/*
+ * Keep this calculation before the loading return.
+ * Hooks must execute in the same order on every render.
+ */
+const groupedProducts = useMemo(() => {
+  return groupProducts(enrichedProducts, mockups);
+}, [enrichedProducts, mockups]);
+
+// Derive dynamic Category options strictly from Product Type Configuration metaobjects
+const categoryFilterOptions = useMemo(() => {
+  const list = new Set<string>();
+
+  // 1. Add from metaobject configurations
+  if (configurations && Array.isArray(configurations)) {
+    for (const config of configurations) {
+      if (config.displayName) {
+        list.add(config.displayName);
+      } else if (config.entryName) {
+        list.add(config.entryName);
+      }
+    }
   }
 
-  const groupedProducts = groupProducts(enrichedProducts, mockups);
+  // 2. Add from grouped products
+  for (const gp of groupedProducts) {
+    if (gp.displayName) {
+      list.add(gp.displayName);
+    } else if (gp.name) {
+      list.add(gp.name);
+    }
+  }
+
+  // Never show generic product types
+  const generic = [
+    "tops",
+    "bottoms",
+    "outerwear",
+    "knits",
+    "all",
+  ];
+
+  return Array.from(list).filter(
+    (item) => !generic.includes(item.toLowerCase())
+  );
+}, [configurations, groupedProducts]);
+
+if (loading) {
+  return <PageLoader />;
+}
 
   // Apply filtering
   const filteredProducts = groupedProducts.filter((product) => {
@@ -225,7 +290,7 @@ useEffect(() => {
       </div>
 
       <ShopFilterBar 
-        categories={categories.map(c => c.title)}
+        categories={categoryFilterOptions}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         selectedSize={selectedSize}
@@ -272,7 +337,7 @@ useEffect(() => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {finalProducts.map((p: any) => (
               <ProductCard
-                key={p.id}
+                key={p.groupKey || p.id}
                 {...p}
                 selectedColors={selectedColor}
               />

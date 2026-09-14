@@ -23,6 +23,56 @@ export const STOREFRONT_QUERIES = {
             handle
             createdAt
             productType
+            productTypeConfig: metafield(namespace: "custom", key: "product_type_configuration") {
+              id
+              value
+              reference {
+                ... on Metaobject {
+                  id
+                  handle
+                  type
+                  fields {
+                    key
+                    value
+                    reference {
+                      ... on MediaImage {
+                        image {
+                          url
+                        }
+                      }
+                      ... on GenericFile {
+                        url
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            metafieldProductType: metafield(namespace: "custom", key: "product_type") {
+              id
+              value
+              reference {
+                ... on Metaobject {
+                  id
+                  handle
+                  type
+                  fields {
+                    key
+                    value
+                    reference {
+                      ... on MediaImage {
+                        image {
+                          url
+                        }
+                      }
+                      ... on GenericFile {
+                        url
+                      }
+                    }
+                  }
+                }
+              }
+            }
             tags
             options {
               name
@@ -75,6 +125,56 @@ export const STOREFRONT_QUERIES = {
         description
         handle
         productType
+        productTypeConfig: metafield(namespace: "custom", key: "product_type_configuration") {
+          id
+          value
+          reference {
+            ... on Metaobject {
+              id
+              handle
+              type
+              fields {
+                key
+                value
+                reference {
+                  ... on MediaImage {
+                    image {
+                      url
+                    }
+                  }
+                  ... on GenericFile {
+                    url
+                  }
+                }
+              }
+            }
+          }
+        }
+        metafieldProductType: metafield(namespace: "custom", key: "product_type") {
+          id
+          value
+          reference {
+            ... on Metaobject {
+              id
+              handle
+              type
+              fields {
+                key
+                value
+                reference {
+                  ... on MediaImage {
+                    image {
+                      url
+                    }
+                  }
+                  ... on GenericFile {
+                    url
+                  }
+                }
+              }
+            }
+          }
+        }
         images(first: 10) {
           edges {
             node {
@@ -110,6 +210,56 @@ export const STOREFRONT_QUERIES = {
               title
               handle
               productType
+              productTypeConfig: metafield(namespace: "custom", key: "product_type_configuration") {
+                id
+                value
+                reference {
+                  ... on Metaobject {
+                    id
+                    handle
+                    type
+                    fields {
+                      key
+                      value
+                      reference {
+                        ... on MediaImage {
+                          image {
+                            url
+                          }
+                        }
+                        ... on GenericFile {
+                          url
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              metafieldProductType: metafield(namespace: "custom", key: "product_type") {
+                id
+                value
+                reference {
+                  ... on Metaobject {
+                    id
+                    handle
+                    type
+                    fields {
+                      key
+                      value
+                      reference {
+                        ... on MediaImage {
+                          image {
+                            url
+                          }
+                        }
+                        ... on GenericFile {
+                          url
+                        }
+                      }
+                    }
+                  }
+                }
+              }
               images(first: 1) {
                 edges {
                   node {
@@ -176,6 +326,56 @@ export const STOREFRONT_QUERIES = {
               handle
               createdAt
               productType
+              productTypeConfig: metafield(namespace: "custom", key: "product_type_configuration") {
+                id
+                value
+                reference {
+                  ... on Metaobject {
+                    id
+                    handle
+                    type
+                    fields {
+                      key
+                      value
+                      reference {
+                        ... on MediaImage {
+                          image {
+                            url
+                          }
+                        }
+                        ... on GenericFile {
+                          url
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              metafieldProductType: metafield(namespace: "custom", key: "product_type") {
+                id
+                value
+                reference {
+                  ... on Metaobject {
+                    id
+                    handle
+                    type
+                    fields {
+                      key
+                      value
+                      reference {
+                        ... on MediaImage {
+                          image {
+                            url
+                          }
+                        }
+                        ... on GenericFile {
+                          url
+                        }
+                      }
+                    }
+                  }
+                }
+              }
               tags
               options {
                 name

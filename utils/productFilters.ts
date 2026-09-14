@@ -42,6 +42,21 @@ export function matchesCategoryFilter(product: any, selectedCategory: string[]):
     const target = catName.trim().toLowerCase();
     if (!target) return true;
 
+    // 0. Match Product Type Configuration Display Name or entry name or metaobjectId
+    const pDisplayName = (product.displayName || "").trim().toLowerCase();
+    const pMetaName = (product.metaobjectName || "").trim().toLowerCase();
+    const pMetaId = (product.metaobjectId || "").trim().toLowerCase();
+    const pGroupKey = (product.groupKey || "").trim().toLowerCase();
+
+    if (
+      (pDisplayName && (pDisplayName === target || pDisplayName.includes(target) || target.includes(pDisplayName))) ||
+      (pMetaName && (pMetaName === target || pMetaName.includes(target) || target.includes(pMetaName))) ||
+      (pMetaId && pMetaId === target) ||
+      (pGroupKey && pGroupKey === target)
+    ) {
+      return true;
+    }
+
     // 1. Check if target is one of the known Shopify collections
     const rule = COLLECTION_RULES[target];
     if (rule) {
