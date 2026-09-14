@@ -23,6 +23,11 @@ export const STOREFRONT_QUERIES = {
             handle
             createdAt
             productType
+            tags
+            options {
+              name
+              values
+            }
             collections(first: 10) {
               edges {
                 node {
@@ -142,6 +147,14 @@ export const STOREFRONT_QUERIES = {
             image {
               url
             }
+            products(first: 50) {
+              edges {
+                node {
+                  id
+                  handle
+                }
+              }
+            }
           }
         }
       }
@@ -163,6 +176,11 @@ export const STOREFRONT_QUERIES = {
               handle
               createdAt
               productType
+              tags
+              options {
+                name
+                values
+              }
               collections(first: 10) {
                 edges {
                   node {

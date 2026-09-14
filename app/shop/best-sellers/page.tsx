@@ -6,6 +6,7 @@ import { groupProducts, GroupedProduct } from "@/utils/productGroup";
 import ProductCard from "@/components/shop/ProductCard";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
 import { useRouter } from "next/navigation";
+import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter } from "@/utils/productFilters";
 
 type CollectionEdge = { node: { title: string } };
 type ProductOption = { name?: string; value?: string };
@@ -24,6 +25,10 @@ type ProductNode = {
   createdAt?: string;
   handle?: string;
   collections?: { edges?: CollectionEdge[] };
+  tags?: string[];
+  options?: any[];
+  sizes?: string[];
+  colors?: string[];
 };
 
 export default function BestSellersPage() {
@@ -68,7 +73,15 @@ export default function BestSellersPage() {
       productType: node.productType || node.category || 'Tops',
       createdAt: node.createdAt || '',
       handle: node.handle,
-      collections: node.collections?.edges?.map((e: CollectionEdge) => e.node.title) || [],
+      collections: [
+        ...(node.collections?.edges?.map((e: CollectionEdge) => e.node.title) || []),
+        ...(node.category ? [node.category] : []),
+        ...(node.productType ? [node.productType] : [])
+      ],
+      tags: node.tags || [],
+      options: node.options || [],
+      sizes: node.sizes || node.options?.find((o: any) => o.name?.toLowerCase() === "size")?.values || [],
+      colors: node.colors || [],
       variants: node.variants
     };
   }) || [];
@@ -79,28 +92,9 @@ export default function BestSellersPage() {
 
   // Apply filtering
   const filteredProducts = baseList.filter(product => {
-    if (selectedCategory.length > 0) {
-      const expectedCats = selectedCategory.map((cat) => cat.toLowerCase());
-      const matchesCollection = product.collections?.some((c: string) => expectedCats.includes(c.toLowerCase()));
-      const matchesType = expectedCats.includes((product.productType || product.category || "").toLowerCase());
-      if (!matchesCollection && !matchesType) return false;
-    }
-    if (selectedSize.length > 0) {
-      const expectedSizes = selectedSize.map((size) => size.toLowerCase());
-      const hasSize = product.allVariants?.some((edge: ProductVariantEdge) => 
-        expectedSizes.some((size) => edge.node?.title?.toLowerCase().includes(size)) || 
-        edge.node?.selectedOptions?.some((opt: ProductOption) => opt.name?.toLowerCase() === "size" && expectedSizes.includes(opt.value?.toLowerCase() || ""))
-      );
-      if (!hasSize) return false;
-    }
-    if (selectedColor.length > 0) {
-      const expectedColors = selectedColor.map((color) => color.toLowerCase());
-      const hasColor = product.allVariants?.some((edge: ProductVariantEdge) => 
-        expectedColors.some((color) => edge.node?.title?.toLowerCase().includes(color)) || 
-        edge.node?.selectedOptions?.some((opt: ProductOption) => opt.name?.toLowerCase() === "color" && expectedColors.includes(opt.value?.toLowerCase() || ""))
-      );
-      if (!hasColor) return false;
-    }
+    if (!matchesCategoryFilter(product, selectedCategory)) return false;
+    if (!matchesColorFilter(product, selectedColor)) return false;
+    if (!matchesSizeFilter(product, selectedSize)) return false;
     return true;
   });
 
@@ -171,6 +165,7 @@ export default function BestSellersPage() {
               key={p.id}
               {...p}
               badge={newestIds.has(p.id) ? "New" : p.badge}
+              selectedColors={selectedColor}
             />
           ))}
         </div>

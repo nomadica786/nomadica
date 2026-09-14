@@ -33,6 +33,9 @@ export interface GroupedProduct {
   createdAt?: string;
   collections?: string[];
   allVariants?: any[];
+  sizes?: string[];
+  colors?: string[];
+  tags?: string[];
 }
 
 export const COLOR_HEX_MAP: Record<string, string> = {
@@ -47,25 +50,39 @@ export const COLOR_HEX_MAP: Record<string, string> = {
   "Blue": "#1976D2",
   "Green": "#388E3C",
   "Navy Blue": "#1A237E",
+  "Navy": "#1A237E",
   "Maroon": "#800000",
   "Pink": "#E89BA8",
   "Grey": "#808080",
+  "Gray": "#808080",
+  "Yellow": "#FBC02D",
+  "Gold": "#FBC02D",
   "Coffee": "#6F4E37",
+  "Olive": "#4F6B5A",
   "Original": "#D4C5B0",
 };
 
 // Known multi-word colors in the shop
-const MULTI_WORD_COLORS = ["navy blue", "denim wash", "black washed", "washed black"];
+const MULTI_WORD_COLORS = [
+  "navy blue",
+  "denim wash",
+  "black washed",
+  "washed black",
+  "off white",
+  "light blue",
+  "dark grey",
+  "dark gray"
+];
 
 export function parseProduct(product: any) {
-  const name = product.name || product.title || "";
+  const name = (product.name || product.title || "").trim();
   const lowerName = name.toLowerCase();
 
-  // 1. Check for multi-word colors
+  // 1. Check for multi-word colors at start
   for (const mc of MULTI_WORD_COLORS) {
     if (lowerName.startsWith(mc + " ")) {
       const colorName = name.slice(0, mc.length);
-      const matchedKey = Object.keys(COLOR_HEX_MAP).find(k => k.toLowerCase() === colorName.toLowerCase()) || colorName;
+      const matchedKey = Object.keys(COLOR_HEX_MAP).find((k) => k.toLowerCase() === colorName.toLowerCase()) || colorName;
       const baseName = name.slice(mc.length + 1).trim();
       return {
         colorName: matchedKey,
@@ -76,17 +93,17 @@ export function parseProduct(product: any) {
     }
   }
 
-  // 2. Check for single-word colors (split by spaces)
+  // 2. Check for single-word colors (first word)
   const parts = name.split(" ");
   if (parts.length > 1) {
     const colorName = parts[0];
     const baseName = parts.slice(1).join(" ");
-    
-    // Check if the first word matches a known color or if we want to treat it general
+
     const knownColors = Object.keys(COLOR_HEX_MAP);
-    const matchedKey = knownColors.find(c => c.toLowerCase() === colorName.toLowerCase());
-    
-    // If it's a known color, we treat it as a cloth variation
+    const matchedKey = knownColors.find(
+      (c) => c.toLowerCase() === colorName.toLowerCase() && c.toLowerCase() !== "original"
+    );
+
     if (matchedKey) {
       return {
         colorName: matchedKey,
@@ -97,7 +114,44 @@ export function parseProduct(product: any) {
     }
   }
 
-  // 3. Fallback for mock products or unrecognized structures
+  // 3. Check for color at the end (e.g., "Tee - White", "Travel Tee White")
+  for (const [colorKey, hex] of Object.entries(COLOR_HEX_MAP)) {
+    if (colorKey.toLowerCase() === "original") continue;
+    const lk = colorKey.toLowerCase();
+    const endRegex = new RegExp(`[-/\\s]+${lk}$`, "i");
+    if (endRegex.test(lowerName)) {
+      const baseName = name.replace(new RegExp(`[-/\\s]+${lk}$`, "i"), "").trim();
+      if (baseName) {
+        return {
+          colorName: colorKey,
+          colorHex: hex,
+          baseName,
+          isClothVariation: true
+        };
+      }
+    }
+  }
+
+  // 4. Check for variant selectedOptions "Color" or "Colour"
+  if (product.variants?.edges && Array.isArray(product.variants.edges)) {
+    for (const edge of product.variants.edges) {
+      const opt = edge.node?.selectedOptions?.find(
+        (o: any) => o.name?.toLowerCase() === "color" || o.name?.toLowerCase() === "colour"
+      );
+      if (opt && opt.value) {
+        const val = opt.value.trim();
+        const matchedKey = Object.keys(COLOR_HEX_MAP).find((k) => k.toLowerCase() === val.toLowerCase()) || val;
+        return {
+          colorName: matchedKey,
+          colorHex: COLOR_HEX_MAP[matchedKey] || "#FFFFFF",
+          baseName: name,
+          isClothVariation: true
+        };
+      }
+    }
+  }
+
+  // 5. Fallback for mock products or unrecognized structures
   return {
     colorName: "Original",
     colorHex: product.colors?.[0] || "#D4C5B0",
@@ -111,7 +165,7 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
 
   for (const product of products) {
     if (!product) continue;
-    
+
     // Normalize names/types
     const name = (product.name || product.title || "").trim();
     const rawType = product.productType || product.category || "Tops";
@@ -136,32 +190,58 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
       allVariants: product.variants?.edges ? [...product.variants.edges] : []
     };
 
-    const groupKey = productType.toLowerCase();
-    
+    const groupKey = (parsedColor.isClothVariation && parsedColor.baseName)
+      ? parsedColor.baseName.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+      : (productType || name).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
     // Smart mockup resolution with fallback
-    let config = mockupLookup[productType];
+    let config = mockupLookup[parsedColor.baseName] || mockupLookup[productType];
     if (!config) {
+      const lowerBase = (parsedColor.baseName || "").toLowerCase();
       const lowerType = productType.toLowerCase();
       for (const [key, val] of Object.entries(mockupLookup)) {
         const lowerKey = key.toLowerCase();
-        if (lowerType.includes(lowerKey) || lowerKey.includes(lowerType)) {
+        if (
+          lowerBase.includes(lowerKey) ||
+          lowerKey.includes(lowerBase) ||
+          lowerType.includes(lowerKey) ||
+          lowerKey.includes(lowerType)
+        ) {
           config = val;
           break;
         }
       }
     }
-    if (!config && (productType.toLowerCase().includes("tee") || productType.toLowerCase().includes("t-shirt"))) {
+    if (!config && (name.toLowerCase().includes("tee") || productType.toLowerCase().includes("tee"))) {
       config = mockupLookup["Tee"];
     }
 
     const mockupImage = typeof config === "object" ? config.mockupImage : config;
-    const displayName = (typeof config === "object" && config.displayName) ? config.displayName : productType;
+    const displayName = (parsedColor.isClothVariation && parsedColor.baseName)
+      ? parsedColor.baseName
+      : ((typeof config === "object" && config.displayName) ? config.displayName : (name || productType));
+
+    const productSizes = Array.from(
+      new Set([
+        ...(product.sizes || []),
+        ...(product.options?.find((o: any) => o.name?.toLowerCase() === "size")?.values || []),
+        ...(product.variants?.edges?.map((e: any) => e.node?.title).filter((t: string) => t && t !== "Default Title") || [])
+      ])
+    );
+
+    const productColors = Array.from(
+      new Set([
+        ...(product.colors || []),
+        ...(parsedColor.colorName !== "Original" ? [parsedColor.colorName] : []),
+        ...(parsedColor.colorHex ? [parsedColor.colorHex] : [])
+      ])
+    );
 
     if (!groups[groupKey]) {
       // First product in the group is the default variant
       groups[groupKey] = {
         id: product.id,
-        name: displayName, // Use Display Name from configuration
+        name: displayName,
         price: product.price,
         originalPrice: product.originalPrice,
         image: product.image || product.images?.[0]?.node?.url || product.images?.[0] || "",
@@ -173,17 +253,24 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
         handle: product.handle,
         colorVariants: [variant],
         createdAt: product.createdAt,
-        collections: product.collections || [],
+        collections: Array.from(
+          new Set([
+            ...(product.collections || []),
+            ...(product.category ? [product.category] : []),
+            ...(productType ? [productType] : [])
+          ])
+        ),
         allVariants: product.variants?.edges ? [...product.variants.edges] : [],
+        sizes: productSizes,
+        colors: productColors,
+        tags: [...(product.tags || [])]
       };
     } else {
-      // Add variant only if not already present by ID or by same color (prevents two colors being selected simultaneously)
+      // Add variant only if not already present by ID or by same color
       const isDuplicate = groups[groupKey].colorVariants.some(
         (v) =>
           v.id === variant.id ||
-          (v.colorHex &&
-            variant.colorHex &&
-            v.colorHex.toLowerCase() === variant.colorHex.toLowerCase()) ||
+          (v.colorHex && variant.colorHex && v.colorHex.toLowerCase() === variant.colorHex.toLowerCase()) ||
           (v.colorName &&
             variant.colorName &&
             v.colorName.toLowerCase() === variant.colorName.toLowerCase() &&
@@ -192,9 +279,46 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
       if (!isDuplicate) {
         groups[groupKey].colorVariants.push(variant);
       }
-      
+
       if (product.variants?.edges) {
         groups[groupKey].allVariants?.push(...product.variants.edges);
+      }
+
+      if (product.collections) {
+        for (const col of product.collections) {
+          if (!groups[groupKey].collections?.includes(col)) {
+            groups[groupKey].collections?.push(col);
+          }
+        }
+      }
+      if (product.category && !groups[groupKey].collections?.includes(product.category)) {
+        groups[groupKey].collections?.push(product.category);
+      }
+      if (productType && !groups[groupKey].collections?.includes(productType)) {
+        groups[groupKey].collections?.push(productType);
+      }
+
+      // Merge sizes
+      for (const s of productSizes) {
+        if (!groups[groupKey].sizes?.includes(s)) {
+          groups[groupKey].sizes?.push(s);
+        }
+      }
+
+      // Merge colors
+      for (const c of productColors) {
+        if (!groups[groupKey].colors?.includes(c)) {
+          groups[groupKey].colors?.push(c);
+        }
+      }
+
+      // Merge tags
+      if (product.tags) {
+        for (const t of product.tags) {
+          if (!groups[groupKey].tags?.includes(t)) {
+            groups[groupKey].tags?.push(t);
+          }
+        }
       }
 
       // Bubble up badge if variant has one
@@ -204,7 +328,10 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
 
       // Bubble up latest createdAt date
       if (product.createdAt) {
-        if (!groups[groupKey].createdAt || new Date(product.createdAt).getTime() > new Date(groups[groupKey].createdAt || 0).getTime()) {
+        if (
+          !groups[groupKey].createdAt ||
+          new Date(product.createdAt).getTime() > new Date(groups[groupKey].createdAt || 0).getTime()
+        ) {
           groups[groupKey].createdAt = product.createdAt;
         }
       }
@@ -224,7 +351,10 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
   return Object.values(groups);
 }
 
-export function sortNewArrivalsFirst(products: GroupedProduct[], count: number = 3): { sorted: GroupedProduct[], newestIds: Set<string> } {
+export function sortNewArrivalsFirst(
+  products: GroupedProduct[],
+  count: number = 3
+): { sorted: GroupedProduct[]; newestIds: Set<string> } {
   if (products.length === 0) return { sorted: [], newestIds: new Set() };
 
   // 1. Find the newest products by date
@@ -244,8 +374,8 @@ export function sortNewArrivalsFirst(products: GroupedProduct[], count: number =
   }
 
   // 2. Separate into newest and other products
-  const newestList = products.filter(p => newestIds.has(p.id));
-  const otherList = products.filter(p => !newestIds.has(p.id));
+  const newestList = products.filter((p) => newestIds.has(p.id));
+  const otherList = products.filter((p) => !newestIds.has(p.id));
 
   // Sort the newest subset descending so the absolute newest is index 0
   newestList.sort((a, b) => {

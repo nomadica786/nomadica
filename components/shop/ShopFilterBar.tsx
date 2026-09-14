@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
 
 export const SIZES = ["All", "XS", "S", "M", "L", "XL", "XXL"];
-export const COLORS = ["All", "White", "Black", "Red", "Blue", "Green", "Yellow", "Navy", "Grey"];
+export const COLORS = ["All", "White", "Black", "Red", "Blue", "Green", "Yellow", "Navy", "Grey", "Pink", "Maroon"];
 export const SORT_OPTIONS = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
 
 interface ShopFilterBarProps {
@@ -121,18 +121,35 @@ export function ShopFilterBar({
     padding: 0
   });
 
-  const filterItems = (items: string[], selected: string[], setSelected: (next: string[]) => void) => {
+  const getColorHex = (colorName: string) => {
+    const c = colorName.toLowerCase();
+    if (c === "white") return "#FFFFFF";
+    if (c === "black") return "#1E1E1E";
+    if (c === "red") return "#D32F2F";
+    if (c === "blue") return "#1976D2";
+    if (c === "green") return "#388E3C";
+    if (c === "yellow") return "#FBC02D";
+    if (c === "navy") return "#1A237E";
+    if (c === "grey" || c === "gray") return "#808080";
+    if (c === "pink") return "#E89BA8";
+    if (c === "maroon") return "#800000";
+    return c;
+  };
+
+  const filterItems = (selected: string[], setSelected: (next: string[]) => void) => {
     return (item: string) => {
-      const isSelected = selected.includes(item);
-      if (isSelected) {
-        setSelected(selected.filter((value) => value !== item));
+      if (item === "All") {
+        setSelected([]);
+        return;
+      }
+      const cleanSelected = selected.filter((value) => value !== "All");
+      if (cleanSelected.includes(item)) {
+        setSelected(cleanSelected.filter((value) => value !== item));
       } else {
-        setSelected([...selected, item]);
+        setSelected([...cleanSelected, item]);
       }
     };
   };
-
-  
 
   const hasActiveFilters = selectedCategory.length > 0 || selectedSize.length > 0 || selectedColor.length > 0;
   const resetFilters = () => {
@@ -175,7 +192,7 @@ export function ShopFilterBar({
                   return (
                     <button
                       key={cat}
-                      onClick={() => filterItems(categories.filter((item) => item !== "All"), selectedCategory, setSelectedCategory)(cat)}
+                      onClick={() => filterItems(selectedCategory, setSelectedCategory)(cat)}
                       style={dropdownItemStyle(isSelected)}
                       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isSelected ? "#F3E2CA" : "#F9F9F9")}
                       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isSelected ? "#F3E2CA" : "transparent")}
@@ -204,13 +221,13 @@ export function ShopFilterBar({
                   return (
                     <button
                       key={size}
-                      onClick={() => filterItems(SIZES.filter((s) => s !== "All"), selectedSize, setSelectedSize)(size)}
+                      onClick={() => filterItems(selectedSize, setSelectedSize)(size)}
                       style={dropdownItemStyle(isSelected)}
                       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F9F9F9")}
                       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isSelected ? "#F3E2CA" : "transparent")}
                     >
                       <span style={checkboxStyle(isSelected)}>
-                        {isSelected && <Check size={14} color="#C4A77D" />}
+                        {isSelected && <Check size={14} color="white" />}
                       </span>
                       <span>{size}</span>
                     </button>
@@ -229,8 +246,8 @@ export function ShopFilterBar({
                   width: "14px", 
                   height: "14px", 
                   borderRadius: "50%", 
-                  backgroundColor: selectedColor[0] === "White" ? "#FFFFFF" : selectedColor[0].toLowerCase(), 
-                  border: selectedColor[0] === "White" ? "1px solid rgba(0,0,0,0.15)" : "none"
+                  backgroundColor: getColorHex(selectedColor[0]), 
+                  border: selectedColor[0].toLowerCase() === "white" ? "1px solid rgba(0,0,0,0.15)" : "none"
                 }} />
               )}
               {selectedColor.length === 0 ? "Color" : selectedColor.length === 1 ? selectedColor[0] : `Color (${selectedColor.length})`}
@@ -238,19 +255,28 @@ export function ShopFilterBar({
             </button>
             {openDropdown === "color" && (
               <div style={dropdownMenuStyle}>
-                {COLORS.map(color => {
+                {COLORS.filter(color => color !== "All").map(color => {
                   const isSelected = selectedColor.includes(color);
                   return (
                     <button
                       key={color}
-                      onClick={() => filterItems(COLORS, selectedColor, setSelectedColor)(color)}
+                      onClick={() => filterItems(selectedColor, setSelectedColor)(color)}
                       style={dropdownItemStyle(isSelected)}
                       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F9F9F9")}
                       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isSelected ? "#F3E2CA" : "transparent")}
                     >
                       <span style={checkboxStyle(isSelected)}>
-                        {isSelected && <Check size={14} color="#C4A77D" />}
+                        {isSelected && <Check size={14} color="white" />}
                       </span>
+                      <span style={{
+                        width: "14px",
+                        height: "14px",
+                        borderRadius: "50%",
+                        backgroundColor: getColorHex(color),
+                        border: color.toLowerCase() === "white" ? "1px solid rgba(0,0,0,0.2)" : "none",
+                        display: "inline-block",
+                        flexShrink: 0
+                      }} />
                       <span>{color}</span>
                     </button>
                   );

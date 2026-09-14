@@ -260,9 +260,10 @@ function computeVariations(rawProduct: any, allEdges: any[], mockupLookup: Recor
     });
   }
   const grouped = groupProducts(allMapped, mockupLookup);
+  const parsedCurrent = parseProduct({ name: rawProduct.title, colors: rawProduct.colors });
   const currentGroup = grouped.find(g => 
-    g.colorVariants.some(v => v.id === rawProduct.id) ||
-    g.productType?.toLowerCase() === (rawProduct.productType || rawProduct.category || "").toLowerCase()
+    g.colorVariants.some(v => v.id === rawProduct.id || (v.handle && rawProduct.handle && v.handle === rawProduct.handle)) ||
+    (parsedCurrent.baseName && g.name.toLowerCase() === parsedCurrent.baseName.toLowerCase())
   );
   if (!currentGroup) return [];
   const vars = currentGroup.colorVariants.map(v => ({

@@ -61,6 +61,18 @@ export default async function CollectionPage({ params }: PageProps) {
       category: node.productType || node.category || 'Tops',
       productType: node.productType || node.category || 'Tops',
       createdAt: node.createdAt || '',
+      collections: [
+        collection.title,
+        handle,
+        ...(node.collections?.edges?.flatMap((e: any) => [e.node.title, e.node.handle]) || []),
+        ...(node.category ? [node.category] : []),
+        ...(node.productType ? [node.productType] : [])
+      ],
+      tags: node.tags || [],
+      options: node.options || [],
+      sizes: node.sizes || node.options?.find((o: any) => o.name?.toLowerCase() === "size")?.values || [],
+      colors: node.colors || [],
+      variants: node.variants,
     };
   });
 

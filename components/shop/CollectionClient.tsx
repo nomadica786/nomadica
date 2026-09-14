@@ -1,11 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import ProductCard from "@/components/shop/ProductCard";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts } from "@/utils/productGroup";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
+import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter } from "@/utils/productFilters";
 
 const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
 
@@ -23,19 +24,36 @@ export default function CollectionClient({
   initialCategories
 }: CollectionClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryCategory = searchParams ? searchParams.get("category") : null;
+
   const [categories, setCategories] = useState<{ title: string; handle: string }[]>(
     initialCategories || [{ title: "All", handle: "all" }]
   );
+  const [collectionEdges, setCollectionEdges] = useState<any[]>([]);
   const [sortBy, setSortBy] = useState("Featured");
   const [loading, setLoading] = useState(!initialProducts);
   const [productsState, setProductsState] = useState<any[]>(initialProducts || []);
   const [mockups, setMockups] = useState<Record<string, string>>({});
 
-  const [selectedCategory, setSelectedCategory] = useState<string[]>(
-    categoryParam.toLowerCase() === "all" ? [] : [(categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1))]
-  );
+  const [selectedCategory, setSelectedCategory] = useState<string[]>(() => {
+    if (categoryParam.toLowerCase() !== "all") {
+      return [categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)];
+    }
+    if (queryCategory && queryCategory.toLowerCase() !== "all") {
+      return [queryCategory.charAt(0).toUpperCase() + queryCategory.slice(1)];
+    }
+    return [];
+  });
   const [selectedSize, setSelectedSize] = useState<string[]>([]);
   const [selectedColor, setSelectedColor] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (queryCategory && queryCategory.toLowerCase() !== "all") {
+      const formatted = queryCategory.charAt(0).toUpperCase() + queryCategory.slice(1);
+      setSelectedCategory((prev) => (prev.includes(formatted) ? prev : [formatted]));
+    }
+  }, [queryCategory]);
 
   // Fetch mockups on mount
   useEffect(() => {
@@ -50,36 +68,37 @@ export default function CollectionClient({
     fetchMockups();
   }, []);
 
-  // Fetch categories/collections list on mount if not provided
-  useEffect(() => {
-    if (initialCategories) return;
-    const fetchCategories = async () => {
-      try {
-        const res = await api.collections.list();
-        const edges = res?.collections?.edges || [];
-        const list = edges.map((edge: any) => ({
-          title: edge.node.title,
-          handle: edge.node.handle
-        }));
-        setCategories([{ title: "All", handle: "all" }, ...list]);
-      } catch (err) {
-        console.error("Failed to fetch collections list:", err);
-        setCategories([
-          { title: "All", handle: "all" },
-          { title: "Tops", handle: "tops" },
-          { title: "Bottoms", handle: "bottoms" },
-          { title: "Outerwear", handle: "outerwear" },
-          { title: "Knits", handle: "knits" }
-        ]);
-      }
-    };
-    fetchCategories();
-  }, [initialCategories]);
+// Fetch collections list on mount if not provided
+useEffect(() => {
+  if (initialCategories) return;
+
+  const fetchCollections = async () => {
+    try {
+      const res = await api.collections.list();
+      const edges = res?.collections?.edges || [];
+
+      setCollectionEdges(edges);
+
+      const list = edges.map((edge: any) => ({
+        title: edge.node.title,
+        handle: edge.node.handle,
+      }));
+
+      // Only show actual collections in the category dropdown
+      setCategories(list);
+    } catch (err) {
+      console.error("Failed to fetch collections list:", err);
+      setCategories([]);
+    }
+  };
+
+  fetchCollections();
+}, [initialCategories]);
+
 
   // Load products client-side if initialProducts is not provided (fallback)
   useEffect(() => {
     if (initialProducts) {
-      // productsState is already initialized from initialProducts via useState
       setLoading(false);
       return;
     }
@@ -96,7 +115,7 @@ export default function CollectionClient({
         }
 
         const edges = res?.collectionByHandle?.products?.edges || res?.products?.edges || [];
-          const mapped = edges.map((edge: any) => {
+        const mapped = edges.map((edge: any) => {
           const node = edge.node;
           const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
           const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
@@ -106,13 +125,21 @@ export default function CollectionClient({
             handle: node.handle,
             price: priceVal,
             originalPrice: origPriceVal,
-            image: node.images?.edges?.[0]?.node?.url || '',
-            hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || '',
+            image: node.images?.edges?.[0]?.node?.url || node.image?.url || node.image || '',
+            hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || node.image?.url || node.image || '',
             badge: node.badge,
             category: node.productType || node.category || 'Tops',
             productType: node.productType || node.category || 'Tops',
             createdAt: node.createdAt || '',
-            collections: node.collections?.edges?.map((e: any) => e.node.title) || [],
+            collections: [
+              ...(node.collections?.edges?.flatMap((e: any) => [e.node.title, e.node.handle]) || []),
+              ...(node.category ? [node.category] : []),
+              ...(node.productType ? [node.productType] : [])
+            ],
+            tags: node.tags || [],
+            options: node.options || [],
+            sizes: node.sizes || node.options?.find((o: any) => o.name?.toLowerCase() === "size")?.values || [],
+            colors: node.colors || [],
             variants: node.variants,
           };
         }) || [];
@@ -127,44 +154,36 @@ export default function CollectionClient({
     loadProducts();
   }, [categoryParam, initialProducts]);
 
-  const handleCategoryChange = (handle: string) => {
-    if (handle === "all") {
-      router.push("/shop");
-    } else {
-      router.push(`/collections/${handle}`);
-    }
-  };
+  const enrichedProducts = useMemo(() => {
+    if (!productsState || productsState.length === 0) return [];
+    if (!collectionEdges || collectionEdges.length === 0) return productsState;
+    return productsState.map((p) => {
+      const extraCollections = [...(p.collections || [])];
+      for (const cEdge of collectionEdges) {
+        const colNode = cEdge.node;
+        const hasProd = colNode.products?.edges?.some(
+          (pe: any) => pe.node?.id === p.id || pe.node?.handle === p.handle
+        );
+        if (hasProd) {
+          if (!extraCollections.includes(colNode.title)) extraCollections.push(colNode.title);
+          if (!extraCollections.includes(colNode.handle)) extraCollections.push(colNode.handle);
+        }
+      }
+      return { ...p, collections: extraCollections };
+    });
+  }, [productsState, collectionEdges]);
 
   if (loading) {
     return <PageLoader />;
   }
 
-  const groupedProducts = groupProducts(productsState, mockups);
+  const groupedProducts = groupProducts(enrichedProducts, mockups);
 
   // Apply filtering
-  const filteredProducts = groupedProducts.filter(product => {
-    if (selectedCategory.length > 0) {
-      const expectedCats = selectedCategory.map((cat) => cat.toLowerCase());
-      const matchesCollection = product.collections?.some((c: string) => expectedCats.includes(c.toLowerCase()));
-      const matchesType = expectedCats.includes((product.productType || product.category || "").toLowerCase());
-      if (!matchesCollection && !matchesType) return false;
-    }
-    if (selectedSize.length > 0) {
-      const expectedSizes = selectedSize.map((s) => s.toLowerCase());
-      const hasSize = product.allVariants?.some((edge: any) => 
-        expectedSizes.some((size) => edge.node?.title?.toLowerCase().includes(size)) || 
-        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "size" && expectedSizes.includes(opt.value.toLowerCase()))
-      );
-      if (!hasSize) return false;
-    }
-    if (selectedColor.length > 0) {
-      const expectedColors = selectedColor.map((c) => c.toLowerCase());
-      const hasColor = product.allVariants?.some((edge: any) => 
-        expectedColors.some((color) => edge.node?.title?.toLowerCase().includes(color)) || 
-        edge.node?.selectedOptions?.some((opt: any) => opt.name.toLowerCase() === "color" && expectedColors.includes(opt.value.toLowerCase()))
-      );
-      if (!hasColor) return false;
-    }
+  const filteredProducts = groupedProducts.filter((product) => {
+    if (!matchesCategoryFilter(product, selectedCategory)) return false;
+    if (!matchesColorFilter(product, selectedColor)) return false;
+    if (!matchesSizeFilter(product, selectedSize)) return false;
     return true;
   });
 
@@ -187,7 +206,13 @@ export default function CollectionClient({
   })();
 
   const isAll = (categoryParam.toLowerCase() === "all");
-  const pageTitle = initialCollectionTitle || (selectedCategory.length > 0 ? selectedCategory[0] : (isAll ? "All Collections" : (categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1))));
+  const pageTitle = initialCollectionTitle || (
+    selectedCategory.length === 1
+      ? selectedCategory[0]
+      : selectedCategory.length > 1
+        ? "Selected Collections"
+        : (isAll ? "All Collections" : (categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)))
+  );
   const pageLabel = selectedCategory.length > 0 ? "Collection" : (isAll ? "Explore" : "Collection");
 
   return (
@@ -229,14 +254,46 @@ export default function CollectionClient({
 
       {/* Products Grid */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "4rem 1.5rem" }}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {finalProducts.map((p: any) => (
-            <ProductCard
-              key={p.id}
-              {...p}
-            />
-          ))}
-        </div>
+        {finalProducts.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "4rem 0", fontFamily: "'Montserrat', sans-serif" }}>
+            <p style={{ fontSize: "1.125rem", color: "#1E1E1E", fontWeight: 500, marginBottom: "0.5rem" }}>
+              No products found
+            </p>
+            <p style={{ fontSize: "0.875rem", color: "rgba(30, 30, 30, 0.5)", marginBottom: "1.5rem" }}>
+              Try adjusting your filter selections or clearing filters.
+            </p>
+            <button
+              onClick={() => {
+                setSelectedCategory([]);
+                setSelectedSize([]);
+                setSelectedColor([]);
+              }}
+              style={{
+                padding: "0.625rem 1.5rem",
+                backgroundColor: "#1E1E1E",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+              }}
+            >
+              Clear All Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {finalProducts.map((p: any) => (
+              <ProductCard
+                key={p.id}
+                {...p}
+                selectedColors={selectedColor}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

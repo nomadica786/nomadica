@@ -43,6 +43,7 @@ interface ProductCardProps {
   showAddToCart?: boolean;
   onAddToCart?: (variant?: any) => void;
   allVariants?: any[];
+  selectedColors?: string[];
 }
 
 export default function ProductCard({
@@ -61,6 +62,7 @@ export default function ProductCard({
   showAddToCart = false,
   onAddToCart,
   allVariants,
+  selectedColors,
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -83,17 +85,47 @@ export default function ProductCard({
 
   useEffect(() => {
     if (uniqueVariants && uniqueVariants.length > 0) {
+      const expected = (selectedColors || [])
+        .map((c) => c.toLowerCase())
+        .filter((c) => c !== "all");
+
+      if (expected.length > 0) {
+        const colorMatch = uniqueVariants.find((v) => {
+          const cName = (v.colorName || "").toLowerCase();
+          const vTitle = (v.name || "").toLowerCase();
+          const hex = (v.colorHex || "").toLowerCase();
+          return expected.some((sc) => {
+            if (cName.includes(sc) || vTitle.includes(sc)) return true;
+            if (sc === "white" && (hex === "#ffffff" || hex === "#fff" || hex === "#faf9f6" || cName.includes("white") || vTitle.includes("white"))) return true;
+            if (sc === "black" && (hex === "#1e1e1e" || hex === "#000000" || hex === "#383838" || cName.includes("black") || vTitle.includes("black"))) return true;
+            if (sc === "blue" && (hex === "#1976d2" || hex === "#4e6e82" || hex === "#5c768d" || cName.includes("denim") || cName.includes("blue") || vTitle.includes("blue"))) return true;
+            if (sc === "navy" && (hex === "#1a237e" || cName.includes("navy") || vTitle.includes("navy"))) return true;
+            if (sc === "red" && (hex === "#d32f2f" || hex === "#800000" || cName.includes("red") || cName.includes("maroon") || vTitle.includes("red") || vTitle.includes("maroon"))) return true;
+            if (sc === "maroon" && (hex === "#800000" || cName.includes("maroon") || vTitle.includes("maroon"))) return true;
+            if (sc === "pink" && (hex === "#e89ba8" || cName.includes("pink") || vTitle.includes("pink"))) return true;
+            if ((sc === "grey" || sc === "gray") && (hex === "#808080" || cName.includes("grey") || cName.includes("gray") || vTitle.includes("grey") || vTitle.includes("gray"))) return true;
+            if (sc === "green" && (hex === "#388e3c" || hex === "#4f6b5a" || cName.includes("green") || cName.includes("olive") || vTitle.includes("green"))) return true;
+            if (sc === "yellow" && (hex === "#fbc02d" || cName.includes("yellow") || cName.includes("gold") || vTitle.includes("yellow"))) return true;
+            return false;
+          });
+        });
+        if (colorMatch) {
+          setActiveVariant(colorMatch);
+          setHasInteracted(true);
+          return;
+        }
+      }
       const match = uniqueVariants.find(v => v.id === id);
       setActiveVariant(match || uniqueVariants[0]);
     } else {
       setActiveVariant(null);
     }
-  }, [id, colorVariants]);
+  }, [id, colorVariants, selectedColors]);
 
   const currentId = activeVariant ? activeVariant.id : id;
   const currentName = activeVariant && activeVariant.colorName !== "Original" && !name.toLowerCase().includes(activeVariant.colorName.toLowerCase())
     ? `${activeVariant.colorName} ${name}`
-    : name;
+    : (activeVariant?.name || name);
   const currentPrice = activeVariant ? activeVariant.price : price;
   const currentOriginalPrice = activeVariant ? activeVariant.originalPrice : originalPrice;
   const currentImage = (mockupImage && !hasInteracted)
