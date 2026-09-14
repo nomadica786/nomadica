@@ -74,6 +74,7 @@ export default async function ProductPage({ params }: PageProps) {
       <JsonLd schema={productSchema} />
       <JsonLd schema={breadcrumbSchema} />
       <ProductDetailClient
+        key={handle}
         initialProduct={product}
         initialAllEdges={allEdges}
         initialMockupLookup={mergedMockups}

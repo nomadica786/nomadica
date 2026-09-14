@@ -306,12 +306,25 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
   const id = searchParams.get("id");
   const queryHandle = searchParams.get("handle");
 
+  const [mockupLookupState, setMockupLookupState] = useState<Record<string, any>>(() => initialMockupLookup || {});
+  const [allProductsList, setAllProductsList] = useState<any[]>(() => {
+    const list = initialAllEdges?.map((e: any) => e.node || e) || [];
+    if (initialProduct && !list.some((p: any) => p.id === initialProduct.id)) {
+      list.push(initialProduct);
+    }
+    return list;
+  });
+
   const [product, setProduct] = useState<ProductDetails | null>(() => {
     if (!initialProduct) return null;
     const mapped = mapRawProduct(initialProduct);
     const mock = getInitialMockup(initialProduct, initialMockupLookup || {});
     if (mock) {
       const filtered = (mapped.images || []).filter(img => img !== mock);
+      const actualImg = initialProduct.image || initialProduct.images?.edges?.[0]?.node?.url || "";
+      if (filtered.length === 0 && actualImg) {
+        filtered.push(actualImg);
+      }
       mapped.images = [mock, ...filtered];
     }
     return mapped;
@@ -413,8 +426,14 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
           api.products.list(50),
           api.mockups.get().catch(() => ({ mockups: {} }))
         ]);
-        const mockupLookup = mockupsRes?.mockups || {};
-        const allEdges = allRes?.products?.edges || [];
+        const mockupLookup = mockupsRes?.mockups || initialMockupLookup || {};
+        setMockupLookupState(mockupLookup);
+        const allEdges = allRes?.products?.edges || initialAllEdges || [];
+        const mappedList = allEdges.map((e: any) => e.node || e);
+        if (rawProduct && !mappedList.some((p: any) => p.id === rawProduct.id)) {
+          mappedList.push(rawProduct);
+        }
+        setAllProductsList(mappedList);
         
         // Map all products preserving their natural, stable catalog order from allEdges
         const allMappedForGroup = allEdges.map((edge: any) => {
@@ -533,12 +552,16 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
             if (!prev) return null;
             const existingImages = prev.images || [];
             const filtered = existingImages.filter(img => img !== mockupImg);
+            const actualImg = rawProduct.image || rawProduct.images?.edges?.[0]?.node?.url || "";
+            if (filtered.length === 0 && actualImg) {
+              filtered.push(actualImg);
+            }
             return {
               ...prev,
               images: [mockupImg, ...filtered]
             };
           });
-          setSelectedImage(0);
+          setSelectedImage(prev => (prev === 0 ? 0 : prev));
         }
 
         const currentVarIdx = variations.findIndex(v => v.id === rawProduct.id);
@@ -611,12 +634,84 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
     }
   }, [product?.id, colorVariations]);
 
+  const handleColorSelect = (v: any, idx: number) => {
+    setHoveredColorImage(null);
+    setHoveredSwatchId(null);
+    setLightboxVariantIndex(idx);
+
+    if (v.id === product?.id) {
+      // User clicked the currently selected color:
+      // If currently showing mock image (selectedImage === 0), switch to the product photo for this color
+      setSelectedImage(1);
+      return;
+    }
+
+    // User clicked a different color variant
+    const matchingNode = allProductsList.find((p: any) => p.id === v.id || (v.handle && p.handle === v.handle)) ||
+      initialAllEdges?.map((e: any) => e.node || e).find((p: any) => p.id === v.id || (v.handle && p.handle === v.handle));
+
+    if (matchingNode) {
+      const mapped = mapRawProduct(matchingNode);
+      const productTypeKey = matchingNode.productType || matchingNode.category || "Tee";
+      const mockupConfig = mockupLookupState[productTypeKey] || mockupLookupState["Tee"];
+      const currentGroup = groupProducts([matchingNode], mockupLookupState)[0];
+      const mockupImg = currentGroup?.mockupImage || (typeof mockupConfig === "object" ? mockupConfig?.mockupImage : mockupConfig);
+
+      const colorImg = v.image || matchingNode.images?.edges?.[0]?.node?.url || matchingNode.image || "";
+      const rawImages = matchingNode.images?.edges?.map((edge: any) => edge.node.url) || (matchingNode.image ? [matchingNode.image] : []);
+      const filtered = rawImages.filter((img: string) => img !== mockupImg);
+      if (colorImg && !filtered.includes(colorImg)) {
+        filtered.unshift(colorImg);
+      }
+
+      mapped.images = mockupImg ? [mockupImg, ...filtered] : filtered;
+      if (mapped.images.length === 1 && colorImg && mockupImg) {
+        mapped.images.push(colorImg);
+      }
+
+      setProduct(prev => ({
+        ...mapped,
+        name: prev?.name || mapped.name,
+      }));
+      setVariants(matchingNode.variants?.edges?.map((edge: any) => edge.node) || []);
+      setSelectedImage(1); // Show color product photo instead of mock image
+
+      if (v.handle) {
+        window.history.replaceState(null, "", `/products/${v.handle}`);
+      }
+    } else {
+      setSelectedImage(1);
+      if (v.handle) {
+        router.push(`/products/${v.handle}`);
+      } else {
+        router.push(`/shop/product-details?id=${v.id}`);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const pathname = window.location.pathname;
+      const match = pathname.match(/\/products\/([^/?#]+)/);
+      if (match && match[1]) {
+        const handleFromUrl = match[1];
+        const vIdx = colorVariations.findIndex(v => v.handle === handleFromUrl);
+        if (vIdx >= 0) {
+          const v = colorVariations[vIdx];
+          handleColorSelect(v, vIdx);
+        }
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [colorVariations, allProductsList]);
+
   const handleCloseLightbox = (syncVariant: boolean = false) => {
     setIsLightboxOpen(false);
     if (syncVariant) {
       const target = colorVariations[lightboxVariantIndex];
-      if (target?.handle && target.handle !== product?.handle) {
-        router.push(`/products/${target.handle}`);
+      if (target) {
+        handleColorSelect(target, lightboxVariantIndex);
       }
     }
   };
@@ -829,22 +924,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
               return (
                 <button
                   key={v.id || idx}
-                  onClick={() => {
-                    if (isCurrentProduct) {
-                      setSelectedImage(1);
-                      setHoveredColorImage(null);
-                      setHoveredSwatchId(null);
-                    } else {
-                      setHoveredColorImage(null);
-                      setHoveredSwatchId(null);
-                      setLightboxVariantIndex(idx);
-                      if (v.handle) {
-                        router.push(`/products/${v.handle}`);
-                      } else {
-                        router.push(`/shop/product-details?id=${v.id}`);
-                      }
-                    }
-                  }}
+                  onClick={() => handleColorSelect(v, idx)}
                   onMouseEnter={() => {
                     setHoveredColorImage(v.image);
                     setHoveredSwatchId(v.id);
@@ -901,14 +981,23 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
               }}
               title="Click to expand"
             >
-              <Image
-                src={getShopifyImageUrl(hoveredColorImage || product.images[selectedImage] || product.images[0], 1000)}
-                alt={product.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 700px"
-                style={{ objectFit: "cover", transition: "opacity 0.3s ease" }}
-              />
+              {(() => {
+                const activeVariant = uniqueColorVariations.find(v => v.id === currentVariantId);
+                const activeDisplayImage = hoveredColorImage ||
+                  (selectedImage === 0
+                    ? (product.images[0] || activeVariant?.image || "")
+                    : (product.images[selectedImage] || product.images[1] || activeVariant?.image || product.images[0] || ""));
+                return (
+                  <Image
+                    src={getShopifyImageUrl(activeDisplayImage, 1000)}
+                    alt={product.name}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 700px"
+                    style={{ objectFit: "cover", transition: "opacity 0.3s ease" }}
+                  />
+                );
+              })()}
 
               {/* Floating Bestseller Badge */}
               <div
@@ -1138,17 +1227,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
                 return (
                   <button
                     key={v.id || idx}
-                    onClick={() => {
-                      if (v.id === product.id) return;
-                      setHoveredColorImage(null);
-                      setHoveredSwatchId(null);
-                      setLightboxVariantIndex(idx);
-                      if (v.handle) {
-                        router.push(`/products/${v.handle}`);
-                      } else {
-                        router.push(`/shop/product-details?id=${v.id}`);
-                      }
-                    }}
+                    onClick={() => handleColorSelect(v, idx)}
                     style={{
                       width: "40px",
                       height: "40px",
