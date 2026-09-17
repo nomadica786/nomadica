@@ -83,6 +83,11 @@ export function extractCollectionOptions(
 ): string[] {
   const rawSet = new Set<string>();
 
+  // 0. Include baseline canonical collections so all signature collections are immediately available
+  for (const def of DEFAULT_COLLECTION_OPTIONS) {
+    rawSet.add(def);
+  }
+
   // 1. From fetched collections list
   if (collectionsList && Array.isArray(collectionsList)) {
     for (const item of collectionsList) {

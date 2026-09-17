@@ -6,7 +6,16 @@ import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { groupProducts } from "@/utils/productGroup";
 import { ShopFilterBar } from "@/components/shop/ShopFilterBar";
-import { matchesCategoryFilter, matchesColorFilter, matchesSizeFilter, sortProducts, extractCollectionOptions } from "@/utils/productFilters";
+import { 
+  matchesCategoryFilter, 
+  matchesColorFilter, 
+  matchesSizeFilter, 
+  sortProducts, 
+  extractCollectionOptions,
+  normalizeCollectionKey,
+  CANONICAL_COLLECTION_TITLES,
+  DEFAULT_COLLECTION_OPTIONS
+} from "@/utils/productFilters";
 
 const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
 
@@ -15,6 +24,34 @@ interface CollectionClientProps {
   initialProducts?: any[];
   initialCollectionTitle?: string;
   initialCategories?: { title: string; handle: string }[];
+}
+
+function getInitialCategoryTitle(
+  param?: string | null,
+  initialTitle?: string | null,
+  query?: string | null
+): string[] {
+  const candidate = (initialTitle && initialTitle.trim())
+    ? initialTitle.trim()
+    : (param && param.toLowerCase() !== "all" ? param : query);
+
+  if (!candidate || candidate.toLowerCase() === "all") return [];
+
+  const norm = normalizeCollectionKey(candidate);
+  if (norm && CANONICAL_COLLECTION_TITLES[norm]) {
+    return [CANONICAL_COLLECTION_TITLES[norm]];
+  }
+
+  if (initialTitle && initialTitle.trim()) {
+    return [initialTitle.trim()];
+  }
+
+  const clean = candidate.replace(/[-_]+/g, " ").trim();
+  const formatted = clean
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+  return [formatted.toLowerCase().endsWith("collection") ? formatted : `${formatted} Collection`];
 }
 
 export default function CollectionClient({
@@ -28,7 +65,10 @@ export default function CollectionClient({
   const queryCategory = searchParams ? searchParams.get("category") : null;
 
   const [categories, setCategories] = useState<{ title: string; handle: string }[]>(
-    initialCategories || [{ title: "All", handle: "all" }]
+    initialCategories || DEFAULT_COLLECTION_OPTIONS.map((title) => ({
+      title,
+      handle: title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+    }))
   );
   const [collectionEdges, setCollectionEdges] = useState<any[]>([]);
   const [sortBy, setSortBy] = useState("Featured");
@@ -38,23 +78,24 @@ export default function CollectionClient({
   const [configurations, setConfigurations] = useState<any[]>([]);
 
   const [selectedCategory, setSelectedCategory] = useState<string[]>(() => {
-    if (categoryParam.toLowerCase() !== "all") {
-      return [categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)];
-    }
-    if (queryCategory && queryCategory.toLowerCase() !== "all") {
-      return [queryCategory.charAt(0).toUpperCase() + queryCategory.slice(1)];
-    }
-    return [];
+    return getInitialCategoryTitle(categoryParam, initialCollectionTitle, queryCategory);
   });
   const [selectedSize, setSelectedSize] = useState<string[]>([]);
   const [selectedColor, setSelectedColor] = useState<string[]>([]);
 
   useEffect(() => {
-    if (queryCategory && queryCategory.toLowerCase() !== "all") {
-      const formatted = queryCategory.charAt(0).toUpperCase() + queryCategory.slice(1);
-      setSelectedCategory((prev) => (prev.includes(formatted) ? prev : [formatted]));
+    if (categoryParam && categoryParam.toLowerCase() !== "all") {
+      const initial = getInitialCategoryTitle(categoryParam, initialCollectionTitle);
+      if (initial.length > 0) {
+        setSelectedCategory(initial);
+      }
+    } else if (queryCategory && queryCategory.toLowerCase() !== "all") {
+      const initial = getInitialCategoryTitle(null, null, queryCategory);
+      if (initial.length > 0) {
+        setSelectedCategory(initial);
+      }
     }
-  }, [queryCategory]);
+  }, [categoryParam, initialCollectionTitle, queryCategory]);
 
   // Fetch mockups on mount
   useEffect(() => {
@@ -89,6 +130,21 @@ useEffect(() => {
       }));
 
       setCategories(list);
+
+      // Ensure selectedCategory matches the exact title from the fetched collections
+      const currentTarget = categoryParam || initialCollectionTitle || "";
+      if (currentTarget && currentTarget.toLowerCase() !== "all") {
+        const targetNorm = normalizeCollectionKey(currentTarget);
+        const matched = list.find((c: any) => {
+          return (
+            normalizeCollectionKey(c.handle) === targetNorm ||
+            normalizeCollectionKey(c.title) === targetNorm
+          );
+        });
+        if (matched) {
+          setSelectedCategory([matched.title]);
+        }
+      }
     } catch (err) {
       console.error("Failed to fetch collections list:", err);
       setCategories([]);
@@ -96,69 +152,115 @@ useEffect(() => {
   };
 
   fetchCollections();
-}, [initialCategories]);
+}, [initialCategories, categoryParam, initialCollectionTitle]);
 
 
   // Load products client-side if initialProducts is not provided (fallback)
+  // Or if the user changes the selected collection away from the initial collection
   useEffect(() => {
-    if (initialProducts) {
-      setLoading(false);
+    if (!initialProducts) {
+      const loadProducts = async () => {
+        setLoading(true);
+        try {
+          const isAll = categoryParam.toLowerCase() === "all";
+          let res;
+          if (isAll) {
+            res = await api.products.list(50);
+          } else {
+            res = await api.collections.getByHandle(categoryParam, 50);
+          }
+
+          const edges = res?.collectionByHandle?.products?.edges || res?.products?.edges || [];
+          const mapped = edges.map((edge: any) => {
+            const node = edge.node;
+            const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
+            const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
+            return {
+              id: node.id,
+              name: node.title,
+              handle: node.handle,
+              price: priceVal,
+              originalPrice: origPriceVal,
+              image: node.images?.edges?.[0]?.node?.url || node.image?.url || node.image || '',
+              hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || node.image?.url || node.image || '',
+              badge: node.badge,
+              category: node.productType || node.category || 'Tops',
+              productType: node.productType || node.category || 'Tops',
+              productTypeConfig: node.productTypeConfig,
+              metafieldProductType: node.metafieldProductType,
+              productTypeConfiguration: node.productTypeConfiguration,
+              createdAt: node.createdAt || '',
+              collections: [
+                ...(node.collections?.edges?.flatMap((e: any) => [e.node.title, e.node.handle]) || []),
+                ...(node.category ? [node.category] : []),
+                ...(node.productType ? [node.productType] : [])
+              ],
+              tags: node.tags || [],
+              options: node.options || [],
+              sizes: node.sizes || node.options?.find((o: any) => o.name?.toLowerCase() === "size")?.values || [],
+              colors: node.colors || [],
+              variants: node.variants,
+            };
+          }) || [];
+          setProductsState(mapped);
+        } catch (err) {
+          console.error("Failed to load collection products client-side:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      loadProducts();
       return;
     }
 
-    const loadProducts = async () => {
-      setLoading(true);
-      try {
-        const isAll = categoryParam.toLowerCase() === "all";
-        let res;
-        if (isAll) {
-          res = await api.products.list(50);
-        } else {
-          res = await api.collections.getByHandle(categoryParam, 50);
+    // When initialProducts is provided:
+    // If user changes category or clears filters, load full catalog so other collections display
+    const isInitialOnly =
+      selectedCategory.length === 1 &&
+      (normalizeCollectionKey(selectedCategory[0]) === normalizeCollectionKey(categoryParam) ||
+       normalizeCollectionKey(selectedCategory[0]) === normalizeCollectionKey(initialCollectionTitle || ""));
+
+    if (!isInitialOnly && productsState.length <= initialProducts.length) {
+      api.products.list(100).then((res) => {
+        const edges = res?.products?.edges || [];
+        if (edges.length > 0) {
+          const mapped = edges.map((edge: any) => {
+            const node = edge.node;
+            const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
+            const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
+            return {
+              id: node.id,
+              name: node.title,
+              handle: node.handle,
+              price: priceVal,
+              originalPrice: origPriceVal,
+              image: node.images?.edges?.[0]?.node?.url || node.image?.url || node.image || '',
+              hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || node.image?.url || node.image || '',
+              badge: node.badge,
+              category: node.productType || node.category || 'Tops',
+              productType: node.productType || node.category || 'Tops',
+              productTypeConfig: node.productTypeConfig,
+              metafieldProductType: node.metafieldProductType,
+              productTypeConfiguration: node.productTypeConfiguration,
+              createdAt: node.createdAt || '',
+              collections: [
+                ...(node.collections?.edges?.flatMap((e: any) => [e.node.title, e.node.handle]) || []),
+                ...(node.category ? [node.category] : []),
+                ...(node.productType ? [node.productType] : [])
+              ],
+              tags: node.tags || [],
+              options: node.options || [],
+              sizes: node.sizes || node.options?.find((o: any) => o.name?.toLowerCase() === "size")?.values || [],
+              colors: node.colors || [],
+              variants: node.variants,
+            };
+          });
+          setProductsState(mapped);
         }
-
-        const edges = res?.collectionByHandle?.products?.edges || res?.products?.edges || [];
-        const mapped = edges.map((edge: any) => {
-          const node = edge.node;
-          const priceVal = node.price || parseFloat(node.variants?.edges?.[0]?.node?.price?.amount || '0');
-          const origPriceVal = node.originalPrice || (node.variants?.edges?.[0]?.node?.compareAtPrice ? parseFloat(node.variants?.edges?.[0]?.node?.compareAtPrice?.amount || '0') : undefined);
-          return {
-            id: node.id,
-            name: node.title,
-            handle: node.handle,
-            price: priceVal,
-            originalPrice: origPriceVal,
-            image: node.images?.edges?.[0]?.node?.url || node.image?.url || node.image || '',
-            hoverImage: node.images?.edges?.[1]?.node?.url || node.images?.edges?.[0]?.node?.url || node.image?.url || node.image || '',
-            badge: node.badge,
-            category: node.productType || node.category || 'Tops',
-            productType: node.productType || node.category || 'Tops',
-            productTypeConfig: node.productTypeConfig,
-            metafieldProductType: node.metafieldProductType,
-            productTypeConfiguration: node.productTypeConfiguration,
-            createdAt: node.createdAt || '',
-            collections: [
-              ...(node.collections?.edges?.flatMap((e: any) => [e.node.title, e.node.handle]) || []),
-              ...(node.category ? [node.category] : []),
-              ...(node.productType ? [node.productType] : [])
-            ],
-            tags: node.tags || [],
-            options: node.options || [],
-            sizes: node.sizes || node.options?.find((o: any) => o.name?.toLowerCase() === "size")?.values || [],
-            colors: node.colors || [],
-            variants: node.variants,
-          };
-        }) || [];
-        setProductsState(mapped);
-      } catch (err) {
-        console.error("Failed to load collection products client-side:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
-  }, [categoryParam, initialProducts]);
+      }).catch(console.error);
+    }
+  }, [categoryParam, initialProducts, selectedCategory, initialCollectionTitle, productsState.length]);
 
 const enrichedProducts = useMemo(() => {
   if (!productsState || productsState.length === 0) return [];

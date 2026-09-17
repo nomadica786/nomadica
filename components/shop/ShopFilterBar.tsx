@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDown, Check } from "lucide-react";
+import { normalizeCollectionKey } from "@/utils/productFilters";
 
 export const SIZES = ["All", "XS", "S", "M", "L", "XL", "XXL"];
 export const COLORS = ["All", "White", "Black", "Red", "Blue", "Green", "Yellow", "Navy", "Grey", "Pink", "Maroon"];
@@ -154,6 +155,50 @@ export function ShopFilterBar({
     };
   };
 
+  const isCategorySelected = (cat: string) => {
+    return selectedCategory.some((sc) => {
+      if (!sc || !cat) return false;
+      const cleanSc = sc.trim().toLowerCase();
+      const cleanCat = cat.trim().toLowerCase();
+      return (
+        cleanSc === cleanCat ||
+        normalizeCollectionKey(cleanSc) === normalizeCollectionKey(cleanCat)
+      );
+    });
+  };
+
+  const toggleCategoryItem = (cat: string) => {
+    if (cat === "All") {
+      setSelectedCategory([]);
+      return;
+    }
+    const isSelected = isCategorySelected(cat);
+    if (isSelected) {
+      setSelectedCategory(
+        selectedCategory.filter((sc) => {
+          const cleanSc = sc.trim().toLowerCase();
+          const cleanCat = cat.trim().toLowerCase();
+          return (
+            cleanSc !== cleanCat &&
+            normalizeCollectionKey(cleanSc) !== normalizeCollectionKey(cleanCat)
+          );
+        })
+      );
+    } else {
+      const clean = selectedCategory.filter((sc) => sc !== "All");
+      setSelectedCategory([...clean, cat]);
+    }
+  };
+
+  const categoryButtonLabel = useMemo(() => {
+    if (selectedCategory.length === 0) return categoryLabel;
+    if (selectedCategory.length === 1) {
+      const match = categories.find((c) => isCategorySelected(c));
+      return match || selectedCategory[0];
+    }
+    return `${categoryLabel} (${selectedCategory.length})`;
+  }, [selectedCategory, categories, categoryLabel]);
+
   const hasActiveFilters = selectedCategory.length > 0 || selectedSize.length > 0 || selectedColor.length > 0;
   const resetFilters = () => {
     setSelectedCategory([]);
@@ -185,17 +230,17 @@ export function ShopFilterBar({
         <div style={{ display: "flex", gap: "1rem", position: "relative", flexWrap: "wrap" }}>
           <div style={{ position: "relative" }}>
             <button onClick={() => toggleDropdown("category")} style={activeButtonStyle(openDropdown === "category" || selectedCategory.length > 0) }>
-              {selectedCategory.length === 0 ? categoryLabel : selectedCategory.length === 1 ? selectedCategory[0] : `${categoryLabel} (${selectedCategory.length})`}
+              {categoryButtonLabel}
               <ChevronDown size={14} />
             </button>
             {openDropdown === "category" && (
               <div style={dropdownMenuStyle}>
                 {categories.filter((cat) => cat !== "All").map((cat) => {
-                  const isSelected = selectedCategory.includes(cat);
+                  const isSelected = isCategorySelected(cat);
                   return (
                     <button
                       key={cat}
-                      onClick={() => filterItems(selectedCategory, setSelectedCategory)(cat)}
+                      onClick={() => toggleCategoryItem(cat)}
                       style={dropdownItemStyle(isSelected)}
                       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isSelected ? "#F3E2CA" : "#F9F9F9")}
                       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isSelected ? "#F3E2CA" : "transparent")}
