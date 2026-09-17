@@ -332,6 +332,22 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
       ])
     );
 
+    const rawCollections: string[] = Array.isArray(product.collections)
+      ? product.collections.map((c: any) => (typeof c === "string" ? c : c?.title || c?.handle || "")).filter(Boolean)
+      : product.collections?.edges
+      ? product.collections.edges.flatMap((e: any) => [e?.node?.title, e?.node?.handle].filter(Boolean))
+      : product.collections?.nodes
+      ? product.collections.nodes.flatMap((n: any) => [n?.title, n?.handle].filter(Boolean))
+      : typeof product.collections === "string"
+      ? [product.collections]
+      : [];
+
+    const rawTags: string[] = Array.isArray(product.tags)
+      ? product.tags
+      : typeof product.tags === "string"
+      ? product.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
+      : [];
+
     if (!groups.has(groupKey)) {
       // Create new group representing this logical product
       groups.set(groupKey, {
@@ -356,7 +372,7 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
         createdAt: product.createdAt,
         collections: Array.from(
           new Set([
-            ...(product.collections || []),
+            ...rawCollections,
             ...(product.category ? [product.category] : []),
             ...(metaobjectName ? [metaobjectName] : [])
           ])
@@ -364,7 +380,7 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
         allVariants: product.variants?.edges ? [...product.variants.edges] : [],
         sizes: productSizes,
         colors: parsedColor.colorName !== "Original" ? [parsedColor.colorName] : [],
-        tags: [...(product.tags || [])]
+        tags: [...rawTags]
       });
     } else {
       const existing = groups.get(groupKey)!;
@@ -396,11 +412,9 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
         existing.allVariants?.push(...product.variants.edges);
       }
 
-      if (product.collections) {
-        for (const col of product.collections) {
-          if (!existing.collections?.includes(col)) {
-            existing.collections?.push(col);
-          }
+      for (const col of rawCollections) {
+        if (!existing.collections?.includes(col)) {
+          existing.collections?.push(col);
         }
       }
 
@@ -412,11 +426,9 @@ export function groupProducts(products: any[], mockupLookup: Record<string, any>
       }
 
       // Merge tags
-      if (product.tags) {
-        for (const t of product.tags) {
-          if (!existing.tags?.includes(t)) {
-            existing.tags?.push(t);
-          }
+      for (const t of rawTags) {
+        if (!existing.tags?.includes(t)) {
+          existing.tags?.push(t);
         }
       }
 

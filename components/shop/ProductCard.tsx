@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, ShoppingCart } from "lucide-react";
@@ -7,6 +7,7 @@ import { api } from "@/components/api/api";
 import { useAuth } from "@/utils/hooks/useAuth";
 import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
+import { parseProduct } from "@/utils/productGroup";
 
 const isWhiteColor = (colorHex: string) => {
   if (!colorHex) return false;
@@ -86,26 +87,51 @@ export default function ProductCard({
   const [addingToCart, setAddingToCart] = useState(false);
 
   // Strictly deduplicate colorVariants so no duplicate colors or duplicate IDs can ever exist
-  const uniqueVariants = (colorVariants || []).filter(
-    (v, idx, arr) =>
-      arr.findIndex(
-        (other) =>
-          other.id === v.id ||
-          (other.colorHex && v.colorHex && other.colorHex.toLowerCase() === v.colorHex.toLowerCase())
-      ) === idx
-  );
+  const uniqueVariants = useMemo(() => {
+    return (colorVariants || []).filter(
+      (v, idx, arr) =>
+        arr.findIndex(
+          (other) =>
+            other.id === v.id ||
+            (other.colorHex && v.colorHex && other.colorHex.toLowerCase() === v.colorHex.toLowerCase())
+        ) === idx
+    );
+  }, [colorVariants]);
 
-  const [activeVariant, setActiveVariant] = useState<ColorVariant | null>(null);
+  // Fallback: If colorVariants was empty, but product has a detectable color, provide a single variant
+  const effectiveVariants = useMemo(() => {
+    if (uniqueVariants && uniqueVariants.length > 0) return uniqueVariants;
+    const parsed = parseProduct({ name: displayName || name });
+    if (parsed.isClothVariation && parsed.colorHex) {
+      return [{
+        id: id || handle || "single-var",
+        name: displayName || name,
+        colorName: parsed.colorName,
+        colorHex: parsed.colorHex,
+        image: image || "",
+        price: price,
+        handle: handle || ""
+      }];
+    }
+    return [];
+  }, [uniqueVariants, displayName, name, id, handle, image, price]);
+
+  const [activeVariant, setActiveVariant] = useState<ColorVariant | null>(
+    () => (uniqueVariants && uniqueVariants.length > 0)
+      ? (uniqueVariants.find((v) => v.id === id) || uniqueVariants[0])
+      : null
+  );
   const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
-    if (uniqueVariants && uniqueVariants.length > 0) {
+    const list = effectiveVariants;
+    if (list && list.length > 0) {
       const expected = (selectedColors || [])
         .map((c) => c.toLowerCase())
         .filter((c) => c !== "all");
 
       if (expected.length > 0) {
-        const colorMatch = uniqueVariants.find((v) => {
+        const colorMatch = list.find((v) => {
           const cName = (v.colorName || "").toLowerCase();
           const vTitle = (v.name || "").toLowerCase();
           const hex = (v.colorHex || "").toLowerCase();
@@ -130,12 +156,12 @@ export default function ProductCard({
           return;
         }
       }
-      const match = uniqueVariants.find(v => v.id === id);
-      setActiveVariant(match || uniqueVariants[0]);
+      const match = list.find(v => v.id === id);
+      setActiveVariant(match || list[0]);
     } else {
       setActiveVariant(null);
     }
-  }, [id, colorVariants, selectedColors]);
+  }, [id, effectiveVariants, selectedColors]);
 
   const baseDisplayName = displayName || name;
   const representativeId = representativeProduct?.id || id;
@@ -318,10 +344,10 @@ export default function ProductCard({
         </div>
 
         {/* Color Swatches */}
-        {uniqueVariants && uniqueVariants.length > 1 && (
+        {effectiveVariants && effectiveVariants.length > 0 && (
           <div style={{ display: "flex", justifyContent: "center", gap: "6px", flexWrap: "wrap", minHeight: "22px", marginBottom: "0.5rem" }}>
-            {uniqueVariants.map((v) => {
-              const isSelected = activeVariant ? activeVariant.id === v.id : false;
+            {effectiveVariants.map((v) => {
+              const isSelected = activeVariant ? activeVariant.id === v.id : (v.id === currentId || effectiveVariants.length === 1);
               const isWhite = isWhiteColor(v.colorHex);
               return (
                 <div

@@ -416,11 +416,11 @@ export function ProductCarouselSection({
                                   (other.colorHex && v.colorHex && other.colorHex.toLowerCase() === v.colorHex.toLowerCase())
                               ) === idx
                           );
-                          if (uniqueVars.length <= 1) return null;
+                          if (uniqueVars.length === 0) return null;
                           return (
                             <div style={{ display: "flex", justifyContent: "center", gap: "6px", flexWrap: "wrap", minHeight: "22px" }}>
                               {uniqueVars.map((v: any) => {
-                                const isSelected = activeVar ? activeVar.id === v.id : false;
+                                const isSelected = activeVar ? activeVar.id === v.id : uniqueVars.length === 1;
                                 const isWhite = v.colorHex?.toLowerCase() === "#ffffff" || v.colorHex?.toLowerCase() === "white";
                                 return (
                                   <div

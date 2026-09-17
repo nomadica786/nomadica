@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Star, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
@@ -279,7 +279,17 @@ function computeVariations(rawProduct: any, allEdges: any[], mockupLookup: Recor
     (g.displayName && rawProduct.title && g.displayName.toLowerCase() === rawProduct.title.toLowerCase()) ||
     (parsedCurrent.baseName && g.name.toLowerCase() === parsedCurrent.baseName.toLowerCase())
   );
-  if (!currentGroup) return [];
+  if (!currentGroup) {
+    const parsed = parseProduct({ name: rawProduct.title, colors: rawProduct.colors });
+    return [{
+      id: rawProduct.id,
+      handle: rawProduct.handle,
+      colorName: parsed.colorName || "Original",
+      colorHex: parsed.colorHex || "#FFFFFF",
+      image: rawProduct.images?.edges?.[0]?.node?.url || (Array.isArray(rawProduct.images) ? rawProduct.images[0] : rawProduct.image) || "",
+      createdAt: rawProduct.createdAt || ""
+    }];
+  }
   const vars = currentGroup.colorVariants.map(v => ({
     id: v.id,
     handle: v.handle,
@@ -383,9 +393,42 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
       ) === idx
   );
 
-  const currentVariantId = uniqueColorVariations.some(v => v.id === product?.id)
-    ? product?.id
-    : (uniqueColorVariations[0]?.id || product?.id);
+  const isVariantActive = useCallback((v: any) => {
+    if (!v) return false;
+    if (product?.id && v.id) {
+      if (v.id === product.id) return true;
+      const vNum = String(v.id).replace(/\D/g, "");
+      const pNum = String(product.id).replace(/\D/g, "");
+      if (vNum && pNum && vNum === pNum) return true;
+    }
+    if (product?.handle && v.handle && v.handle.toLowerCase() === product.handle.toLowerCase()) {
+      return true;
+    }
+    return false;
+  }, [product?.id, product?.handle]);
+
+  const activeVariant = uniqueColorVariations.find(isVariantActive) || uniqueColorVariations[0];
+  const currentVariantId = activeVariant?.id || product?.id;
+
+  const activeDisplayImage = hoveredColorImage ||
+    (selectedImage === 0
+      ? (product?.images?.[0] || activeVariant?.image || "")
+      : (product?.images?.[selectedImage] || product?.images?.[1] || activeVariant?.image || product?.images?.[0] || ""));
+
+  const lightboxImages = useMemo(() => {
+    const list: string[] = [];
+    if (product?.images && product.images.length > 0) {
+      for (const img of product.images) {
+        if (img && !list.includes(img)) list.push(img);
+      }
+    }
+    for (const v of uniqueColorVariations) {
+      if (v.image && !list.includes(v.image)) {
+        list.push(v.image);
+      }
+    }
+    return list;
+  }, [product?.images, uniqueColorVariations]);
 
   const [openAccordion, setOpenAccordion] = useState<Record<string, boolean>>({
     details: false,
@@ -658,37 +701,32 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
     checkWishlist();
   }, [product?.id]);
 
-  useEffect(() => {
-    if (colorVariations.length > 0 && product?.id) {
-      const idx = colorVariations.findIndex(v => v.id === product.id);
-      if (idx >= 0) {
-        setLightboxVariantIndex(idx);
-      }
-    }
-  }, [product?.id, colorVariations]);
-
   const handleColorSelect = (v: any, idx: number) => {
     setHoveredColorImage(null);
     setHoveredSwatchId(null);
     setLightboxVariantIndex(idx);
 
-    if (v.id === product?.id) {
+    const isCurrentlySelected = isVariantActive(v);
+
+    if (isCurrentlySelected) {
       // User clicked the currently selected color:
       // If currently showing mock image (selectedImage === 0), switch to the product photo for this color
-      setSelectedImage(1);
+      setSelectedImage(product && product.images && product.images.length > 1 ? 1 : 0);
       return;
     }
 
     // User clicked a different color variant
-    const matchingNode = allProductsList.find((p: any) => p.id === v.id || (v.handle && p.handle === v.handle)) ||
-      initialAllEdges?.map((e: any) => e.node || e).find((p: any) => p.id === v.id || (v.handle && p.handle === v.handle));
+    const matchingNode = allProductsList.find((p: any) => 
+      (v.id && p.id && (p.id === v.id || String(p.id).replace(/\D/g, "") === String(v.id).replace(/\D/g, ""))) || 
+      (v.handle && p.handle && p.handle.toLowerCase() === v.handle.toLowerCase())
+    ) || initialAllEdges?.map((e: any) => e.node || e).find((p: any) => 
+      (v.id && p.id && (p.id === v.id || String(p.id).replace(/\D/g, "") === String(v.id).replace(/\D/g, ""))) || 
+      (v.handle && p.handle && p.handle.toLowerCase() === v.handle.toLowerCase())
+    );
 
     if (matchingNode) {
       const mapped = mapRawProduct(matchingNode);
-      const productTypeKey = matchingNode.productType || matchingNode.category || "Tee";
-      const mockupConfig = mockupLookupState[productTypeKey] || mockupLookupState["Tee"];
-      const currentGroup = groupProducts([matchingNode], mockupLookupState)[0];
-      const mockupImg = currentGroup?.mockupImage || (typeof mockupConfig === "object" ? mockupConfig?.mockupImage : mockupConfig);
+      const mockupImg = getInitialMockup(matchingNode, mockupLookupState);
 
       const colorImg = v.image || matchingNode.images?.edges?.[0]?.node?.url || matchingNode.image || "";
       const rawImages = matchingNode.images?.edges?.map((edge: any) => edge.node.url) || (matchingNode.image ? [matchingNode.image] : []);
@@ -697,7 +735,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
         filtered.unshift(colorImg);
       }
 
-      mapped.images = mockupImg ? [mockupImg, ...filtered] : filtered;
+      mapped.images = mockupImg ? [mockupImg, ...filtered] : (filtered.length > 0 ? filtered : [colorImg].filter(Boolean));
       if (mapped.images.length === 1 && colorImg && mockupImg) {
         mapped.images.push(colorImg);
       }
@@ -707,17 +745,41 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
         name: prev?.name || mapped.name,
       }));
       setVariants(matchingNode.variants?.edges?.map((edge: any) => edge.node) || []);
-      setSelectedImage(1); // Show color product photo instead of mock image
+      setSelectedImage(mockupImg && mapped.images.length > 1 ? 1 : 0); // Show color product photo instead of mock image
+      setSelectedColor(v.colorName || "");
 
       if (v.handle) {
         window.history.replaceState(null, "", `/products/${v.handle}`);
       }
     } else {
-      setSelectedImage(1);
+      const colorImg = v.image || "";
+      setProduct(prev => prev ? {
+        ...prev,
+        id: v.id,
+        handle: v.handle || prev.handle,
+        images: colorImg ? [colorImg, ...(prev.images || []).filter((i: string) => i !== colorImg)] : prev.images,
+      } : prev);
+      setSelectedImage(0);
+      setSelectedColor(v.colorName || "");
+
       if (v.handle) {
-        router.push(`/products/${v.handle}`);
-      } else {
-        router.push(`/shop/product-details?id=${v.id}`);
+        window.history.replaceState(null, "", `/products/${v.handle}`);
+        api.products.getByHandle(v.handle).then((res: any) => {
+          const raw = res?.product || res?.productByHandle;
+          if (raw) {
+            setAllProductsList(prev => [...prev, raw]);
+            const mapped = mapRawProduct(raw);
+            const mockupImg = getInitialMockup(raw, mockupLookupState);
+            const rawImages = raw.images?.edges?.map((edge: any) => edge.node.url) || (raw.image ? [raw.image] : []);
+            const filtered = rawImages.filter((img: string) => img !== mockupImg);
+            if (colorImg && !filtered.includes(colorImg)) {
+              filtered.unshift(colorImg);
+            }
+            mapped.images = mockupImg ? [mockupImg, ...filtered] : (filtered.length > 0 ? filtered : [colorImg].filter(Boolean));
+            setProduct(prev => ({ ...mapped, name: prev?.name || mapped.name }));
+            setVariants(raw.variants?.edges?.map((edge: any) => edge.node) || []);
+          }
+        }).catch(() => {});
       }
     }
   };
@@ -728,42 +790,30 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
       const match = pathname.match(/\/products\/([^/?#]+)/);
       if (match && match[1]) {
         const handleFromUrl = match[1];
-        const vIdx = colorVariations.findIndex(v => v.handle === handleFromUrl);
+        const vIdx = uniqueColorVariations.findIndex(v => v.handle === handleFromUrl);
         if (vIdx >= 0) {
-          const v = colorVariations[vIdx];
+          const v = uniqueColorVariations[vIdx];
           handleColorSelect(v, vIdx);
         }
       }
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [colorVariations, allProductsList]);
+  }, [uniqueColorVariations, allProductsList]);
 
-  const handleCloseLightbox = (syncVariant: boolean = false) => {
+  const handleCloseLightbox = () => {
     setIsLightboxOpen(false);
-    if (syncVariant) {
-      const target = colorVariations[lightboxVariantIndex];
-      if (target) {
-        handleColorSelect(target, lightboxVariantIndex);
-      }
-    }
   };
 
   const handlePrevLightbox = () => {
-    if (colorVariations.length > 1) {
-      const prevIdx = (lightboxVariantIndex - 1 + colorVariations.length) % colorVariations.length;
-      setLightboxVariantIndex(prevIdx);
-    } else if (product?.images && product.images.length > 1) {
-      setSelectedImage((prev) => (prev - 1 + product.images.length) % product.images.length);
+    if (lightboxImages.length > 1) {
+      setLightboxVariantIndex((prev) => (prev - 1 + lightboxImages.length) % lightboxImages.length);
     }
   };
 
   const handleNextLightbox = () => {
-    if (colorVariations.length > 1) {
-      const nextIdx = (lightboxVariantIndex + 1) % colorVariations.length;
-      setLightboxVariantIndex(nextIdx);
-    } else if (product?.images && product.images.length > 1) {
-      setSelectedImage((prev) => (prev + 1) % product.images.length);
+    if (lightboxImages.length > 1) {
+      setLightboxVariantIndex((prev) => (prev + 1) % lightboxImages.length);
     }
   };
 
@@ -787,7 +837,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isLightboxOpen, colorVariations, lightboxVariantIndex, product?.images]);
+  }, [isLightboxOpen, lightboxImages.length]);
 
   const handleWishlistToggle = async () => {
     if (!product) return;
@@ -951,8 +1001,8 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
 
             {/* All available color variants */}
             {uniqueColorVariations.map((v, idx) => {
-              const isCurrentProduct = v.id === currentVariantId;
-              const isSelected = (isCurrentProduct && selectedImage !== 0 && !hoveredColorImage) || hoveredSwatchId === v.id;
+              const isCurrentProduct = isVariantActive(v);
+              const isSelected = (isCurrentProduct && (selectedImage !== 0 || !product.images?.[0]) && !hoveredColorImage) || hoveredSwatchId === v.id;
 
               return (
                 <button
@@ -973,11 +1023,12 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
                     overflow: "hidden",
                     borderRadius: "6px",
                     border: isSelected ? "2px solid #C1A886" : "1px solid rgba(30, 30, 30, 0.2)",
+                    boxShadow: isSelected ? "0 0 0 1px #C1A886" : "none",
                     cursor: "pointer",
                     padding: 0,
                     background: "#FFFFFF",
                     position: "relative",
-                    transition: "border-color 0.2s ease, transform 0.2s ease",
+                    transition: "border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
                     flexShrink: 0,
                   }}
                   title={v.colorName}
@@ -998,8 +1049,8 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
           <div style={{ flexGrow: 1, minWidth: 0 }}>
             <div
               onClick={() => {
-                const currentIdx = colorVariations.findIndex(v => v.id === product.id);
-                setLightboxVariantIndex(currentIdx >= 0 ? currentIdx : 0);
+                const imgIdx = lightboxImages.findIndex(img => img === activeDisplayImage);
+                setLightboxVariantIndex(imgIdx >= 0 ? imgIdx : 0);
                 setIsLightboxOpen(true);
               }}
               style={{
@@ -1014,23 +1065,14 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
               }}
               title="Click to expand"
             >
-              {(() => {
-                const activeVariant = uniqueColorVariations.find(v => v.id === currentVariantId);
-                const activeDisplayImage = hoveredColorImage ||
-                  (selectedImage === 0
-                    ? (product.images[0] || activeVariant?.image || "")
-                    : (product.images[selectedImage] || product.images[1] || activeVariant?.image || product.images[0] || ""));
-                return (
-                  <Image
-                    src={getShopifyImageUrl(activeDisplayImage, 1000)}
-                    alt={product.name}
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 700px"
-                    style={{ objectFit: "cover", transition: "opacity 0.3s ease" }}
-                  />
-                );
-              })()}
+              <Image
+                src={getShopifyImageUrl(activeDisplayImage, 1000)}
+                alt={product.name}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 700px"
+                style={{ objectFit: "cover", transition: "opacity 0.3s ease" }}
+              />
 
               {/* Floating Bestseller Badge */}
               <div
@@ -1250,12 +1292,12 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
               COLOR: <span style={{ fontWeight: 400, color: "rgba(30,30,30,0.6)" }}>
                 {hoveredSwatchId
                   ? uniqueColorVariations.find((v) => v.id === hoveredSwatchId)?.colorName
-                  : (uniqueColorVariations.find((v) => v.id === currentVariantId)?.colorName || parseProduct({ name: product.rawName }).colorName)}
+                  : (activeVariant?.colorName || parseProduct({ name: product.rawName }).colorName)}
               </span>
             </p>
             <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
               {uniqueColorVariations.map((v, idx) => {
-                const isCurrent = v.id === currentVariantId;
+                const isCurrent = isVariantActive(v);
                 const isHovered = hoveredSwatchId === v.id;
                 return (
                   <button
@@ -1271,9 +1313,9 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
                       outlineOffset: "3px",
                       cursor: "pointer",
                       padding: 0,
-                      transform: isCurrent ? "scale(1.05)" : (isHovered ? "scale(1.1)" : "scale(1)"),
+                      transform: isCurrent ? "scale(1.08)" : (isHovered ? "scale(1.1)" : "scale(1)"),
                       transition: "transform 0.2s ease, outline 0.2s ease",
-                      boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                      boxShadow: isCurrent ? "0 2px 8px rgba(0,0,0,0.15)" : "0 1px 4px rgba(0,0,0,0.1)",
                     }}
                     title={v.colorName}
                     onMouseEnter={() => {
@@ -1507,7 +1549,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
       {/* Full-Screen Lightbox Modal */}
       {isLightboxOpen && (
         <div
-          onClick={() => handleCloseLightbox(false)}
+          onClick={() => handleCloseLightbox()}
           style={{
             position: "fixed",
             inset: 0,
@@ -1524,7 +1566,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleCloseLightbox(false);
+              handleCloseLightbox();
             }}
             aria-label="Close image popup"
             style={{
@@ -1632,174 +1674,37 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
             <ChevronRight size={36} color="#FFFFFF" strokeWidth={2.5} />
           </button>
 
-          {/* Center Content Container */}
+          {/* Center Content Container: Occupies the whole space */}
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
               position: "relative",
-              maxWidth: "85vw",
-              maxHeight: "88vh",
+              maxWidth: "92vw",
+              maxHeight: "92vh",
               display: "flex",
-              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               userSelect: "none",
             }}
           >
-            <div
+            <img
+              key={lightboxImages[lightboxVariantIndex] || activeDisplayImage}
+              src={getShopifyImageUrl(
+                lightboxImages[lightboxVariantIndex] || activeDisplayImage,
+                1600
+              )}
+              alt={product.name}
               style={{
-                position: "relative",
-                maxHeight: "68vh",
-                maxWidth: "80vw",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                maxHeight: "90vh",
+                maxWidth: "90vw",
+                width: "auto",
+                height: "auto",
+                objectFit: "contain",
+                borderRadius: "8px",
+                boxShadow: "0 25px 60px rgba(0, 0, 0, 0.7)",
+                display: "block",
               }}
-            >
-              <img
-                key={colorVariations[lightboxVariantIndex]?.id || lightboxVariantIndex}
-                src={getShopifyImageUrl(
-                  (colorVariations.length > 0 && colorVariations[lightboxVariantIndex]?.image) ||
-                  product.images[selectedImage] ||
-                  product.images[0],
-                  1400
-                )}
-                alt={colorVariations[lightboxVariantIndex]?.colorName || product.name}
-                style={{
-                  maxHeight: "66vh",
-                  maxWidth: "75vw",
-                  objectFit: "contain",
-                  borderRadius: "8px",
-                  boxShadow: "0 20px 50px rgba(0, 0, 0, 0.6)",
-                  display: "block",
-                }}
-              />
-            </div>
-
-            {/* Active Color Variant Name / Indicator & Mini Swatch Strip */}
-            {colorVariations.length > 0 && (
-              <div
-                style={{
-                  marginTop: "0.875rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "0.625rem",
-                }}
-              >
-                {/* Info pill with color dot + name + counter + quick select */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.75rem",
-                    backgroundColor: "rgba(0, 0, 0, 0.75)",
-                    padding: "0.45rem 1.15rem",
-                    borderRadius: "24px",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    backdropFilter: "blur(8px)",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "14px",
-                      height: "14px",
-                      borderRadius: "50%",
-                      backgroundColor: colorVariations[lightboxVariantIndex]?.colorHex || "#FFFFFF",
-                      border: "1.5px solid rgba(255, 255, 255, 0.9)",
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "0.875rem",
-                      color: "#FFFFFF",
-                      fontWeight: 600,
-                      letterSpacing: "0.03em",
-                    }}
-                  >
-                    {colorVariations[lightboxVariantIndex]?.colorName} ({lightboxVariantIndex + 1} of {colorVariations.length})
-                  </span>
-
-                  {colorVariations[lightboxVariantIndex]?.handle &&
-                    colorVariations[lightboxVariantIndex].handle !== product.handle && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCloseLightbox(true);
-                      }}
-                      style={{
-                        marginLeft: "0.25rem",
-                        backgroundColor: "#C1A886",
-                        color: "#FFFFFF",
-                        border: "none",
-                        borderRadius: "14px",
-                        padding: "0.25rem 0.75rem",
-                        fontSize: "0.75rem",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        fontFamily: "'Montserrat', sans-serif",
-                        transition: "background-color 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = "#A88E6E";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = "#C1A886";
-                      }}
-                    >
-                      Select Color
-                    </button>
-                  )}
-                </div>
-
-                {/* Mini Swatches Strip */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "0.5rem",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexWrap: "wrap",
-                    maxWidth: "90vw",
-                  }}
-                >
-                  {uniqueColorVariations.map((v, idx) => {
-                    const isActive = idx === lightboxVariantIndex;
-                    return (
-                      <button
-                        key={v.id || idx}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setLightboxVariantIndex(idx);
-                        }}
-                        style={{
-                          width: "36px",
-                          height: "46px",
-                          borderRadius: "4px",
-                          overflow: "hidden",
-                          border: isActive ? "2px solid #C1A886" : "1px solid rgba(255, 255, 255, 0.3)",
-                          outline: isActive ? "2px solid #FFFFFF" : "none",
-                          padding: 0,
-                          backgroundColor: "#FFFFFF",
-                          cursor: "pointer",
-                          transform: isActive ? "scale(1.1)" : "scale(1)",
-                          transition: "all 0.15s ease",
-                          position: "relative",
-                        }}
-                        title={v.colorName}
-                      >
-                        <img
-                          src={getShopifyImageUrl(v.image, 100)}
-                          alt={v.colorName}
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            />
           </div>
         </div>
       )}

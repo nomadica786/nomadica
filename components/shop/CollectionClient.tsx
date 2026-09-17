@@ -165,7 +165,12 @@ const enrichedProducts = useMemo(() => {
   if (!collectionEdges || collectionEdges.length === 0) return productsState;
 
   return productsState.map((p) => {
-    const extraCollections = [...(p.collections || [])];
+    const rawCols: string[] = Array.isArray(p.collections)
+      ? p.collections
+      : p.collections?.edges
+      ? p.collections.edges.flatMap((e: any) => [e?.node?.title, e?.node?.handle].filter(Boolean))
+      : [];
+    const extraCollections = [...rawCols];
 
     for (const cEdge of collectionEdges) {
       const colNode = cEdge.node;
