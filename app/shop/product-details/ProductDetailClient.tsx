@@ -55,8 +55,8 @@ interface ProductDetails {
   sizes: string[];
   colors: string[];
   images: string[];
-  rating: number;
-  reviews: number;
+  // rating: number;
+  // reviews: number;
   badge?: string;
   handle?: string;
 }
@@ -189,8 +189,8 @@ const mapRawProduct = (rawProduct: any): ProductDetails => {
     sizes: rawProduct.sizes || ["XS - 36", "S - 38", "M - 40", "L - 42", "XL - 44", "XXL - 46"],
     colors: rawProduct.colors || ["#1E1E1E", "#1E1E1E"],
     images: rawProduct.images?.edges?.map((edge: any) => edge.node.url) || [rawProduct.image || ""],
-    rating: rawProduct.rating || 4.5,
-    reviews: rawProduct.reviews || 3448,
+    // rating: rawProduct.rating || 4.5,
+    // reviews: rawProduct.reviews || 3448,
     badge: rawProduct.badge,
     handle: rawProduct.handle,
   };
@@ -1178,40 +1178,6 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
           >
             {product.name}
           </h1>
-
-          {/* Rating */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
-            <span
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "0.9375rem",
-                fontWeight: 700,
-                color: "#1E1E1E",
-              }}
-            >
-              {product.rating}
-            </span>
-            <div style={{ display: "flex", gap: "2px" }}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  size={16}
-                  fill={star <= Math.floor(product.rating) ? "#FF9800" : star - 0.5 <= product.rating ? "#FF9800" : "none"}
-                  stroke="#FF9800"
-                />
-              ))}
-            </div>
-            <span
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "0.8125rem",
-                color: "#3B82F6",
-                fontWeight: 500,
-              }}
-            >
-              ({product.reviews.toLocaleString()})
-            </span>
-          </div>
 
           {/* Price */}
           <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.25rem" }}>
