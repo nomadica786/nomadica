@@ -19,7 +19,6 @@ const navLinks = [
       { label: "New Arrivals", href: "/shop/new-arrivals" },
       { label: "Best Sellers", href: "/shop/best-sellers" },
       { label: "Collections", href: "/shop/collections" },
-      { label: "Limited Drops", href: "/shop/limited-drops" },
     ],
   },
   { label: "ARTICLES", href: "/journal" },
