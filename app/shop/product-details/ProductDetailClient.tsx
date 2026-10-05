@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Star, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
@@ -358,7 +358,12 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
     return initialProduct?.variants?.edges?.map((edge: any) => edge.node) || [];
   });
   const [loading, setLoading] = useState(() => !initialProduct);
-  const [selectedImage, setSelectedImage] = useState(0);
+  const hasUserClickedMockup = useRef(false);
+  const [selectedImage, setSelectedImage] = useState<number>(() => {
+    if (!initialProduct) return 0;
+    const mock = getInitialMockup(initialProduct, initialMockupLookup || {});
+    return mock ? 1 : 0;
+  });
   const [selectedSize, setSelectedSize] = useState("XS - 36");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -410,10 +415,17 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
   const activeVariant = uniqueColorVariations.find(isVariantActive) || uniqueColorVariations[0];
   const currentVariantId = activeVariant?.id || product?.id;
 
+  const currentMockupImg = useMemo(() => {
+    return getInitialMockup(product || initialProduct, mockupLookupState);
+  }, [product, initialProduct, mockupLookupState]);
+
+  const hasMockup = !!(currentMockupImg && product?.images && product.images.length > 1 && product.images[0] === currentMockupImg);
+  const isViewingMockup = hasMockup && hasUserClickedMockup.current && selectedImage === 0;
+
   const activeDisplayImage = hoveredColorImage ||
-    (selectedImage === 0
+    (isViewingMockup
       ? (product?.images?.[0] || activeVariant?.image || "")
-      : (product?.images?.[selectedImage] || product?.images?.[1] || activeVariant?.image || product?.images?.[0] || ""));
+      : ((selectedImage > 1 && product?.images?.[selectedImage]) || activeVariant?.image || (product?.images && product.images.length > 1 ? product.images[1] : product?.images?.[0]) || ""));
 
   const lightboxImages = useMemo(() => {
     const list: string[] = [];
@@ -462,11 +474,12 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
           const rawProduct = res?.product || res?.productByHandle;
           if (rawProduct) {
             const mapped = mapRawProduct(rawProduct);
+            const mock = getInitialMockup(rawProduct, mockupLookupState);
             setProduct(mapped);
             setVariants(rawProduct.variants?.edges?.map((edge: any) => edge.node) || []);
             setSelectedColor(mapped.colors[0] || "");
             setSelectedSize("S - 38");
-            setSelectedImage(0);
+            setSelectedImage(mock ? 1 : 0);
             setLoading(false);
             
             await loadVariationsAndRelated(rawProduct, mapped);
@@ -633,7 +646,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
               images: [mockupImg, ...filtered]
             };
           });
-          setSelectedImage(prev => (prev === 0 ? 0 : prev));
+          setSelectedImage(prev => (hasUserClickedMockup.current && prev === 0 ? 0 : 1));
         }
 
         const currentVarIdx = variations.findIndex(v => v.id === rawProduct.id);
@@ -705,12 +718,13 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
     setHoveredColorImage(null);
     setHoveredSwatchId(null);
     setLightboxVariantIndex(idx);
+    hasUserClickedMockup.current = false;
 
     const isCurrentlySelected = isVariantActive(v);
 
     if (isCurrentlySelected) {
       // User clicked the currently selected color:
-      // If currently showing mock image (selectedImage === 0), switch to the product photo for this color
+      // Switch back to the product photo for this color
       setSelectedImage(product && product.images && product.images.length > 1 ? 1 : 0);
       return;
     }
@@ -752,14 +766,16 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
         window.history.replaceState(null, "", `/products/${v.handle}`);
       }
     } else {
+      const mockupImg = getInitialMockup({ category: product?.category, productType: product?.category }, mockupLookupState);
       const colorImg = v.image || "";
+      const tempImages = mockupImg ? [mockupImg, colorImg].filter(Boolean) : [colorImg].filter(Boolean);
       setProduct(prev => prev ? {
         ...prev,
         id: v.id,
         handle: v.handle || prev.handle,
-        images: colorImg ? [colorImg, ...(prev.images || []).filter((i: string) => i !== colorImg)] : prev.images,
+        images: tempImages,
       } : prev);
-      setSelectedImage(0);
+      setSelectedImage(mockupImg && tempImages.length > 1 ? 1 : 0);
       setSelectedColor(v.colorName || "");
 
       if (v.handle) {
@@ -769,15 +785,16 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
           if (raw) {
             setAllProductsList(prev => [...prev, raw]);
             const mapped = mapRawProduct(raw);
-            const mockupImg = getInitialMockup(raw, mockupLookupState);
+            const mImg = getInitialMockup(raw, mockupLookupState);
             const rawImages = raw.images?.edges?.map((edge: any) => edge.node.url) || (raw.image ? [raw.image] : []);
-            const filtered = rawImages.filter((img: string) => img !== mockupImg);
+            const filtered = rawImages.filter((img: string) => img !== mImg);
             if (colorImg && !filtered.includes(colorImg)) {
               filtered.unshift(colorImg);
             }
-            mapped.images = mockupImg ? [mockupImg, ...filtered] : (filtered.length > 0 ? filtered : [colorImg].filter(Boolean));
+            mapped.images = mImg ? [mImg, ...filtered] : (filtered.length > 0 ? filtered : [colorImg].filter(Boolean));
             setProduct(prev => ({ ...mapped, name: prev?.name || mapped.name }));
             setVariants(raw.variants?.edges?.map((edge: any) => edge.node) || []);
+            setSelectedImage(mImg && mapped.images.length > 1 ? 1 : 0);
           }
         }).catch(() => {});
       }
@@ -867,6 +884,8 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
     const variantId = selectedVariant?.id || (product.id && product.id.startsWith("gid://shopify/")
       ? product.id.replace("/Product/", "/ProductVariant/")
       : `gid://shopify/ProductVariant/${product.id}`);
+
+    const cartItemImage = activeVariant?.image || (hasMockup && product.images.length > 1 ? product.images[1] : product.images[0]) || "";
     
     try {
       let cartId = localStorage.getItem("nomadica_cart_id");
@@ -879,7 +898,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
           title: selectedSize,
           price: product.price,
           productTitle: product.name,
-          image: product.images[0] || ""
+          image: cartItemImage
         }]);
         const newCart = res?.cartCreate?.cart || res?.cart;
         if (newCart?.id) {
@@ -895,7 +914,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
             title: selectedSize,
             price: product.price,
             productTitle: product.name,
-            image: product.images[0] || ""
+            image: cartItemImage
           }]
         });
         updatedCart = res?.cartLinesUpdate?.cart || res?.cart;
@@ -959,10 +978,11 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
               overflowY: "auto",
             }}
           >
-            {/* Mockup photo is ALWAYS the first thumbnail */}
-            {product.images && product.images[0] && (
+            {/* Mockup photo is only shown if product has a mockup */}
+            {hasMockup && product.images && product.images[0] && (
               <button
                 onClick={() => {
+                  hasUserClickedMockup.current = true;
                   setSelectedImage(0);
                   setHoveredColorImage(null);
                   setHoveredSwatchId(null);
@@ -973,7 +993,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
                   aspectRatio: "3/4",
                   overflow: "hidden",
                   borderRadius: "6px",
-                  border: (selectedImage === 0 && !hoveredColorImage) ? "2px solid #C1A886" : "1px solid rgba(30, 30, 30, 0.2)",
+                  border: (isViewingMockup && !hoveredColorImage) ? "2px solid #C1A886" : "1px solid rgba(30, 30, 30, 0.2)",
                   cursor: "pointer",
                   padding: 0,
                   background: "#FFFFFF",
@@ -983,10 +1003,10 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
                 }}
                 title="Lifestyle mockup photo"
                 onMouseEnter={(e) => {
-                  if (selectedImage !== 0 || !!hoveredColorImage) (e.currentTarget as HTMLElement).style.borderColor = "#1E1E1E";
+                  if (!isViewingMockup || !!hoveredColorImage) (e.currentTarget as HTMLElement).style.borderColor = "#1E1E1E";
                 }}
                 onMouseLeave={(e) => {
-                  if (selectedImage !== 0 || !!hoveredColorImage) (e.currentTarget as HTMLElement).style.borderColor = "rgba(30, 30, 30, 0.2)";
+                  if (!isViewingMockup || !!hoveredColorImage) (e.currentTarget as HTMLElement).style.borderColor = "rgba(30, 30, 30, 0.2)";
                 }}
               >
                 <Image
@@ -1002,7 +1022,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
             {/* All available color variants */}
             {uniqueColorVariations.map((v, idx) => {
               const isCurrentProduct = isVariantActive(v);
-              const isSelected = (isCurrentProduct && (selectedImage !== 0 || !product.images?.[0]) && !hoveredColorImage) || hoveredSwatchId === v.id;
+              const isSelected = (isCurrentProduct && !isViewingMockup && !hoveredColorImage) || hoveredSwatchId === v.id;
 
               return (
                 <button
