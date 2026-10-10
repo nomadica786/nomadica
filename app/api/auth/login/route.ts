@@ -95,36 +95,70 @@ export async function POST(request: Request) {
           path: '/',
         });
 
-        return NextResponse.json({ success: true });
+        cookieStore.set('nomadica_auth', 'true', {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 30
+        });
+
+        return NextResponse.json({
+          success: true,
+          token: accessToken,
+          user: {
+            email,
+            firstName: email.split('@')[0],
+            lastName: 'Traveler'
+          }
+        });
       } catch (err: unknown) {
         console.error('Shopify customer login failed, falling back to mock:', err);
       }
     }
 
     // Mock Fallback Mode
+    const mockToken = `mock_customer_token_${Date.now()}`;
     const cookieStore = await cookies();
-    cookieStore.set('customer_access_token', `mock_customer_token_${Date.now()}`, {
+    cookieStore.set('customer_access_token', mockToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
+      maxAge: 60 * 60 * 24 * 30
     });
 
     cookieStore.set('customer_email', email, {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
+      maxAge: 60 * 60 * 24 * 30
     });
 
-    // Save a mock profile in cookies
-    cookieStore.set('mock_profile', JSON.stringify({
+    cookieStore.set('nomadica_auth', 'true', {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30
+    });
+
+    const mockProfile = {
       email: email,
       firstName: email.split('@')[0],
       lastName: 'Traveler',
       phone: ''
-    }), { path: '/' });
+    };
 
-    return NextResponse.json({ success: true });
+    // Save a mock profile in cookies
+    cookieStore.set('mock_profile', JSON.stringify(mockProfile), {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30
+    });
+
+    return NextResponse.json({
+      success: true,
+      token: mockToken,
+      user: mockProfile
+    });
 
   } catch (error) {
     console.error('Login error:', error);

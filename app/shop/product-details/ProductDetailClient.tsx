@@ -8,7 +8,7 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import ProductCard from "@/components/shop/ProductCard";
 import { ProductCarouselSection } from "@/components/shop/ProductCarouselSection";
 import { parseProduct, groupProducts } from "@/utils/productGroup";
-import { useAuth } from "@/utils/hooks/useAuth";
+import { useAuth, getStoredAuth } from "@/utils/hooks/useAuth";
 import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 
@@ -370,7 +370,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
   const [wishlisted, setWishlisted] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [cartAdding, setCartAdding] = useState(false);
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [loginPromptType, setLoginPromptType] = useState<"cart" | "wishlist" | null>(null);
   const initialGroupKey = (initialProduct?.productType || initialProduct?.category || "Tee").toLowerCase();
   const [colorVariations, setColorVariations] = useState<any[]>(() => {
     if (initialProduct && initialAllEdges && initialAllEdges.length > 0) {
@@ -704,6 +704,27 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
   useEffect(() => {
     const checkWishlist = async () => {
       if (!product?.id) return;
+
+      // Auto-fulfill pending wishlist addition if user returned after logging in
+      if (isAuthenticated) {
+        try {
+          const pendingId =
+            sessionStorage.getItem("pending_wishlist_product_id") ||
+            localStorage.getItem("pending_wishlist_product_id");
+          if (pendingId && (pendingId === product.id || pendingId === product.handle)) {
+            sessionStorage.removeItem("pending_wishlist_product_id");
+            localStorage.removeItem("pending_wishlist_product_id");
+            await api.wishlist.add(product.id);
+            setWishlisted(true);
+            window.dispatchEvent(new CustomEvent("wishlist-updated"));
+            return;
+          }
+        } catch (e) {
+          sessionStorage.removeItem("pending_wishlist_product_id");
+          localStorage.removeItem("pending_wishlist_product_id");
+        }
+      }
+
       try {
         const res = await api.wishlist.list();
         const isInWishlist = res?.wishlist?.some((item: any) => item.id === product.id);
@@ -713,7 +734,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
       }
     };
     checkWishlist();
-  }, [product?.id]);
+  }, [product?.id, product?.handle, isAuthenticated]);
 
   const handleColorSelect = (v: any, idx: number) => {
     setHoveredColorImage(null);
@@ -865,38 +886,40 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
 
     if (typeof window !== "undefined") {
       sessionStorage.setItem("nomadica_product_redirect", currentUrl);
-      sessionStorage.setItem(
-        "pending_add_to_cart",
-        JSON.stringify({
-          productId: product.id,
-          handle: product.handle,
-          size: selectedSize,
-          timestamp: Date.now()
-        })
-      );
+      if (loginPromptType === "wishlist") {
+        sessionStorage.setItem("pending_wishlist_product_id", product.id);
+        localStorage.setItem("pending_wishlist_product_id", product.id);
+      } else {
+        sessionStorage.setItem(
+          "pending_add_to_cart",
+          JSON.stringify({
+            productId: product.id,
+            handle: product.handle,
+            size: selectedSize,
+            timestamp: Date.now()
+          })
+        );
+      }
     }
     router.push(`/account/login?redirect=${encodeURIComponent(currentUrl)}`);
   };
 
   const handleWishlistToggle = async () => {
     if (!product) return;
-    if (!isAuthenticated) {
-      const currentUrl = typeof window !== "undefined"
-        ? (window.location.pathname + window.location.search)
-        : (product.handle ? `/products/${product.handle}` : `/shop/product-details?id=${product.id}`);
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("nomadica_product_redirect", currentUrl);
-      }
-      router.push(`/account/login?redirect=${encodeURIComponent(currentUrl)}`);
+    const isAuthed = isAuthenticated || (typeof window !== "undefined" && getStoredAuth().isAuthenticated);
+    if (!isAuthed) {
+      setLoginPromptType("wishlist");
       return;
     }
     try {
       if (wishlisted) {
         await api.wishlist.remove(product.id);
         setWishlisted(false);
+        window.dispatchEvent(new CustomEvent("wishlist-updated"));
       } else {
         await api.wishlist.add(product.id);
         setWishlisted(true);
+        window.dispatchEvent(new CustomEvent("wishlist-updated"));
       }
     } catch (err) {
       console.error("Failed to toggle wishlist:", err);
@@ -905,8 +928,9 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
 
   const handleAddToBag = async () => {
     if (!product) return;
-    if (!isAuthenticated) {
-      setShowLoginPrompt(true);
+    const isAuthed = isAuthenticated || (typeof window !== "undefined" && getStoredAuth().isAuthenticated);
+    if (!isAuthed) {
+      setLoginPromptType("cart");
       return;
     }
     setCartAdding(true);
@@ -1473,8 +1497,18 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
           {/* Buy Now */}
           <button
             onClick={async () => {
+              const isAuthed = isAuthenticated || (typeof window !== "undefined" && getStoredAuth().isAuthenticated);
+              if (!isAuthed) {
+                setLoginPromptType("cart");
+                return;
+              }
               await handleAddToBag();
-              router.push("/checkout");
+              const activeCartId = typeof window !== "undefined" ? localStorage.getItem("nomadica_cart_id") : null;
+              if (activeCartId) {
+                router.push(`/checkout?cartId=${activeCartId}`);
+              } else {
+                router.push("/checkout");
+              }
             }}
             style={{
               width: "100%",
@@ -1748,10 +1782,10 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
         </div>
       )}
 
-      {/* Login Prompt Modal when trying to Add to Cart unauthenticated */}
-      {showLoginPrompt && (
+      {/* Login Prompt Modal when trying to Add to Cart or Wishlist unauthenticated */}
+      {loginPromptType !== null && (
         <div
-          onClick={() => setShowLoginPrompt(false)}
+          onClick={() => setLoginPromptType(null)}
           style={{
             position: "fixed",
             inset: 0,
@@ -1780,7 +1814,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
           >
             {/* Close Button */}
             <button
-              onClick={() => setShowLoginPrompt(false)}
+              onClick={() => setLoginPromptType(null)}
               aria-label="Close"
               style={{
                 position: "absolute",
@@ -1797,21 +1831,39 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
             </button>
 
             {/* Icon */}
-            <div
-              style={{
-                width: "56px",
-                height: "56px",
-                borderRadius: "50%",
-                backgroundColor: "#F5F3F0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto 1.25rem",
-                color: "#1E1E1E"
-              }}
-            >
-              <ShoppingCart size={24} />
-            </div>
+            {loginPromptType === "wishlist" ? (
+              <div
+                style={{
+                  width: "56px",
+                  height: "56px",
+                  borderRadius: "50%",
+                  backgroundColor: "#FDF2F2",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 1.25rem",
+                  color: "#DC2626"
+                }}
+              >
+                <Heart size={26} fill="#DC2626" color="#DC2626" />
+              </div>
+            ) : (
+              <div
+                style={{
+                  width: "56px",
+                  height: "56px",
+                  borderRadius: "50%",
+                  backgroundColor: "#F5F3F0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 1.25rem",
+                  color: "#1E1E1E"
+                }}
+              >
+                <ShoppingCart size={24} />
+              </div>
+            )}
 
             <h3
               style={{
@@ -1822,7 +1874,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
                 margin: "0 0 0.5rem"
               }}
             >
-              Sign In to Add to Bag
+              {loginPromptType === "wishlist" ? "Sign In to Save to Wishlist" : "Sign In to Add to Bag"}
             </h3>
 
             <p
@@ -1834,7 +1886,15 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
                 margin: "0 0 1.5rem"
               }}
             >
-              Please log in to your account to add <strong>{product.name}</strong> to your shopping bag. Your saved address and preferences will be autofilled automatically during checkout.
+              {loginPromptType === "wishlist" ? (
+                <>
+                  Please log in to your account to save <strong>{product.name}</strong> to your wishlist. Once you sign in, it will be added to your wishlist automatically.
+                </>
+              ) : (
+                <>
+                  Please log in to your account to add <strong>{product.name}</strong> to your shopping bag. Your saved address and preferences will be autofilled automatically during checkout.
+                </>
+              )}
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -1855,7 +1915,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
               </button>
 
               <button
-                onClick={() => setShowLoginPrompt(false)}
+                onClick={() => setLoginPromptType(null)}
                 style={{
                   width: "100%",
                   padding: "0.75rem",

@@ -8,6 +8,8 @@ export async function POST() {
   cookieStore.delete('shopify_shop');
   cookieStore.delete('customer_access_token');
   cookieStore.delete('customer_email');
+  cookieStore.delete('nomadica_auth');
+  cookieStore.delete('mock_profile');
   return NextResponse.json({ success: true });
 }
 
@@ -17,5 +19,7 @@ export async function GET() {
   cookieStore.delete('shopify_shop');
   cookieStore.delete('customer_access_token');
   cookieStore.delete('customer_email');
+  cookieStore.delete('nomadica_auth');
+  cookieStore.delete('mock_profile');
   return NextResponse.json({ success: true });
 }

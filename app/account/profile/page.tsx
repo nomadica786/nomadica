@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { User, LogOut, Plus, X, Edit, MapPin } from "lucide-react";
-import { useAuth } from "@/utils/hooks/useAuth";
+import { useAuth, getStoredAuth } from "@/utils/hooks/useAuth";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 
@@ -51,7 +51,8 @@ function ProfileContent() {
 
   // Auth protection redirect
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    const stored = getStoredAuth();
+    if (!authLoading && !isAuthenticated && !stored.isAuthenticated) {
       router.replace("/account/login");
     }
   }, [authLoading, isAuthenticated, router]);

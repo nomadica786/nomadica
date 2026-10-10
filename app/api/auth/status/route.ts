@@ -5,20 +5,25 @@ import { ShopifyAdminClient, ShopifyStorefrontClient } from '@/lib/shopify/clien
 import { ADMIN_QUERIES } from '@/lib/shopify/queries';
 import { getEnvironment } from '@/utils/env';
 
-export async function GET() {
+export async function GET(request: Request) {
   const cookieStore = await cookies();
-  const customerAccessToken = cookieStore.get('customer_access_token')?.value;
+  const authHeader = request.headers.get('authorization');
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+  const headerToken = request.headers.get('x-customer-token') || bearerToken;
+  const cookieToken = cookieStore.get('customer_access_token')?.value;
+  const customerAccessToken = headerToken || cookieToken;
+
   const customerEmail = cookieStore.get('customer_email')?.value;
   const accessToken = cookieStore.get('shopify_access_token')?.value;
   const shop = cookieStore.get('shopify_shop')?.value;
   const env = getEnvironment();
 
-  // 1. Check customer session first (Storefront API authenticated customer)
+  // 1. Check customer session first (Storefront API authenticated customer or token)
   if (customerAccessToken) {
     const storefrontToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
     const isStorefrontConfigured = !!env.shopUrl && !!storefrontToken && storefrontToken.trim() !== '';
 
-    if (isStorefrontConfigured) {
+    if (isStorefrontConfigured && !customerAccessToken.startsWith('mock_')) {
       try {
         const client = new ShopifyStorefrontClient(env.shopUrl!, storefrontToken!);
         const query = `
@@ -35,8 +40,16 @@ export async function GET() {
         const customer = data?.customer;
 
         if (customer) {
+          cookieStore.set('nomadica_auth', 'true', {
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 30
+          });
+
           return NextResponse.json({
             isAuthenticated: true,
+            token: customerAccessToken,
             user: {
               email: customer.email,
               firstName: customer.firstName,
@@ -55,21 +68,38 @@ export async function GET() {
     const savedProfile = cookieStore.get('mock_profile')?.value;
     if (savedProfile) {
       try {
+        const parsed = JSON.parse(savedProfile);
+        cookieStore.set('nomadica_auth', 'true', {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 30
+        });
+
         return NextResponse.json({
           isAuthenticated: true,
+          token: customerAccessToken,
           user: {
-            ...JSON.parse(savedProfile),
+            ...parsed,
             isCustomer: true
           }
         });
       } catch {}
     }
 
+    cookieStore.set('nomadica_auth', 'true', {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30
+    });
+
     return NextResponse.json({
       isAuthenticated: true,
+      token: customerAccessToken,
       user: {
         email: customerEmail || 'arjun.mehta@email.com',
-        firstName: 'Arjun',
+        firstName: customerEmail ? customerEmail.split('@')[0] : 'Arjun',
         lastName: 'Mehta',
         isCustomer: true
       }
@@ -88,8 +118,16 @@ export async function GET() {
       const firstName = nameParts[0] || 'Shop';
       const lastName = nameParts.slice(1).join(' ') || 'Admin';
 
+      cookieStore.set('nomadica_auth', 'true', {
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30
+      });
+
       return NextResponse.json({
         isAuthenticated: true,
+        token: accessToken,
         user: {
           email: shopData.shop.email,
           firstName,
@@ -110,6 +148,7 @@ export async function GET() {
       try {
         return NextResponse.json({
           isAuthenticated: true,
+          token: 'mock_token',
           user: JSON.parse(savedProfile),
         });
       } catch {}
@@ -117,6 +156,7 @@ export async function GET() {
 
     return NextResponse.json({
       isAuthenticated: true,
+      token: 'mock_token',
       user: {
         email: 'arjun.mehta@email.com',
         firstName: 'Arjun',
@@ -127,7 +167,7 @@ export async function GET() {
   }
 
   return NextResponse.json(
-    { isAuthenticated: false, user: null },
+    { isAuthenticated: false, user: null, token: null },
     { status: 200 }
   );
 }

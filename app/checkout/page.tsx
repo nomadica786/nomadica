@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CreditCard, Truck, Shield, ChevronLeft, CheckCircle } from "lucide-react";
 import { api } from "@/components/api/api";
-import { useAuth } from "@/utils/hooks/useAuth";
+import { useAuth, getStoredAuth } from "@/utils/hooks/useAuth";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { MOCK_PRODUCTS } from "@/utils/mockData";
 import Script from "next/script";
@@ -13,6 +13,7 @@ function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const cartId = searchParams.get("cartId");
+  const [activeCartId, setActiveCartId] = useState<string | null>(cartId);
 
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const [cart, setCart] = useState<any>(null);
@@ -43,14 +44,26 @@ function CheckoutContent() {
   const [orderInfo, setOrderInfo] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Sync user info when authenticated
+  // Detect active cart ID from query param or localStorage
   useEffect(() => {
-    if (user) {
-      if (user.email) setEmail(user.email);
-      if (user.firstName && !firstName) setFirstName(user.firstName);
-      if (user.lastName && !lastName) setLastName(user.lastName);
+    if (!cartId && typeof window !== "undefined") {
+      const stored = localStorage.getItem("nomadica_cart_id");
+      if (stored) setActiveCartId(stored);
+    } else if (cartId) {
+      setActiveCartId(cartId);
     }
-  }, [user, firstName, lastName]);
+  }, [cartId]);
+
+  // Sync user info from session or stored auth immediately
+  useEffect(() => {
+    const stored = getStoredAuth();
+    const activeUser = user || stored.user;
+    if (activeUser) {
+      if (activeUser.email && !email) setEmail(activeUser.email);
+      if (activeUser.firstName && !firstName) setFirstName(activeUser.firstName);
+      if (activeUser.lastName && !lastName) setLastName(activeUser.lastName);
+    }
+  }, [user, firstName, lastName, email]);
 
   const applyAddress = (addr: any) => {
     if (!addr) return;
@@ -81,10 +94,11 @@ function CheckoutContent() {
     } catch {}
   }, []);
 
-  // Load cart details
+  // Load cart details using activeCartId
   useEffect(() => {
     const fetchCartDetails = async () => {
-      if (!cartId) {
+      const targetCartId = activeCartId || (typeof window !== "undefined" ? localStorage.getItem("nomadica_cart_id") : null);
+      if (!targetCartId) {
         setLoadingCart(false);
         return;
       }
@@ -92,16 +106,14 @@ function CheckoutContent() {
         console.log("========================================");
         console.log("[CHECKOUT FLOW] STEP 2: Loading checkout page");
         console.log("========================================");
-        console.log(`  Loading cart: ${cartId}`);
+        console.log(`  Loading cart: ${targetCartId}`);
         
-        const res = await api.cart.get(cartId);
+        const res = await api.cart.get(targetCartId);
         setCart(res.cart);
         
         const itemCount = res.cart?.lines?.edges?.length || 0;
         const subtotal = res.cart?.cost?.subtotalAmount?.amount || "0";
         console.log(`  ✅ Cart loaded: ${itemCount} items, Subtotal: ${subtotal} INR`);
-        // Always use custom checkout (don't redirect to Shopify)
-        // This allows us to process payments through our own gateway
       } catch (err) {
         console.error("Failed to load cart:", err);
       } finally {
@@ -109,11 +121,12 @@ function CheckoutContent() {
       }
     };
     fetchCartDetails();
-  }, [cartId]);
+  }, [activeCartId]);
 
-  // Load user addresses if logged in and autofill
+  // Load user addresses if logged in or stored token is present and autofill
   useEffect(() => {
-    if (isAuthenticated) {
+    const isAuthed = isAuthenticated || (typeof window !== "undefined" && getStoredAuth().isAuthenticated);
+    if (isAuthed) {
       const fetchAddresses = async () => {
         try {
           const res = await api.customer.addresses();
@@ -327,7 +340,7 @@ function CheckoutContent() {
     return <PageLoader />;
   }
 
-  if (!cartId || !cart || cart.lines?.edges?.length === 0) {
+  if ((!cartId && !activeCartId) || !cart || cart.lines?.edges?.length === 0) {
     return (
       <div style={{ paddingTop: "100px", paddingBottom: "100px", textAlign: "center", backgroundColor: "#FFFFFF", minHeight: "100vh", fontFamily: "Montserrat" }}>
         <h1 style={{ fontFamily: "Playfair Display", fontSize: "2rem", marginBottom: "1rem" }}>Checkout Not Active</h1>
@@ -416,7 +429,7 @@ function CheckoutContent() {
           <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
             
             {/* Shipping Addresses (Authenticated) */}
-            {isAuthenticated && addresses.length > 0 && (
+            {(isAuthenticated || (typeof window !== "undefined" && getStoredAuth().isAuthenticated)) && addresses.length > 0 && (
               <div style={{ backgroundColor: "#fff", padding: "2rem", border: "1px solid rgba(30,30,30,0.08)" }}>
                 <h3 style={{ fontFamily: "Playfair Display", fontSize: "1.25rem", fontWeight: 600, marginBottom: "1rem" }}>Saved Shipping Addresses</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>

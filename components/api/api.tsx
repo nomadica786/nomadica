@@ -6,6 +6,17 @@ const API_BASE_URL = typeof window !== 'undefined'
   ? ''
   : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
 
+const getAuthHeaders = (): Record<string, string> => {
+  if (typeof window === 'undefined') return {};
+  const token = localStorage.getItem('nomadica_customer_token') || localStorage.getItem('customer_access_token');
+  if (token) {
+    return {
+      'Authorization': `Bearer ${token}`,
+      'x-customer-token': token,
+    };
+  }
+  return {};
+};
 
 /**
  * Centralized API client for all backend calls
@@ -187,7 +198,9 @@ export const api = {
      * Get current customer profile
      */
     profile: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/customers/profile`);
+      const response = await fetch(`${API_BASE_URL}/api/customers/profile`, {
+        headers: { ...getAuthHeaders() },
+      });
       if (response.status === 401) throw new Error('Not authenticated');
       if (!response.ok) throw new Error('Failed to fetch profile');
       return response.json();
@@ -199,7 +212,7 @@ export const api = {
     updateProfile: async (data: unknown) => {
       const response = await fetch(`${API_BASE_URL}/api/customers/profile`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data),
       });
       if (response.status === 401) throw new Error('Not authenticated');
@@ -211,7 +224,9 @@ export const api = {
      * Get customer addresses
      */
     addresses: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/customers/addresses`);
+      const response = await fetch(`${API_BASE_URL}/api/customers/addresses`, {
+        headers: { ...getAuthHeaders() },
+      });
       if (response.status === 401) throw new Error('Not authenticated');
       if (!response.ok) throw new Error('Failed to fetch addresses');
       return response.json();
@@ -223,7 +238,7 @@ export const api = {
     createAddress: async (address: unknown) => {
       const response = await fetch(`${API_BASE_URL}/api/customers/addresses`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(address),
       });
       if (response.status === 401) throw new Error('Not authenticated');
@@ -234,7 +249,7 @@ export const api = {
     updateAddress: async (address: unknown) => {
       const response = await fetch(`${API_BASE_URL}/api/customers/addresses`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(address),
       });
       if (response.status === 401) throw new Error('Not authenticated');
@@ -245,7 +260,7 @@ export const api = {
     deleteAddress: async (id: string) => {
       const response = await fetch(`${API_BASE_URL}/api/customers/addresses`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ id }),
       });
       if (response.status === 401) throw new Error('Not authenticated');

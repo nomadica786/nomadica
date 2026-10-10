@@ -1,12 +1,12 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Heart, type LucideIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, X, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 import { style } from "framer-motion/client";
 import { api } from "@/components/api/api";
-import { useAuth } from "@/utils/hooks/useAuth";
+import { useAuth, getStoredAuth } from "@/utils/hooks/useAuth";
 import { useRouter } from "next/navigation";
 export function ProductCarouselSection({
   icon,
@@ -38,6 +38,7 @@ export function ProductCarouselSection({
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [wishlistSet, setWishlistSet] = useState<Set<string>>(new Set());
+  const [promptWishlistProduct, setPromptWishlistProduct] = useState<{ id: string; name: string; handle?: string } | null>(null);
 
   useEffect(() => {
     const fetchWishlist = async () => {
@@ -57,11 +58,32 @@ export function ProductCarouselSection({
     return () => window.removeEventListener("wishlist-updated", handleWishlistUpdate);
   }, []);
 
+  const handleWishlistLoginRedirect = () => {
+    if (!promptWishlistProduct) return;
+    const targetUrl = promptWishlistProduct.handle
+      ? `/products/${promptWishlistProduct.handle}`
+      : typeof window !== "undefined"
+        ? (window.location.pathname + window.location.search)
+        : `/products/${promptWishlistProduct.id}`;
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("nomadica_product_redirect", targetUrl);
+      sessionStorage.setItem("pending_wishlist_product_id", promptWishlistProduct.id);
+      localStorage.setItem("pending_wishlist_product_id", promptWishlistProduct.id);
+    }
+    router.push(`/account/login?redirect=${encodeURIComponent(targetUrl)}`);
+  };
+
   const toggleWishlist = async (id: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isAuthenticated) {
-      router.push("/account/login");
+    const isAuthed = isAuthenticated || (typeof window !== "undefined" && getStoredAuth().isAuthenticated);
+    if (!isAuthed) {
+      const p = products.find((prod) => prod.id === id);
+      setPromptWishlistProduct({
+        id,
+        name: p?.displayName || p?.name || "Product",
+        handle: p?.handle
+      });
       return;
     }
     const newSet = new Set(wishlistSet);
@@ -517,6 +539,153 @@ export function ProductCarouselSection({
         </div>
 
       </div>
+
+      {/* Wishlist Login Prompt Modal */}
+      {promptWishlistProduct !== null && (
+        <div
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setPromptWishlistProduct(null);
+          }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            backdropFilter: "blur(4px)",
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1.5rem",
+            cursor: "default"
+          }}
+        >
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: "8px",
+              maxWidth: "440px",
+              width: "100%",
+              padding: "2.5rem 2rem",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.2)",
+              border: "1px solid rgba(0,0,0,0.06)",
+              position: "relative",
+              textAlign: "center"
+            }}
+          >
+            {/* Close Button */}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setPromptWishlistProduct(null);
+              }}
+              aria-label="Close"
+              style={{
+                position: "absolute",
+                top: "1.25rem",
+                right: "1.25rem",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "rgba(30,30,30,0.5)",
+                padding: "4px"
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            {/* Icon */}
+            <div
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                backgroundColor: "#FDF2F2",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 1.25rem",
+                color: "#DC2626"
+              }}
+            >
+              <Heart size={26} fill="#DC2626" color="#DC2626" />
+            </div>
+
+            <h3
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "1.4rem",
+                fontWeight: 600,
+                color: "#1E1E1E",
+                margin: "0 0 0.5rem"
+              }}
+            >
+              Sign In to Save to Wishlist
+            </h3>
+
+            <p
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.85rem",
+                color: "rgba(30,30,30,0.65)",
+                lineHeight: "1.6",
+                margin: "0 0 1.5rem"
+              }}
+            >
+              Please log in to your account to save <strong>{promptWishlistProduct.name}</strong> to your wishlist. Once you sign in, it will be added to your wishlist automatically.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleWishlistLoginRedirect();
+                }}
+                className="btn-primary"
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  padding: "0.85rem",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase"
+                }}
+              >
+                Sign In to Continue
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setPromptWishlistProduct(null);
+                }}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  background: "none",
+                  border: "none",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.8125rem",
+                  color: "rgba(30,30,30,0.5)",
+                  cursor: "pointer",
+                  textDecoration: "underline"
+                }}
+              >
+                Continue Browsing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

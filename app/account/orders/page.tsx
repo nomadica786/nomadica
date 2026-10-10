@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Search, HelpCircle, FileText, ChevronDown, SlidersHorizontal } from "lucide-react";
-import { useAuth } from "@/utils/hooks/useAuth";
+import { useAuth, getStoredAuth } from "@/utils/hooks/useAuth";
 import { api } from "@/components/api/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { MOCK_PRODUCTS } from "@/utils/mockData";
@@ -26,7 +26,8 @@ function OrdersContent() {
 
   // Auth protection redirect
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    const stored = getStoredAuth();
+    if (!authLoading && !isAuthenticated && !stored.isAuthenticated) {
       router.replace("/account/login");
     }
   }, [authLoading, isAuthenticated, router]);

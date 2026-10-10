@@ -2,9 +2,9 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart, X } from "lucide-react";
 import { api } from "@/components/api/api";
-import { useAuth } from "@/utils/hooks/useAuth";
+import { useAuth, getStoredAuth } from "@/utils/hooks/useAuth";
 import Image from "next/image";
 import { getShopifyImageUrl } from "@/lib/images/shopifyImage";
 import { parseProduct } from "@/utils/productGroup";
@@ -85,6 +85,7 @@ export default function ProductCard({
   const [hovered, setHovered] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [showWishlistModal, setShowWishlistModal] = useState(false);
 
   // Strictly deduplicate colorVariants so no duplicate colors or duplicate IDs can ever exist
   const uniqueVariants = useMemo(() => {
@@ -182,9 +183,41 @@ export default function ProductCard({
 
   const sizedImage = getShopifyImageUrl(currentImage, 600);
 
+  const handleWishlistLoginRedirect = () => {
+    const targetUrl = currentHandle
+      ? `/products/${currentHandle}`
+      : typeof window !== "undefined"
+        ? (window.location.pathname + window.location.search)
+        : `/products/${representativeHandle || handle || id}`;
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("nomadica_product_redirect", targetUrl);
+      sessionStorage.setItem("pending_wishlist_product_id", currentId);
+      localStorage.setItem("pending_wishlist_product_id", currentId);
+    }
+    router.push(`/account/login?redirect=${encodeURIComponent(targetUrl)}`);
+  };
+
   useEffect(() => {
     const checkWishlist = async () => {
       if (!currentId) return;
+
+      // Auto-fulfill pending wishlist if user returned after logging in
+      if (isAuthenticated) {
+        try {
+          const pending =
+            sessionStorage.getItem("pending_wishlist_product_id") ||
+            localStorage.getItem("pending_wishlist_product_id");
+          if (pending && (pending === currentId || pending === id || (currentHandle && pending === currentHandle))) {
+            sessionStorage.removeItem("pending_wishlist_product_id");
+            localStorage.removeItem("pending_wishlist_product_id");
+            setWishlisted(true);
+            await api.wishlist.add(currentId);
+            window.dispatchEvent(new CustomEvent("wishlist-updated"));
+            return;
+          }
+        } catch {}
+      }
+
       try {
         const res = await api.wishlist.list();
         const isInWishlist = res?.wishlist?.some((item: any) => item.id === currentId);
@@ -192,7 +225,7 @@ export default function ProductCard({
       } catch {}
     };
     checkWishlist();
-  }, [currentId]);
+  }, [currentId, isAuthenticated, id, currentHandle]);
 
   return (
     <div
@@ -261,8 +294,9 @@ export default function ProductCard({
             onClick={async (e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (!isAuthenticated) {
-                router.push("/account/login");
+              const isAuthed = isAuthenticated || (typeof window !== "undefined" && getStoredAuth().isAuthenticated);
+              if (!isAuthed) {
+                setShowWishlistModal(true);
                 return;
               }
               try {
@@ -458,6 +492,153 @@ export default function ProductCard({
           </div>
         )}
       </div>
+
+      {/* Wishlist Login Prompt Modal */}
+      {showWishlistModal && (
+        <div
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowWishlistModal(false);
+          }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            backdropFilter: "blur(4px)",
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1.5rem",
+            cursor: "default"
+          }}
+        >
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: "8px",
+              maxWidth: "440px",
+              width: "100%",
+              padding: "2.5rem 2rem",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.2)",
+              border: "1px solid rgba(0,0,0,0.06)",
+              position: "relative",
+              textAlign: "center"
+            }}
+          >
+            {/* Close Button */}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowWishlistModal(false);
+              }}
+              aria-label="Close"
+              style={{
+                position: "absolute",
+                top: "1.25rem",
+                right: "1.25rem",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "rgba(30,30,30,0.5)",
+                padding: "4px"
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            {/* Icon */}
+            <div
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                backgroundColor: "#FDF2F2",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 1.25rem",
+                color: "#DC2626"
+              }}
+            >
+              <Heart size={26} fill="#DC2626" color="#DC2626" />
+            </div>
+
+            <h3
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "1.4rem",
+                fontWeight: 600,
+                color: "#1E1E1E",
+                margin: "0 0 0.5rem"
+              }}
+            >
+              Sign In to Save to Wishlist
+            </h3>
+
+            <p
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.85rem",
+                color: "rgba(30,30,30,0.65)",
+                lineHeight: "1.6",
+                margin: "0 0 1.5rem"
+              }}
+            >
+              Please log in to your account to save <strong>{currentName}</strong> to your wishlist. Once you sign in, it will be added to your wishlist automatically.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleWishlistLoginRedirect();
+                }}
+                className="btn-primary"
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  padding: "0.85rem",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase"
+                }}
+              >
+                Sign In to Continue
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowWishlistModal(false);
+                }}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  background: "none",
+                  border: "none",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.8125rem",
+                  color: "rgba(30,30,30,0.5)",
+                  cursor: "pointer",
+                  textDecoration: "underline"
+                }}
+              >
+                Continue Browsing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

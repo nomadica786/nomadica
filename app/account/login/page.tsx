@@ -1,16 +1,18 @@
 // app/account/login/page.tsx
 "use client";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useAuth, getStoredAuth } from "@/utils/hooks/useAuth";
 
 const isProductPage = (url?: string | null): boolean => {
   if (!url) return false;
-  return url.startsWith("/products/") || url.startsWith("/shop/product-details");
+  return url.startsWith("/products/") || url.startsWith("/shop/product-details") || url.startsWith("/checkout");
 };
 
 function LoginForm() {
   const searchParams = useSearchParams();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +24,18 @@ function LoginForm() {
   const targetProductUrl = (redirectQuery && isProductPage(redirectQuery)) 
     ? redirectQuery 
     : (storedRedirect && isProductPage(storedRedirect) ? storedRedirect : null);
+
+  // If already signed in, NEVER ask to sign in again! Seamlessly redirect using the stored token!
+  useEffect(() => {
+    const stored = getStoredAuth();
+    if (isAuthenticated || stored.isAuthenticated) {
+      const destination = targetProductUrl || redirectQuery || "/account/profile";
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem("nomadica_product_redirect");
+      }
+      window.location.href = destination;
+    }
+  }, [isAuthenticated, targetProductUrl, redirectQuery]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +54,23 @@ function LoginForm() {
         throw new Error(data.error || "Login failed");
       }
 
+      // Persist auth token and user profile into localStorage and cookies
+      if (data.token) {
+        localStorage.setItem("nomadica_customer_token", data.token);
+      }
+      if (data.user) {
+        localStorage.setItem("nomadica_auth_user", JSON.stringify(data.user));
+      }
+      localStorage.setItem("nomadica_is_authenticated", "true");
+      if (typeof document !== "undefined") {
+        document.cookie = "nomadica_auth=true; path=/; max-age=2592000; SameSite=Lax";
+      }
+      window.dispatchEvent(
+        new CustomEvent("auth-state-changed", {
+          detail: { isAuthenticated: true, user: data.user, token: data.token },
+        })
+      );
+
       // Pre-fetch addresses so autofill is instantly primed in localStorage
       try {
         const addrRes = await fetch("/api/customers/addresses");
@@ -52,12 +83,32 @@ function LoginForm() {
         }
       } catch {}
 
-      // Only if logged in from a product page, redirect back to that product
+      // Automatically add pending wishlist item to user's wishlist
+      try {
+        const pendingWishlistId = typeof window !== "undefined"
+          ? (sessionStorage.getItem("pending_wishlist_product_id") || localStorage.getItem("pending_wishlist_product_id"))
+          : null;
+        if (pendingWishlistId) {
+          await fetch("/api/wishlist", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productId: pendingWishlistId }),
+          });
+          sessionStorage.removeItem("pending_wishlist_product_id");
+          localStorage.removeItem("pending_wishlist_product_id");
+        }
+      } catch (err) {
+        console.error("Failed to add pending wishlist item on login:", err);
+      }
+
+      // Redirect back to target product or checkout or profile
       if (targetProductUrl) {
         if (typeof window !== "undefined") {
           sessionStorage.removeItem("nomadica_product_redirect");
         }
         window.location.href = targetProductUrl;
+      } else if (redirectQuery) {
+        window.location.href = redirectQuery;
       } else {
         if (typeof window !== "undefined") {
           sessionStorage.removeItem("nomadica_product_redirect");
@@ -70,6 +121,24 @@ function LoginForm() {
       setLoading(false);
     }
   };
+
+  if (isAuthenticated || (typeof window !== "undefined" && getStoredAuth().isAuthenticated)) {
+    return (
+      <div 
+        style={{ 
+          backgroundColor: "#F5F5F0", 
+          minHeight: "100vh", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center" 
+        }}
+      >
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", color: "rgba(30,30,30,0.6)" }}>
+          Already signed in. Redirecting...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div 

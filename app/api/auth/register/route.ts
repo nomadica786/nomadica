@@ -85,45 +85,82 @@ export async function POST(request: Request) {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/',
+            maxAge: 60 * 60 * 24 * 30
           });
 
           cookieStore.set('customer_email', email, {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/',
+            maxAge: 60 * 60 * 24 * 30
+          });
+
+          cookieStore.set('nomadica_auth', 'true', {
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 30
           });
         }
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({
+          success: true,
+          token: accessToken || null,
+          user: {
+            email,
+            firstName: firstName || email.split('@')[0],
+            lastName: lastName || 'Traveler',
+            phone: phone || ''
+          }
+        });
       } catch (err: any) {
         console.error('Shopify customer registration failed, falling back to mock:', err);
       }
     }
 
     // Mock Fallback Mode
+    const mockToken = `mock_customer_token_${Date.now()}`;
     const cookieStore = await cookies();
-    cookieStore.set('customer_access_token', `mock_customer_token_${Date.now()}`, {
+    cookieStore.set('customer_access_token', mockToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
+      maxAge: 60 * 60 * 24 * 30
     });
 
     cookieStore.set('customer_email', email, {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
+      maxAge: 60 * 60 * 24 * 30
     });
 
-    // Save mock profile in cookies
-    cookieStore.set('mock_profile', JSON.stringify({
+    cookieStore.set('nomadica_auth', 'true', {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30
+    });
+
+    const mockProfile = {
       email,
       firstName: firstName || email.split('@')[0],
       lastName: lastName || 'Traveler',
       phone: phone || ''
-    }), { path: '/' });
+    };
 
-    return NextResponse.json({ success: true });
+    // Save mock profile in cookies
+    cookieStore.set('mock_profile', JSON.stringify(mockProfile), {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30
+    });
+
+    return NextResponse.json({
+      success: true,
+      token: mockToken,
+      user: mockProfile
+    });
 
   } catch (error) {
     console.error('Registration error:', error);
