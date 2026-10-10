@@ -1,9 +1,16 @@
 // app/account/signup/page.tsx
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
-export default function SignupPage() {
+const isProductPage = (url?: string | null): boolean => {
+  if (!url) return false;
+  return url.startsWith("/products/") || url.startsWith("/shop/product-details");
+};
+
+function SignupForm() {
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -12,6 +19,12 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const redirectQuery = searchParams.get("redirect") || searchParams.get("returnUrl");
+  const storedRedirect = typeof window !== "undefined" ? sessionStorage.getItem("nomadica_product_redirect") : null;
+  const targetProductUrl = (redirectQuery && isProductPage(redirectQuery)) 
+    ? redirectQuery 
+    : (storedRedirect && isProductPage(storedRedirect) ? storedRedirect : null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +49,17 @@ export default function SignupPage() {
         throw new Error(data.error || "Signup failed");
       }
 
-      window.location.href = "/account/profile";
+      if (targetProductUrl) {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("nomadica_product_redirect");
+        }
+        window.location.href = targetProductUrl;
+      } else {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("nomadica_product_redirect");
+        }
+        window.location.href = "/account/profile";
+      }
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
@@ -354,7 +377,7 @@ export default function SignupPage() {
           >
             Already have an account?{" "}
             <Link 
-              href="/account/login" 
+              href={targetProductUrl ? `/account/login?redirect=${encodeURIComponent(targetProductUrl)}` : "/account/login"} 
               style={{ 
                 color: "#C4B5A0", 
                 textDecoration: "none", 
@@ -369,5 +392,17 @@ export default function SignupPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ backgroundColor: "#F5F5F0", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", color: "rgba(30,30,30,0.5)" }}>Loading...</p>
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   );
 }

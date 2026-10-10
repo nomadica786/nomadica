@@ -43,13 +43,43 @@ function CheckoutContent() {
   const [orderInfo, setOrderInfo] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Sync user info when authenticated
   useEffect(() => {
     if (user) {
-      setEmail(user.email || "");
-      setFirstName(user.firstName || "");
-      setLastName(user.lastName || "");
+      if (user.email) setEmail(user.email);
+      if (user.firstName && !firstName) setFirstName(user.firstName);
+      if (user.lastName && !lastName) setLastName(user.lastName);
     }
-  }, [user]);
+  }, [user, firstName, lastName]);
+
+  const applyAddress = (addr: any) => {
+    if (!addr) return;
+    setSelectedAddressId(addr.id || "");
+    const parts = (addr.name || "").trim().split(/\s+/);
+    const fName = addr.firstName || parts[0] || user?.firstName || "";
+    const lName = addr.lastName || parts.slice(1).join(" ") || user?.lastName || "";
+    if (fName) setFirstName(fName);
+    if (lName) setLastName(lName);
+    setAddress1(addr.address1 || "");
+    setAddress2(addr.address2 || "");
+    setCity(addr.city || "");
+    setProvince(addr.province || "");
+    setZip(addr.zip || "");
+    try {
+      localStorage.setItem("nomadica_saved_address", JSON.stringify(addr));
+    } catch {}
+  };
+
+  // Immediate autofill from local cache
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem("nomadica_saved_address");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed) applyAddress(parsed);
+      }
+    } catch {}
+  }, []);
 
   // Load cart details
   useEffect(() => {
@@ -81,14 +111,15 @@ function CheckoutContent() {
     fetchCartDetails();
   }, [cartId]);
 
-  // Load user addresses if logged in
+  // Load user addresses if logged in and autofill
   useEffect(() => {
     if (isAuthenticated) {
       const fetchAddresses = async () => {
         try {
           const res = await api.customer.addresses();
-          setAddresses(res.addresses || []);
-          const defaultAddr = res.addresses?.find((a: any) => a.default);
+          const list = res?.addresses || [];
+          setAddresses(list);
+          const defaultAddr = list.find((a: any) => a.default) || list[0];
           if (defaultAddr) {
             applyAddress(defaultAddr);
           }
@@ -99,17 +130,6 @@ function CheckoutContent() {
       fetchAddresses();
     }
   }, [isAuthenticated]);
-
-  const applyAddress = (addr: any) => {
-    setSelectedAddressId(addr.id);
-    setFirstName(addr.name?.split(" ")[0] || "");
-    setLastName(addr.name?.split(" ").slice(1).join(" ") || "");
-    setAddress1(addr.address1 || "");
-    setAddress2(addr.address2 || "");
-    setCity(addr.city || "");
-    setProvince(addr.province || "");
-    setZip(addr.zip || "");
-  };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();

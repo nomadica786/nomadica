@@ -67,11 +67,14 @@ export async function POST(request: NextRequest) {
                         id
                         title
                         quantity
-                        variant {
-                          id
-                          price
-                          image {
-                            url
+                        variantTitle
+                        image {
+                          url
+                        }
+                        originalUnitPriceSet {
+                          shopMoney {
+                            amount
+                            currencyCode
                           }
                         }
                       }
@@ -101,20 +104,24 @@ export async function POST(request: NextRequest) {
             lineItems: {
               edges: orderNode.lineItems?.edges?.map((itemEdge: any) => {
                 const itemNode = itemEdge.node;
+                const priceAmount = itemNode.originalUnitPriceSet?.shopMoney?.amount || '0';
+                const currency = itemNode.originalUnitPriceSet?.shopMoney?.currencyCode || 'INR';
                 return {
                   node: {
                     id: itemNode.id,
                     title: itemNode.title,
                     quantity: itemNode.quantity,
-                    variant: itemNode.variant ? {
+                    variant: {
+                      id: itemNode.id,
+                      title: itemNode.variantTitle || '',
                       price: {
-                        amount: itemNode.variant.price || '0',
-                        currencyCode: 'INR'
+                        amount: priceAmount,
+                        currencyCode: currency
                       },
-                      image: itemNode.variant.image ? {
-                        url: itemNode.variant.image.url
+                      image: itemNode.image ? {
+                        url: itemNode.image.url
                       } : null
-                    } : null
+                    }
                   }
                 };
               })
