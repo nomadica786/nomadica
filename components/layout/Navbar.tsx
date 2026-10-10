@@ -42,8 +42,13 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const checkActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -127,6 +132,10 @@ export default function Navbar() {
   const [wishlistCount, setWishlistCount] = useState(0);
 
   const fetchWishlist = async () => {
+    if (!isAuthenticated) {
+      setWishlistCount(0);
+      return;
+    }
     try {
       const res = await api.wishlist.list();
       setWishlistCount(res?.wishlist?.length || 0);
@@ -142,7 +151,7 @@ export default function Navbar() {
     };
     window.addEventListener("wishlist-updated", handleWishlistUpdate);
     return () => window.removeEventListener("wishlist-updated", handleWishlistUpdate);
-  }, []);
+  }, [isAuthenticated]);
 
   const totalItems = cart?.lines?.edges?.reduce((acc: number, edge: any) => acc + edge.node.quantity, 0) || 0;
   const userInitials = user?.firstName ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ""}`.toUpperCase() : "T";
@@ -278,7 +287,7 @@ export default function Navbar() {
 
           <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
             <Link 
-              href="/account/wishlist" 
+              href={mounted && !isAuthenticated ? "/account/login?redirect=/account/wishlist" : "/account/wishlist"} 
               style={{ 
                 color: "#1E1E1E", 
                 textDecoration: "none",
@@ -291,7 +300,7 @@ export default function Navbar() {
             >
               <div style={{ position: "relative" }}>
                 <Heart size={20} />
-                {wishlistCount > 0 && (
+                {mounted && isAuthenticated && wishlistCount > 0 && (
                   <div
                     style={{
                       position: "absolute",
@@ -319,7 +328,7 @@ export default function Navbar() {
             </Link>
 
             {/* Profile Avatar / Login Icon */}
-            {isAuthenticated ? (
+            {mounted && isAuthenticated ? (
               <div
                 style={{ position: "relative" }}
                 onMouseEnter={() => setOpenDropdown("user")}
@@ -386,7 +395,10 @@ export default function Navbar() {
                     <div style={{ borderTop: "1px solid rgba(30,30,30,0.05)", margin: "0.25rem 0" }} />
 
                     <button
-                      onClick={logout}
+                      onClick={async () => {
+                        setOpenDropdown(null);
+                        await logout();
+                      }}
                       style={{
                         ...dropdownItemStyle,
                         width: "100%",
@@ -623,22 +635,26 @@ export default function Navbar() {
           ))}
 
           <div style={{ marginTop: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <Link href="/account/wishlist" style={{ textDecoration: "none" }} onClick={() => setMobileOpen(false)}>
+            <Link 
+              href={mounted && !isAuthenticated ? "/account/login?redirect=/account/wishlist" : "/account/wishlist"} 
+              style={{ textDecoration: "none" }} 
+              onClick={() => setMobileOpen(false)}
+            >
               <button className="btn-outline" style={{ width: "100%", justifyContent: "center" }}>
                 My Wishlist
               </button>
             </Link>
-            {isAuthenticated ? (
+            {mounted && isAuthenticated ? (
               <>
-                <Link href="/account/profile" style={{ textDecoration: "none" }}>
+                <Link href="/account/profile" style={{ textDecoration: "none" }} onClick={() => setMobileOpen(false)}>
                   <button className="btn-primary" style={{ width: "100%", justifyContent: "center" }}>
                     Profile Hub
                   </button>
                 </Link>
                 <button
-                  onClick={() => {
-                    logout();
+                  onClick={async () => {
                     setMobileOpen(false);
+                    await logout();
                   }}
                   className="btn-outline"
                   style={{ width: "100%", justifyContent: "center" }}

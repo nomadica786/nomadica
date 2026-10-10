@@ -91,18 +91,22 @@ export async function GET() {
     console.error('Failed to fetch live profile, falling back to mock:', error);
   }
 
-  // Fallback to mock profile
+  // Fallback to mock profile only if a customer token was provided or valid session exists
   const savedProfile = cookieStore.get('mock_profile')?.value;
-  if (savedProfile) {
+  if (savedProfile && customerAccessToken) {
     try {
       return NextResponse.json({ customer: JSON.parse(savedProfile) });
     } catch {}
   }
 
+  if (!customerAccessToken && !accessToken) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
   return NextResponse.json({
     customer: {
-      email: 'arjun.mehta@email.com',
-      firstName: 'Arjun',
+      email: customerEmail || 'arjun.mehta@email.com',
+      firstName: customerEmail ? customerEmail.split('@')[0] : 'Arjun',
       lastName: 'Mehta',
       phone: '+91 98765 43210'
     }

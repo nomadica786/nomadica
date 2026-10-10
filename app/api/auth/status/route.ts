@@ -140,32 +140,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // 3. Fallback to default mock customer if not configured
-  const isConfigured = !!env.shopUrl && !!env.clientId;
-  if (!isConfigured) {
-    const savedProfile = cookieStore.get('mock_profile')?.value;
-    if (savedProfile) {
-      try {
-        return NextResponse.json({
-          isAuthenticated: true,
-          token: 'mock_token',
-          user: JSON.parse(savedProfile),
-        });
-      } catch {}
-    }
-
-    return NextResponse.json({
-      isAuthenticated: true,
-      token: 'mock_token',
-      user: {
-        email: 'arjun.mehta@email.com',
-        firstName: 'Arjun',
-        lastName: 'Mehta',
-        isMock: true,
-      },
-    });
-  }
-
   return NextResponse.json(
     { isAuthenticated: false, user: null, token: null },
     { status: 200 }

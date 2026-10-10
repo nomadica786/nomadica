@@ -13,6 +13,19 @@ export async function DELETE(
 
   try {
     const cookieStore = await cookies();
+    const authHeader = request.headers.get('authorization');
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    const headerToken = request.headers.get('x-customer-token') || bearerToken;
+    const cookieToken = cookieStore.get('customer_access_token')?.value;
+    const customerAccessToken = headerToken || cookieToken;
+    const authCookie = cookieStore.get('nomadica_auth')?.value;
+
+    const isAuthed = !!customerAccessToken || authCookie === 'true';
+
+    if (!isAuthed) {
+      return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
+    }
+
     const wishlistCookie = cookieStore.get('shopify_wishlist')?.value;
     let productIds: string[] = [];
 

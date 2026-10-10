@@ -54,6 +54,7 @@ function LoginForm() {
         throw new Error(data.error || "Login failed");
       }
 
+      localStorage.removeItem("nomadica_logged_out");
       // Persist auth token and user profile into localStorage and cookies
       if (data.token) {
         localStorage.setItem("nomadica_customer_token", data.token);

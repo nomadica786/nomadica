@@ -132,11 +132,43 @@ export const api = {
      * Logout and clear session
      */
     logout: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
-        method: 'POST',
-      });
-      if (response.ok) {
-        window.location.href = '/';
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('nomadica_logged_out', 'true');
+        localStorage.removeItem('nomadica_customer_token');
+        localStorage.removeItem('customer_access_token');
+        localStorage.removeItem('nomadica_auth_user');
+        localStorage.removeItem('nomadica_is_authenticated');
+        localStorage.removeItem('nomadica_saved_address');
+        const cookieNames = [
+          'nomadica_auth',
+          'customer_email',
+          'customer_access_token',
+          'shopify_access_token',
+          'shopify_shop',
+          'mock_profile',
+          'mock_orders',
+          'shopify_wishlist'
+        ];
+        cookieNames.forEach((name) => {
+          document.cookie = `${name}=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        });
+        window.dispatchEvent(
+          new CustomEvent('auth-state-changed', {
+            detail: { isAuthenticated: false, user: null, token: null },
+          })
+        );
+      }
+      try {
+        await fetch(`${API_BASE_URL}/api/auth/logout`, {
+          method: 'POST',
+        });
+      } catch {}
+      if (typeof window !== 'undefined') {
+        if (window.location.pathname === '/') {
+          window.location.reload();
+        } else {
+          window.location.href = '/';
+        }
       }
     },
 
@@ -338,7 +370,12 @@ export const api = {
      * Get user wishlist
      */
     list: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/wishlist`);
+      const headers: Record<string, string> = {};
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('nomadica_customer_token') || localStorage.getItem('customer_access_token');
+        if (token) headers['x-customer-token'] = token;
+      }
+      const response = await fetch(`${API_BASE_URL}/api/wishlist`, { headers });
       if (!response.ok) throw new Error('Failed to fetch wishlist');
       return response.json();
     },
@@ -347,9 +384,14 @@ export const api = {
      * Add product to wishlist
      */
     add: async (productId: string) => {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('nomadica_customer_token') || localStorage.getItem('customer_access_token');
+        if (token) headers['x-customer-token'] = token;
+      }
       const response = await fetch(`${API_BASE_URL}/api/wishlist`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ productId }),
       });
       if (!response.ok) throw new Error('Failed to add to wishlist');
@@ -360,9 +402,14 @@ export const api = {
      * Remove product from wishlist
      */
     remove: async (productId: string) => {
+      const headers: Record<string, string> = {};
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('nomadica_customer_token') || localStorage.getItem('customer_access_token');
+        if (token) headers['x-customer-token'] = token;
+      }
       const response = await fetch(
         `${API_BASE_URL}/api/wishlist/${encodeURIComponent(productId)}`,
-        { method: 'DELETE' }
+        { method: 'DELETE', headers }
       );
       if (!response.ok) throw new Error('Failed to remove from wishlist');
       return response.json();

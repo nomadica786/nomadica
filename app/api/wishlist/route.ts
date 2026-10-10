@@ -5,8 +5,22 @@ import { MOCK_PRODUCTS } from '@/utils/mockData';
 import { cookies } from 'next/headers';
 import { NextResponse, NextRequest } from 'next/server';
 
-export async function GET() {
+export async function GET(request: Request) {
   const cookieStore = await cookies();
+  const authHeader = request.headers.get('authorization');
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+  const headerToken = request.headers.get('x-customer-token') || bearerToken;
+  const cookieToken = cookieStore.get('customer_access_token')?.value;
+  const customerAccessToken = headerToken || cookieToken;
+  const authCookie = cookieStore.get('nomadica_auth')?.value;
+
+  const isAuthed = !!customerAccessToken || authCookie === 'true';
+
+  // Unauthenticated users have no stored wishlist items
+  if (!isAuthed) {
+    return NextResponse.json({ wishlist: [] });
+  }
+
   const wishlistCookie = cookieStore.get('shopify_wishlist')?.value;
   let productIds: string[] = [];
 
@@ -14,6 +28,10 @@ export async function GET() {
     try {
       productIds = JSON.parse(wishlistCookie);
     } catch {}
+  }
+
+  if (productIds.length === 0) {
+    return NextResponse.json({ wishlist: [] });
   }
 
   const env = getEnvironment();
@@ -176,12 +194,25 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    const authHeader = request.headers.get('authorization');
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    const headerToken = request.headers.get('x-customer-token') || bearerToken;
+    const cookieToken = cookieStore.get('customer_access_token')?.value;
+    const customerAccessToken = headerToken || cookieToken;
+    const authCookie = cookieStore.get('nomadica_auth')?.value;
+
+    const isAuthed = !!customerAccessToken || authCookie === 'true';
+
+    if (!isAuthed) {
+      return NextResponse.json({ error: 'Please sign in to add items to your wishlist' }, { status: 401 });
+    }
+
     const { productId } = await request.json();
     if (!productId) {
       return NextResponse.json({ error: 'Missing productId' }, { status: 400 });
     }
 
-    const cookieStore = await cookies();
     const wishlistCookie = cookieStore.get('shopify_wishlist')?.value;
     let productIds: string[] = [];
 

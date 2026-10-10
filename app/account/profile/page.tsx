@@ -192,7 +192,9 @@ function ProfileContent() {
             Profile
           </h1>
           <button
-            onClick={logout}
+            onClick={async () => {
+              await logout();
+            }}
             style={{
               backgroundColor: "#FFFFFF",
               color: "#1E1E1E",

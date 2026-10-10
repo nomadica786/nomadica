@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Trash2, Heart } from "lucide-react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import ProductCard from "@/components/shop/ProductCard";
 import QuickViewModal from "@/components/shop/QuickViewModal";
@@ -9,10 +10,18 @@ import { api } from "@/components/api/api";
 import { useAuth } from "@/utils/hooks/useAuth";
 
 export default function WishlistPage() {
+  const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [wishlistItems, setWishlistItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
+
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.replace("/account/login?redirect=/account/wishlist");
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   const handleRemoveItem = async (id: string) => {
     try {
@@ -99,11 +108,18 @@ export default function WishlistPage() {
   };
 
   useEffect(() => {
-    fetchWishlist();
-    const handleWishlistUpdate = () => fetchWishlist();
+    if (isAuthenticated) {
+      fetchWishlist();
+    } else if (!authLoading) {
+      setLoading(false);
+      setWishlistItems([]);
+    }
+    const handleWishlistUpdate = () => {
+      if (isAuthenticated) fetchWishlist();
+    };
     window.addEventListener("wishlist-updated", handleWishlistUpdate);
     return () => window.removeEventListener("wishlist-updated", handleWishlistUpdate);
-  }, []);
+  }, [isAuthenticated, authLoading]);
 
   const handleClearAll = async () => {
     if (!wishlistItems.length) return;
@@ -119,7 +135,78 @@ export default function WishlistPage() {
     }
   };
 
-  if (authLoading || !isAuthenticated) {
+  if (authLoading) {
+    return <PageLoader />;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div
+        style={{
+          minHeight: "70vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "1.25rem",
+          padding: "2rem",
+          textAlign: "center",
+          backgroundColor: "#FAF8F5",
+        }}
+      >
+        <div
+          style={{
+            width: "64px",
+            height: "64px",
+            borderRadius: "50%",
+            backgroundColor: "rgba(30,30,30,0.05)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Heart size={32} color="#1E1E1E" />
+        </div>
+        <h1
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
+            fontWeight: 500,
+            color: "#1E1E1E",
+            margin: 0,
+          }}
+        >
+          Sign In to View Wishlist
+        </h1>
+        <p
+          style={{
+            fontFamily: "'Montserrat', sans-serif",
+            fontSize: "0.95rem",
+            color: "#666",
+            maxWidth: "420px",
+            lineHeight: 1.6,
+            margin: 0,
+          }}
+        >
+          Save and track your favorite travel-inspired styles across all devices. Please sign in or create an account to view your wishlist.
+        </p>
+        <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
+          <Link href="/account/login?redirect=/account/wishlist" style={{ textDecoration: "none" }}>
+            <button className="btn-primary" style={{ padding: "0.75rem 2rem" }}>
+              Sign In
+            </button>
+          </Link>
+          <Link href="/account/signup" style={{ textDecoration: "none" }}>
+            <button className="btn-outline" style={{ padding: "0.75rem 2rem" }}>
+              Create Account
+            </button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
     return <PageLoader />;
   }
 
