@@ -47,10 +47,12 @@ export async function GET(
                   id
                   title
                   quantity
-                  variant {
-                    id
-                    title
-                    price
+                  variantTitle
+                  originalUnitPriceSet {
+                    shopMoney {
+                      amount
+                      currencyCode
+                    }
                   }
                 }
               }
@@ -84,11 +86,11 @@ export async function GET(
                 title: itemNode.title,
                 quantity: itemNode.quantity,
                 variant: {
-                  id: itemNode.variant?.id,
-                  title: itemNode.variant?.title,
+                  id: itemNode.id,
+                  title: itemNode.variantTitle || '',
                   price: {
-                    amount: itemNode.variant?.price || '0',
-                    currencyCode: 'INR'
+                    amount: itemNode.originalUnitPriceSet?.shopMoney?.amount || '0',
+                    currencyCode: itemNode.originalUnitPriceSet?.shopMoney?.currencyCode || 'INR'
                   }
                 }
               }

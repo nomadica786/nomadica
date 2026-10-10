@@ -1,14 +1,27 @@
 // app/account/login/page.tsx
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+const isProductPage = (url?: string | null): boolean => {
+  if (!url) return false;
+  return url.startsWith("/products/") || url.startsWith("/shop/product-details");
+};
+
+function LoginForm() {
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const redirectQuery = searchParams.get("redirect") || searchParams.get("returnUrl");
+  const storedRedirect = typeof window !== "undefined" ? sessionStorage.getItem("nomadica_product_redirect") : null;
+  const targetProductUrl = (redirectQuery && isProductPage(redirectQuery)) 
+    ? redirectQuery 
+    : (storedRedirect && isProductPage(storedRedirect) ? storedRedirect : null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +40,30 @@ export default function LoginPage() {
         throw new Error(data.error || "Login failed");
       }
 
-      window.location.href = "/account/profile";
+      // Pre-fetch addresses so autofill is instantly primed in localStorage
+      try {
+        const addrRes = await fetch("/api/customers/addresses");
+        if (addrRes.ok) {
+          const addrData = await addrRes.json();
+          const primaryAddr = addrData.addresses?.find((a: any) => a.default) || addrData.addresses?.[0];
+          if (primaryAddr) {
+            localStorage.setItem("nomadica_saved_address", JSON.stringify(primaryAddr));
+          }
+        }
+      } catch {}
+
+      // Only if logged in from a product page, redirect back to that product
+      if (targetProductUrl) {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("nomadica_product_redirect");
+        }
+        window.location.href = targetProductUrl;
+      } else {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("nomadica_product_redirect");
+        }
+        window.location.href = "/account/profile";
+      }
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
@@ -254,7 +290,7 @@ export default function LoginPage() {
           >
             Don't have an account?{" "}
             <Link 
-              href="/account/signup" 
+              href={targetProductUrl ? `/account/signup?redirect=${encodeURIComponent(targetProductUrl)}` : "/account/signup"} 
               style={{ 
                 color: "#C4B5A0", 
                 textDecoration: "none", 
@@ -269,5 +305,17 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ backgroundColor: "#F5F5F0", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "0.85rem", color: "rgba(30,30,30,0.5)" }}>Loading...</p>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

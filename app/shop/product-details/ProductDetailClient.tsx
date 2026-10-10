@@ -370,6 +370,7 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
   const [wishlisted, setWishlisted] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [cartAdding, setCartAdding] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const initialGroupKey = (initialProduct?.productType || initialProduct?.category || "Tee").toLowerCase();
   const [colorVariations, setColorVariations] = useState<any[]>(() => {
     if (initialProduct && initialAllEdges && initialAllEdges.length > 0) {
@@ -856,10 +857,37 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
     };
   }, [isLightboxOpen, lightboxImages.length]);
 
+  const handleLoginRedirect = () => {
+    if (!product) return;
+    const currentUrl = typeof window !== "undefined"
+      ? (window.location.pathname + window.location.search)
+      : (product.handle ? `/products/${product.handle}` : `/shop/product-details?id=${product.id}`);
+
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("nomadica_product_redirect", currentUrl);
+      sessionStorage.setItem(
+        "pending_add_to_cart",
+        JSON.stringify({
+          productId: product.id,
+          handle: product.handle,
+          size: selectedSize,
+          timestamp: Date.now()
+        })
+      );
+    }
+    router.push(`/account/login?redirect=${encodeURIComponent(currentUrl)}`);
+  };
+
   const handleWishlistToggle = async () => {
     if (!product) return;
     if (!isAuthenticated) {
-      router.push("/account/login");
+      const currentUrl = typeof window !== "undefined"
+        ? (window.location.pathname + window.location.search)
+        : (product.handle ? `/products/${product.handle}` : `/shop/product-details?id=${product.id}`);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("nomadica_product_redirect", currentUrl);
+      }
+      router.push(`/account/login?redirect=${encodeURIComponent(currentUrl)}`);
       return;
     }
     try {
@@ -877,6 +905,10 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
 
   const handleAddToBag = async () => {
     if (!product) return;
+    if (!isAuthenticated) {
+      setShowLoginPrompt(true);
+      return;
+    }
     setCartAdding(true);
     
     const baseSize = selectedSize.split(" - ")[0] || selectedSize;
@@ -927,6 +959,27 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
       setCartAdding(false);
     }
   };
+
+  // Auto-resume Add to Bag if user returned after logging in from this product page
+  useEffect(() => {
+    if (isAuthenticated && product && !loading) {
+      try {
+        const raw = sessionStorage.getItem("pending_add_to_cart");
+        if (raw) {
+          const pending = JSON.parse(raw);
+          if (
+            (pending.productId && pending.productId === product.id) ||
+            (pending.handle && pending.handle === product.handle)
+          ) {
+            sessionStorage.removeItem("pending_add_to_cart");
+            handleAddToBag();
+          }
+        }
+      } catch (e) {
+        sessionStorage.removeItem("pending_add_to_cart");
+      }
+    }
+  }, [isAuthenticated, product?.id, loading]);
 
   if (loading) {
     return <PageLoader />;
@@ -1691,6 +1744,133 @@ export function ProductDetailContent({ initialProduct, initialAllEdges, initialM
                 display: "block",
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Login Prompt Modal when trying to Add to Cart unauthenticated */}
+      {showLoginPrompt && (
+        <div
+          onClick={() => setShowLoginPrompt(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            backdropFilter: "blur(4px)",
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1.5rem"
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: "8px",
+              maxWidth: "460px",
+              width: "100%",
+              padding: "2.5rem 2rem",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.2)",
+              border: "1px solid rgba(0,0,0,0.06)",
+              position: "relative",
+              textAlign: "center"
+            }}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowLoginPrompt(false)}
+              aria-label="Close"
+              style={{
+                position: "absolute",
+                top: "1.25rem",
+                right: "1.25rem",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "rgba(30,30,30,0.5)",
+                padding: "4px"
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            {/* Icon */}
+            <div
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                backgroundColor: "#F5F3F0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 1.25rem",
+                color: "#1E1E1E"
+              }}
+            >
+              <ShoppingCart size={24} />
+            </div>
+
+            <h3
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "1.5rem",
+                fontWeight: 600,
+                color: "#1E1E1E",
+                margin: "0 0 0.5rem"
+              }}
+            >
+              Sign In to Add to Bag
+            </h3>
+
+            <p
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: "0.85rem",
+                color: "rgba(30,30,30,0.65)",
+                lineHeight: "1.6",
+                margin: "0 0 1.5rem"
+              }}
+            >
+              Please log in to your account to add <strong>{product.name}</strong> to your shopping bag. Your saved address and preferences will be autofilled automatically during checkout.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              <button
+                onClick={handleLoginRedirect}
+                className="btn-primary"
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  padding: "0.85rem",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase"
+                }}
+              >
+                Sign In to Continue
+              </button>
+
+              <button
+                onClick={() => setShowLoginPrompt(false)}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  background: "none",
+                  border: "none",
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "0.8125rem",
+                  color: "rgba(30,30,30,0.5)",
+                  cursor: "pointer",
+                  textDecoration: "underline"
+                }}
+              >
+                Continue Browsing
+              </button>
+            </div>
           </div>
         </div>
       )}
