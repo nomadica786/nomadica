@@ -250,7 +250,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid pageToken' }, { status: 400 });
     }
 
-    const pageSize = 24;
+    const pageSize = Math.min(Number(searchParams.get('pageSize')) || 10, 24);
     
     // Filter the verified videos based on scoring system
     const filteredVideos = VERIFIED_YOUTUBE_VIDEOS.filter(video => {

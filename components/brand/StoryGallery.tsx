@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 
 const tiles = [
   {
@@ -89,6 +90,16 @@ export default function StoryGallery() {
               </div>
             </Link>
           ))}
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "3rem" }}>
+          <Link
+            href="/brand/story"
+            className="flex items-center gap-2.5 px-8 py-3.5 border border-black/15 bg-white text-black font-sans text-xs font-bold tracking-wider uppercase rounded-full shadow-sm hover:bg-[#FAF9F7] hover:border-black/30 hover:shadow-md transition-all duration-300"
+          >
+            View More Stories
+            <ArrowRight size={14} />
+          </Link>
         </div>
       </div>
     </section>

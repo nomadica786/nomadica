@@ -114,7 +114,7 @@ export default async function ArticlePage({ params }: PageProps) {
           />
 
           {/* 6. Share Buttons */}
-          <ShareButtons />
+          <ShareButtons title={article.title} />
         </div>
 
         {/* 7. More Travel Tips Section */}

@@ -717,10 +717,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Latest Collection Section */}
+      {/* 3. New Arrivals Section */}
       <ProductCarouselSection
         icon={Star}
-        title="Latest Collection"
+        title="New Arrivals"
         products={newArrivals}
         loading={loading}
         viewAllLink="/shop/new-arrivals"

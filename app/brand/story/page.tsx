@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import Image from "next/image";
-import { Play, X, Compass, Loader2 } from "lucide-react";
+import { Play, X, Loader2, ArrowRight } from "lucide-react";
 
 interface TravelShort {
   id: string;
@@ -13,7 +13,7 @@ interface TravelShort {
   channelTitle: string;
 }
 
-// // Memoized Single Video Card to prevent rendering degradation with thousands of items
+// Memoized Single Video Card to prevent rendering degradation with thousands of items
 const VideoCard = memo(({ 
   video, 
   index, 
@@ -90,9 +90,6 @@ export default function BrandStoryPage() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
 
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-
   const isFetchingRef = useRef(false);
 
   // Fetch travel shorts from endpoint
@@ -124,35 +121,7 @@ export default function BrandStoryPage() {
   // Initial load
   useEffect(() => {
     fetchShorts("1");
-  }, []);
-
-  // Infinite Scroll Trigger
-  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
-    const target = entries[0];
-    if (target.isIntersecting && pageToken && !isLoading) {
-      fetchShorts(pageToken);
-    }
-  }, [pageToken, isLoading, fetchShorts]);
-
-  useEffect(() => {
-    if (isLoading || isInitialLoad) return;
-
-    if (observerRef.current) observerRef.current.disconnect();
-
-    observerRef.current = new IntersectionObserver(handleObserver, {
-      root: null,
-      rootMargin: "300px", // Trigger loading slightly before reaching the bottom
-      threshold: 0.1
-    });
-
-    if (sentinelRef.current) {
-      observerRef.current.observe(sentinelRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) observerRef.current.disconnect();
-    };
-  }, [handleObserver, isLoading, isInitialLoad]);
+  }, [fetchShorts]);
 
   // Video playback interaction handlers
   const openVideoModal = useCallback((videoId: string) => {
@@ -215,15 +184,41 @@ export default function BrandStoryPage() {
           ))}
         </div>
 
-        {/* Loading Sentinel & Skeletons */}
-        <div ref={sentinelRef} className="w-full flex flex-col items-center justify-center py-16 gap-3">
-          {isLoading && (
-            <>
-              <Loader2 className="animate-spin text-[#1E1E1E] mb-2" size={32} />
+        {/* View More Stories Button / Loading State */}
+        <div className="w-full flex flex-col items-center justify-center py-16 gap-3">
+          {pageToken && !isInitialLoad && (
+            <button
+              onClick={() => fetchShorts(pageToken)}
+              disabled={isLoading}
+              className="flex items-center gap-2.5 px-8 py-3.5 border border-black/15 bg-white text-black font-sans text-xs font-bold tracking-wider uppercase rounded-full shadow-sm hover:bg-[#FAF9F7] hover:border-black/30 hover:shadow-md transition-all duration-300 disabled:opacity-50 cursor-pointer"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin text-[#1E1E1E]" size={14} />
+                  Loading Stories...
+                </>
+              ) : (
+                <>
+                  View More Stories
+                  <ArrowRight size={14} />
+                </>
+              )}
+            </button>
+          )}
+
+          {isInitialLoad && isLoading && (
+            <div className="flex flex-col items-center justify-center gap-3">
+              <Loader2 className="animate-spin text-[#1E1E1E]" size={32} />
               <span className="font-sans text-xs font-semibold text-black/40 tracking-wider uppercase">
-                Loading more stories...
+                Loading stories...
               </span>
-            </>
+            </div>
+          )}
+
+          {!pageToken && !isInitialLoad && videos.length > 0 && (
+            <span className="font-sans text-xs font-semibold text-black/40 tracking-wider uppercase">
+              You&apos;ve viewed all travel stories
+            </span>
           )}
         </div>
       </main>

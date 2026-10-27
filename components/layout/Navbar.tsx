@@ -224,7 +224,7 @@ export default function Navbar() {
                   href={link.href}
                   className={`nav-link ${checkActive(link.href) ? "nav-link-active" : ""}`}
                   style={{
-                    fontFamily: "'Montserrat', sans-serif",
+                    fontFamily: link.label === "SHOP" ? "'Montserrat', sans-serif" : "'Montserrat', sans-serif",
                     fontSize: "0.875rem",
                     fontWeight: 600,
                     textDecoration: "none",
@@ -261,8 +261,9 @@ export default function Navbar() {
                         style={{
                           display: "block",
                           padding: "0.5rem 1.25rem",
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontSize: "0.875rem",
+                          fontFamily: "'Playfair Display', serif",
+                          fontSize: "0.9375rem",
+                          fontWeight: 500,
                           color: "#1E1E1E",
                           textDecoration: "none",
                           transition: "background 0.15s ease, color 0.15s ease",
@@ -578,7 +579,7 @@ export default function Navbar() {
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      fontFamily: "'Playfair Display', sans-serif",
+                      fontFamily: "'Playfair Display', serif",
                       fontSize: "1.375rem",
                       fontWeight: 500,
                       color: "var(--charcoal)",
@@ -603,8 +604,9 @@ export default function Navbar() {
                           style={{
                             display: "block",
                             padding: "0.625rem 1rem",
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "0.9375rem",
+                            fontFamily: "'Playfair Display', serif",
+                            fontSize: "1.05rem",
+                            fontWeight: 500,
                             color: "var(--charcoal)",
                             textDecoration: "none",
                           }}

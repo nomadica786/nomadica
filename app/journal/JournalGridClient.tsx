@@ -256,13 +256,13 @@ export default function JournalGridClient({
           </div>
         )}
 
-        {/* Load More Button */}
-        {pageInfo.hasNextPage && selectedCategory === "ALL" && (
+        {/* View More Button */}
+        {pageInfo.hasNextPage && (
           <div className="flex justify-center items-center mt-16">
             <button
               onClick={loadMore}
               disabled={isLoading}
-              className="flex items-center gap-2.5 px-8 py-3.5 border border-black/15 bg-white text-black font-sans text-xs font-bold tracking-wider uppercase rounded-full shadow-sm hover:bg-[#FFFFFF] hover:border-black/30 transition-all duration-300 disabled:opacity-50"
+              className="flex items-center gap-2.5 px-8 py-3.5 border border-black/15 bg-white text-black font-sans text-xs font-bold tracking-wider uppercase rounded-full shadow-sm hover:bg-[#FFFFFF] hover:border-black/30 transition-all duration-300 disabled:opacity-50 cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -271,7 +271,7 @@ export default function JournalGridClient({
                 </>
               ) : (
                 <>
-                  Load More Stories
+                  View More Stories
                   <ArrowRight size={14} />
                 </>
               )}

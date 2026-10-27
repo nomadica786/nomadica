@@ -142,11 +142,8 @@ export default function NewArrivalsPage() {
       >
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <h1 style={{ fontFamily: "'Playfair Display', sans-serif", textAlign: "center", fontSize: "clamp(2.5rem, 3vw, 4rem)", color: "#1E1E1E", letterSpacing: "-0.02em", paddingTop: "4%" }}>
-            Latest Collection
-          </h1>
-          <p style={{ fontFamily: "'Montserrat', sans-serif", textAlign: "center", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1E1E1E", marginBottom: "0.5rem" }}>
             New Arrivals
-          </p>
+          </h1>
         </div>
       </div>
       <ShopFilterBar 
@@ -161,7 +158,7 @@ export default function NewArrivalsPage() {
         setSortBy={setSortBy}
         productCount={finalProducts.length}
         categoryLabel="Collection"
-        pageFilterLabel={"Latest Collection"}
+        pageFilterLabel={"New Arrivals"}
         onClearPageFilter={() => router.push('/shop')}
       />
 
